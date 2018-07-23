@@ -299,4 +299,26 @@ defmodule Techtree.Accounts do
   def change_email(%Email{} = email) do
     Email.changeset(email, %{})
   end
+
+  def authenticate_by_password(username, password) do
+    query =
+        from u in User,
+        inner_join: p in assoc(u, :password),
+        where: u.username == ^username,
+        select: {u, p}
+
+    case Repo.one(query) do
+        {%User{} = user, %Password{} = stored_password} -> 
+            IO.inspect(user)
+            
+            # TODO refactor this to make it more idiomatic
+            case Password.check(password, stored_password) do
+              true ->
+                {:ok, user}
+              false ->
+                {:error, :unauthorized}
+            end
+        nil -> {:error, :unauthorized}
+    end
+  end
 end

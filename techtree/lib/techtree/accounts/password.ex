@@ -23,4 +23,8 @@ defmodule Techtree.Accounts.Password do
   defp hash_password(password) do
     Comeonin.Argon2.hashpwsalt(password)
   end
+
+  def check(tested_password, %{ :password => hash }) do
+    Comeonin.Argon2.checkpw(tested_password, hash)
+  end
 end
