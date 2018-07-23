@@ -16,5 +16,6 @@ defmodule Techtree.Accounts.Email do
     |> cast(attrs, [:email])
     |> validate_required([:email])
     |> unique_constraint(:email)
+    |> validate_format(:email, ~r/@/)
   end
 end

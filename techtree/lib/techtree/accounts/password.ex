@@ -16,5 +16,11 @@ defmodule Techtree.Accounts.Password do
     |> cast(attrs, [:password])
     |> validate_required([:password])
     |> unique_constraint(:password)
+    |> put_change(:password, hash_password(attrs["password"]))
+  end
+
+  @doc false
+  defp hash_password(password) do
+    Comeonin.Argon2.hashpwsalt(password)
   end
 end

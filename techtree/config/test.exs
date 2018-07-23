@@ -17,3 +17,9 @@ config :techtree, Techtree.Repo,
   database: "techtree_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
+
+# During tests (and tests only), reduce the number of rounds
+# so it does not slow down the test suite.
+config :argon2_elixir,
+  t_cost: 1,
+  m_cost: 8
