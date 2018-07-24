@@ -23,6 +23,12 @@ defmodule TechtreeWeb.Router do
                                               singleton: true
   end
 
+  scope "/projects", TechtreeWeb.Projects do
+    pipe_through [:browser, :authenticate_user]
+
+    resources "/", ProjectController
+  end
+
   defp authenticate_user(conn, _) do
     case get_session(conn, :user_id) do
       nil ->
