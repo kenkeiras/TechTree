@@ -220,4 +220,117 @@ defmodule Techtree.Projects do
   def change_contributor(%Contributor{} = contributor) do
     Contributor.changeset(contributor, %{})
   end
+
+  alias Techtree.Projects.Step
+
+  @doc """
+  Returns the list of steps.
+
+  ## Examples
+
+      iex> list_steps()
+      [%Step{}, ...]
+
+  """
+  def list_steps do
+    Repo.all(Step)
+  end
+
+  @doc """
+  Returns the list of steps on a specific project.
+
+  ## Examples
+
+      iex> list_steps_in_project(%Project{ id=42 })
+      [%Step{}, ...]
+
+  """
+  def list_steps_in_project(%Project{} = project) do
+    Step
+    |> Ecto.Query.where(project_id: ^project.id)
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single step.
+
+  Raises `Ecto.NoResultsError` if the Step does not exist.
+
+  ## Examples
+
+      iex> get_step!(123)
+      %Step{}
+
+      iex> get_step!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_step!(id), do: Repo.get!(Step, id)
+
+  @doc """
+  Creates a step.
+
+  ## Examples
+
+      iex> create_step(%{field: value})
+      {:ok, %Step{}}
+
+      iex> create_step(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_step(%Contributor{} = contributor, %Project{} = project, attrs \\ %{}) do
+    %Step{}
+    |> Step.changeset(attrs)
+    |> Ecto.Changeset.put_change(:contributor_id, contributor.id)
+    |> Ecto.Changeset.put_change(:project_id, project.id)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a step.
+
+  ## Examples
+
+      iex> update_step(step, %{field: new_value})
+      {:ok, %Step{}}
+
+      iex> update_step(step, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_step(%Step{} = step, attrs) do
+    step
+    |> Step.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a Step.
+
+  ## Examples
+
+      iex> delete_step(step)
+      {:ok, %Step{}}
+
+      iex> delete_step(step)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_step(%Step{} = step) do
+    Repo.delete(step)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking step changes.
+
+  ## Examples
+
+      iex> change_step(step)
+      %Ecto.Changeset{source: %Step{}}
+
+  """
+  def change_step(%Step{} = step) do
+    Step.changeset(step, %{})
+  end
 end

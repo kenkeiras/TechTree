@@ -2,11 +2,12 @@ defmodule Techtree.Projects.Project do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias Techtree.Projects.Contributor
+  alias Techtree.Projects.{Contributor, Step}
 
   schema "projects" do
     field :name, :string
     belongs_to :contributor, Contributor
+    has_many :steps, Step
 
     timestamps()
   end

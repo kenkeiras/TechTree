@@ -1,0 +1,18 @@
+<h2>Show Step</h2>
+
+<ul>
+
+  <li>
+    <strong>Title:</strong>
+    <%= @step.title %>
+  </li>
+
+  <li>
+    <strong>Description:</strong>
+    <%= @step.description %>
+  </li>
+
+</ul>
+
+<span><%= link "Edit", to: project_step_path(@conn, :edit, @project.id, @step) %></span>
+<span><%= link "Back", to: project_step_path(@conn, :index, @project.id) %></span>
