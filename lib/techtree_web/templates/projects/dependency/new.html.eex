@@ -1,15 +1,21 @@
 <h2>New dependency</h2>
 
 <%= form_for @conn, project_dependency_path(@conn, :create, @step.project.id, @step.id), fn f -> %>
-  <div class="form-group">
-    <%= label f, :dependency, class: "control-label" %>
-    <%= select f, :dependency, @available_steps, class: "form-control" %>
-    <%= error_tag f, :dependency %>
-  </div>
+  <%= if length(@available_steps) > 0 do %>
+    <div class="form-group">
+      <%= label f, :dependency, class: "control-label" %>
+      <%= select f, :dependency, @available_steps, class: "form-control" %>
+      <%= error_tag f, :dependency %>
+    </div>
 
-  <div class="form-group">
-    <%= submit "Add dependency", class: "btn btn-primary" %>
-  </div>
+    <div class="form-group">
+      <%= submit "Add dependency", class: "btn btn-primary" %>
+    </div>
+  <% else %>
+    <div class="call-to-action">
+      <%= link "Create a new step to add it as dependency", to: project_step_path(@conn, :new, @project.id) %>
+    </div>
+  <% end %>
 <% end %>
 
 <span><%= link "Back", to: project_step_path(@conn, :show, @project.id, @step.id) %></span>

@@ -432,7 +432,7 @@ defmodule Techtree.Projects do
     depended
     |> Repo.preload(:dependencies) # Load existing data
     |> Ecto.Changeset.change() # Build the changeset
-    |> Ecto.Changeset.put_assoc(:dependencies, [depender]) # Set the association
+    |> Ecto.Changeset.put_assoc(:dependencies, [depender | depended.dependencies]) # Set the association
     |> Repo.update!
   end
 

@@ -21,27 +21,25 @@ defmodule TechtreeWeb.Projects.DependencyController do
 
   def get_available_dependencies_for_step(conn, step) do
     all_steps = Projects.list_steps_in_project(conn.assigns.project)
+    others_used = (for dep <- step.dependencies, do: dep.id) |> Enum.into(HashSet.new)
+    used = HashSet.put(others_used, step.id)
 
     for other_step <- all_steps,
-                      step.id != other_step.id,
+                      !(HashSet.member?(used, other_step.id)),
                       do: {other_step.title, other_step.id}
 
   end
 
   def new(conn, %{"step_id" => step_id}) do
-    step = Projects.get_step_with_project!(step_id)
+    step = Projects.get_step_with_dependencies!(step_id)
     available_steps = get_available_dependencies_for_step(conn, step)
 
     render(conn, "new.html", step: step, available_steps: available_steps)
   end
 
   def create(conn, %{"dependency" => depender_id, "step_id" => step_id}) do
-    step = Projects.get_step_with_project!(step_id)
-    available_steps = get_available_dependencies_for_step(conn, step)
+    step = Projects.get_step_with_dependencies!(step_id)
     depender = Projects.get_step!(depender_id)
-
-    IO.puts("#{depender_id} --depends on-> #{step_id} ")
-    IO.inspect(step)
 
     case Projects.create_dependency(step, depender) do
       %Step{} ->
@@ -51,6 +49,8 @@ defmodule TechtreeWeb.Projects.DependencyController do
       {:error, %Ecto.Changeset{} = changeset} ->
         IO.puts("ERROR:")
         IO.inspect(changeset)
+
+        available_steps = get_available_dependencies_for_step(conn, step)
         render(conn, "new.html", step: step,
                                  available_steps: available_steps, 
                                  changeset: changeset)

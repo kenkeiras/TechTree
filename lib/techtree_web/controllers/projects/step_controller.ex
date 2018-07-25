@@ -37,7 +37,6 @@ defmodule TechtreeWeb.Projects.StepController do
 
   def show(conn, %{"step_id" => id}) do
     step = Projects.get_step_with_dependencies!(id)
-    IO.inspect(step)
     render(conn, "show.html", step: step)
   end
 
