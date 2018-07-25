@@ -15,4 +15,4 @@
 </ul>
 
 <span><%= link "Edit", to: project_step_path(@conn, :edit, @project.id, @step) %></span>
-<span><%= link "Back", to: project_step_path(@conn, :index, @project.id) %></span>
+<span><%= link "Back", to: project_project_path(@conn, :show, @project.id) %></span>

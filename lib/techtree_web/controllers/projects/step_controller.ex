@@ -19,12 +19,6 @@ defmodule TechtreeWeb.Projects.StepController do
     ProjectController.authorize_page(conn, x)
   end
 
-  def index(conn, _params) do
-    steps = Projects.list_steps_in_project(conn.assigns.project)
-    IO.inspect(steps)
-    render(conn, "index.html", project: conn.assigns.project, steps: steps)
-  end
-
   def new(conn, _params) do
     changeset = Projects.change_step(%Step{})
     render(conn, "new.html", changeset: changeset)
