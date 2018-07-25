@@ -28,6 +28,7 @@ defmodule TechtreeWeb.Router do
 
     resources "/", ProjectController, param: "project_id"
     resources "/:project_id/steps", StepController, param: "step_id"
+    resources "/:project_id/steps/:step_id/dependencies", DependencyController, param: "dependency_id"
   end
 
   defp authenticate_user(conn, _) do

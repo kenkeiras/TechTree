@@ -1,0 +1,24 @@
+<h2><%= @step.title %>'s dependencies</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for dep <- @step.dependencies do %>
+    <tr>
+      <td><%= dep.title %></td>
+
+      <td class="text-right">
+        <span><%= link "Show", to: project_step_path(@conn, :show, @dep.step.project.id, @dep.step.id), class: "btn btn-default btn-xs" %></span>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<span><%= link "Add dependency", to: project_dependency_path(@conn, :new, @step.project.id, @step.id) %></span>
