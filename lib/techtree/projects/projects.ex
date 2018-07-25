@@ -45,6 +45,26 @@ defmodule Techtree.Projects do
   end
 
   @doc """
+  Gets a single project.
+
+  Raises `Ecto.NoResultsError` if the Project does not exist.
+
+  ## Examples
+
+      iex> get_project!(123)
+      %Project{}
+
+      iex> get_project!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_project_with_dependencies!(id) do
+    Project
+    |> Repo.get!(id)
+    |> Repo.preload(contributor: [user: :email], steps: [])
+  end
+
+  @doc """
   Creates a project.
 
   ## Examples
