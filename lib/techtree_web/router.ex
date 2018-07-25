@@ -16,7 +16,7 @@ defmodule TechtreeWeb.Router do
   scope "/", TechtreeWeb do
     pipe_through :browser # Use the default browser stack
 
-    get "/", PageController, :index
+    get "/", IndexRedirectionController, :index
 
     resources "/users", UserController
     resources "/sessions", SessionController, only: [:new, :create, :delete],

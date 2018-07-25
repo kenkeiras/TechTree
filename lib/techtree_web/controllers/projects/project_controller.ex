@@ -15,8 +15,6 @@ defmodule TechtreeWeb.Projects.ProjectController do
     project = Projects.get_project!(conn.params["project_id"])
 
     if conn.assigns.current_contributor.id == project.contributor_id do
-      IO.inspect("Assigned project")
-      IO.inspect(project)
       assign(conn, :project, project)
     else
       conn
