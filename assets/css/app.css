@@ -1,1 +1,35 @@
-/* This file is for your main application css. */
+.nav-button:hover {
+    text-decoration: none;
+    background-color: #eee;
+}
+
+.nav-button {
+    border-radius: 4px;
+}
+
+.nav-button {
+    position: relative;
+    display: block;
+    padding: 10px 15px;
+}
+
+.nav-button:focus {
+    outline: thin dotted;
+    outline: 5px auto -webkit-focus-ring-color;
+    outline-offset: -2px;
+}
+
+.nav-button:focus, .nav-button:hover {
+    color: #23527c;
+    text-decoration: underline;
+}
+
+.nav-button {
+    border: none;
+    background: inherit;
+    color: #337ab7;
+}
+
+form.bare {
+    margin: 0 0 0 0;
+}

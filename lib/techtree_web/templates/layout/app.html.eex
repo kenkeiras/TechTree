@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Hello Techtree!</title>
+    <title>Technology tree</title>
     <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
   </head>
 
@@ -17,6 +17,11 @@
         <nav role="navigation">
           <ul class="nav nav-pills pull-right">
             <li><a href="http://www.phoenixframework.org/docs">Get Started</a></li>
+            <li>
+              <%= form_for @conn, session_path(@conn, :delete), [method: :delete, as: :user, class: ["bare"]],  fn _ -> %>
+                  <%= submit "Logout", class: ["nav-button"] %>
+              <% end %>
+            </li>
           </ul>
         </nav>
         <span class="logo"></span>
