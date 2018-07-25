@@ -40,6 +40,10 @@ defmodule TechtreeWeb do
       import TechtreeWeb.Router.Helpers
       import TechtreeWeb.ErrorHelpers
       import TechtreeWeb.Gettext
+
+      def is_logged(conn) do
+        Plug.Conn.get_session(conn, :user_id) != nil
+      end
     end
   end
 
