@@ -18,6 +18,6 @@ defmodule Techtree.Projects.Step do
   def changeset(step, attrs) do
     step
     |> cast(attrs, [:title, :description])
-    |> validate_required([:title, :description])
+    |> validate_required([:title])
   end
 end

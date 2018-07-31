@@ -65,4 +65,10 @@ defmodule TechtreeWeb.Projects.DependencyController do
     |> put_flash(:info, "Step deleted successfully.")
     |> redirect(to: project_step_path(conn, :index, conn.assigns.project.id))
   end
+
+  def dependency_graph(conn, _params) do
+    dependency_graph = Projects.get_dependency_graph(conn.assigns.project)
+
+    render(conn, "dependency_graph.json", graph: dependency_graph)
+  end
 end

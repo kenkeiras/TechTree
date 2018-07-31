@@ -31,6 +31,12 @@ defmodule TechtreeWeb.Router do
     resources "/:project_id/steps/:step_id/dependencies", DependencyController, param: "dependency_id"
   end
 
+  scope "/api/projects/", TechtreeWeb.Projects, as: :project do
+    pipe_through [:browser, :api, :authenticate_user]
+
+    get "/:project_id/dependencies", DependencyController, :dependency_graph
+  end
+
   defp authenticate_user(conn, _) do
     case get_session(conn, :user_id) do
       nil ->

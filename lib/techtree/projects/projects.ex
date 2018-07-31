@@ -482,4 +482,22 @@ defmodule Techtree.Projects do
   def change_dependency(%Dependency{} = dependency) do
     Dependency.changeset(dependency, %{})
   end
+
+  @doc """
+  Returns the list of steps on a specific project.
+
+  ## Examples
+
+      iex> list_steps_in_project(%Project{ id=42 })
+      [%Step{}, ...]
+
+  """
+  def get_dependency_graph(%Project{} = project) do
+    Step
+    |> Ecto.Query.where(project_id: ^project.id)
+    |> Repo.all()
+    |> Repo.preload([:dependencies])
+  end
+
+
 end
