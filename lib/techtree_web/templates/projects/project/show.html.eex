@@ -1,5 +1,8 @@
 <h2><%= author_name(@project) %>'s <%= @project.name %></h2>
 
+<div id="dependency_graph">
+</div>
+
 <table>
 <%= for step <- @project.steps do %>
     <tr>

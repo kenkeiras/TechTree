@@ -65,6 +65,6 @@ defmodule TechtreeWeb.Projects.StepController do
 
     conn
     |> put_flash(:info, "Step deleted successfully.")
-    |> redirect(to: project_step_path(conn, :index, conn.assigns.project.id))
+    |> redirect(to: project_project_path(conn, :show, conn.assigns.project.id))
   end
 end
