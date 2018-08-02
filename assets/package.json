@@ -4,7 +4,7 @@
   "scripts": {
     "build-dev": "brunch build",
     "deploy": "brunch build --production",
-    "test": "mocha -u tdd --reporter spec",
+    "test": "mocha --reporter spec",
     "watch": "brunch watch --stdin"
   },
   "dependencies": {

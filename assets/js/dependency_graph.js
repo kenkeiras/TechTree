@@ -10,9 +10,45 @@ class DependencyGraph {
     }
 }
 
+function clear_loops(graph) {
+    const cleaned_graph = {};
+
+    for (const id of Object.keys(graph)) {
+        const e = cleaned_graph[id] = {
+            id: id,
+            depended_by: [],
+            dependencies: []
+        };
+
+        for (let i = 0; i < graph[id].dependencies.length; i++) {
+            const dep = graph[id].dependencies[i];
+
+            if (graph[dep].dependencies.indexOf(+id) === -1) {
+                e.dependencies.push(dep);
+            } else {
+                console.log("Loop", id, dep);
+            }
+        }
+
+        for (let i = 0; i < graph[id].depended_by.length; i++) {
+            const dep = graph[id].depended_by[i];
+
+            if (graph[dep].depended_by.indexOf(+id) === -1) {
+                e.depended_by.push(dep);
+            } else {
+                console.log("Loop", id, dep);
+            }
+        }
+    }
+
+    console.log("Cleaned", cleaned_graph);
+
+    return cleaned_graph;
+}
+
 function sort_by_dependency_columns(steps) {
     // Check which steps are being depended by which
-    const depended = {};
+    let depended = {};
 
     for (const step of steps){
         depended[step.id] = { 
@@ -29,6 +65,9 @@ function sort_by_dependency_columns(steps) {
         }
     }
 
+    depended = clear_loops(depended);
+    console.log("D", depended);
+
     const undepended = [];
     for (const depId of Object.keys(depended)) {
         const dep = depended[depId];
@@ -39,6 +78,7 @@ function sort_by_dependency_columns(steps) {
     }
 
     let rows = [undepended];
+    console.log("U", undepended);
 
     // Start building by the undepended, and backtrack until
     // there are no more dependencies
@@ -46,6 +86,7 @@ function sort_by_dependency_columns(steps) {
         const last_row = rows[rows.length - 1];
         let depended_by_last = [];
         for(const element of last_row) {
+            console.log(element, depended);
             depended_by_last = depended_by_last.concat(depended[element].dependencies);
         }
 
