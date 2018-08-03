@@ -1,13 +1,66 @@
 class DependencyGraph {
     constructor(div) {
         this.div = div;
+        this.canvas = undefined;
     }
 
     render(data) {
-        console.log("Rendering on", this.div, "data:", data);
+        const columns = sort_by_dependency_columns(data.steps);
+        
+        this.canvas = document.createElement("canvas");
+        this.canvas.style.width = "100%";
 
-        console.log(sort_by_dependency_columns(data.steps));
+        draw_columns_in_canvas(columns, this.canvas);
+
+        this.div.appendChild(this.canvas);
     }
+}
+
+function draw_columns_in_canvas(columns, canvas) {
+    const ctx = canvas.getContext("2d");
+
+    const left_margin = 10; // px
+    const top_margin = 10; // px
+    const inter_column_separation = 10; // px
+
+    let x_off = left_margin;
+    let y_off = top_margin;
+
+    for (const column of columns) {
+        const result = draw_column_from(x_off, y_off, column, ctx);
+
+        x_off += result.width + inter_column_separation;
+    }
+}
+
+function draw_column_from(x_off, y_off, column, ctx){
+    const box_padding = 3; // px
+    const inter_row_separation = 5; // px
+
+    let width = 0;
+    let height = y_off;
+
+    for (const element of column) {
+        const measure = ctx.measureText(element.title);
+
+        // TODO: do this calculation in a more reliable way
+        const measure_height = ctx.measureText('M').width;
+
+        const row_width = measure.width + box_padding * 2;
+        const row_height = measure_height + box_padding * 2;
+
+        ctx.rect(x_off, height, row_width, row_height);
+        ctx.stroke();
+
+        ctx.fillText(element.title, x_off + box_padding, height + box_padding + measure_height);
+
+        if (row_width > width) {
+            width = row_width;
+        }
+        height += row_height + inter_row_separation;
+    }
+
+    return { width: width, height: height };
 }
 
 function loops_back(graph, element_id, first_step, selector) {
