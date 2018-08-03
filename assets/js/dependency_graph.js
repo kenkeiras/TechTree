@@ -10,6 +10,35 @@ class DependencyGraph {
     }
 }
 
+function loops_back(graph, element_id, first_step, selector) {
+    const seen = {};
+    let to_check = [first_step];
+
+    while (to_check.length != 0) {
+        const step_id = to_check.shift();
+
+        if (seen[step_id] === true) {
+            continue;
+        }
+        else {
+            seen[step_id] = true;
+        }
+
+        const next_step = selector(graph[step_id]);
+
+        if (next_step.indexOf(+element_id) !== -1) {
+            
+            return true;
+        }
+
+        to_check = to_check.concat(next_step);
+    }
+
+    console.log("----");
+
+    return false;
+}
+
 function clear_loops(graph) {
     const cleaned_graph = {};
 
@@ -23,7 +52,7 @@ function clear_loops(graph) {
         for (let i = 0; i < graph[id].dependencies.length; i++) {
             const dep = graph[id].dependencies[i];
 
-            if (graph[dep].dependencies.indexOf(+id) === -1) {
+            if (!loops_back(graph, id, dep, e => e.dependencies)) {
                 e.dependencies.push(dep);
             } else {
                 console.log("Loop", id, dep);
@@ -33,7 +62,7 @@ function clear_loops(graph) {
         for (let i = 0; i < graph[id].depended_by.length; i++) {
             const dep = graph[id].depended_by[i];
 
-            if (graph[dep].depended_by.indexOf(+id) === -1) {
+            if (!loops_back(graph, id, dep, e => e.depended_by)) {
                 e.depended_by.push(dep);
             } else {
                 console.log("Loop", id, dep);
