@@ -34,8 +34,6 @@ function loops_back(graph, element_id, first_step, selector) {
         to_check = to_check.concat(next_step);
     }
 
-    console.log("----");
-
     return false;
 }
 
@@ -54,8 +52,6 @@ function clear_loops(graph) {
 
             if (!loops_back(graph, id, dep, e => e.dependencies)) {
                 e.dependencies.push(dep);
-            } else {
-                console.log("Loop", id, dep);
             }
         }
 
@@ -64,13 +60,9 @@ function clear_loops(graph) {
 
             if (!loops_back(graph, id, dep, e => e.depended_by)) {
                 e.depended_by.push(dep);
-            } else {
-                console.log("Loop", id, dep);
             }
         }
     }
-
-    console.log("Cleaned", cleaned_graph);
 
     return cleaned_graph;
 }
@@ -95,7 +87,6 @@ function sort_by_dependency_columns(steps) {
     }
 
     depended = clear_loops(depended);
-    console.log("D", depended);
 
     const undepended = [];
     for (const depId of Object.keys(depended)) {
@@ -107,7 +98,6 @@ function sort_by_dependency_columns(steps) {
     }
 
     let rows = [undepended];
-    console.log("U", undepended);
 
     // Start building by the undepended, and backtrack until
     // there are no more dependencies
@@ -115,7 +105,6 @@ function sort_by_dependency_columns(steps) {
         const last_row = rows[rows.length - 1];
         let depended_by_last = [];
         for(const element of last_row) {
-            console.log(element, depended);
             depended_by_last = depended_by_last.concat(depended[element].dependencies);
         }
 
