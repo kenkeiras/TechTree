@@ -8,34 +8,57 @@ class DependencyGraph {
         const columns = sort_by_dependency_columns(data.steps);
         
         this.canvas = document.createElement("canvas");
-        this.canvas.style.width = "100%";
-
-        draw_columns_in_canvas(columns, this.canvas);
-
         this.div.appendChild(this.canvas);
+
+        const prepared_draw = prepare_draw_columns_in_canvas(columns, this.canvas);
+        this.canvas.width = prepared_draw.width;
+        this.canvas.height = prepared_draw.height;
+        this.canvas.style.width = prepared_draw.width + 'px';
+        this.canvas.style.height = prepared_draw.height + 'px';
+
+        prepared_draw.draw();
     }
 }
 
-function draw_columns_in_canvas(columns, canvas) {
+function prepare_draw_columns_in_canvas(columns, canvas) {
     const ctx = canvas.getContext("2d");
 
     const left_margin = 10; // px
     const top_margin = 10; // px
     const inter_column_separation = 10; // px
+    let draw_actions = [];
 
     let x_off = left_margin;
     let y_off = top_margin;
+    let height = 0;
 
     for (const column of columns) {
         const result = draw_column_from(x_off, y_off, column, ctx);
+        draw_actions = draw_actions.concat(result.draw_actions);
 
+        if (result.height > height) {
+            height = result.height;
+        }
         x_off += result.width + inter_column_separation;
     }
+
+    return { 
+        width: x_off,
+         height: height + y_off, 
+         draw: () => {
+            for (const action of draw_actions) {
+                action();
+            }
+
+            ctx.stroke();
+        }
+    };
 }
 
 function draw_column_from(x_off, y_off, column, ctx){
     const box_padding = 3; // px
     const inter_row_separation = 5; // px
+    const draw_actions = [];
 
     let width = 0;
     let height = y_off;
@@ -49,10 +72,15 @@ function draw_column_from(x_off, y_off, column, ctx){
         const row_width = measure.width + box_padding * 2;
         const row_height = measure_height + box_padding * 2;
 
-        ctx.rect(x_off, height, row_width, row_height);
-        ctx.stroke();
+        // Closures are needed around the action push to "freeze" 
+        // the variable values (i.e. height)
+        ((height) => {
+            draw_actions.push(() => ctx.rect(x_off, height, row_width, row_height));
+        })(height);
 
-        ctx.fillText(element.title, x_off + box_padding, height + box_padding + measure_height);
+        ((height) => {
+            draw_actions.push(() => ctx.fillText(element.title, x_off + box_padding, height + box_padding + measure_height));
+        })(height);
 
         if (row_width > width) {
             width = row_width;
@@ -60,7 +88,7 @@ function draw_column_from(x_off, y_off, column, ctx){
         height += row_height + inter_row_separation;
     }
 
-    return { width: width, height: height };
+    return { width: width, height: height, draw_actions: draw_actions };
 }
 
 function loops_back(graph, element_id, first_step, selector) {
