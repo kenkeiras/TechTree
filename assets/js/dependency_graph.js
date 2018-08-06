@@ -140,6 +140,7 @@ function draw_column_from(x_off, y_off, column, ctx, slots, nodes_map){
     const box_padding = 3; // px
     const inter_row_separation = 5; // px
     const draw_actions = [];
+    const end_runway = 5; // px
 
     let height = 0;
     let width = 0;
@@ -176,6 +177,8 @@ function draw_column_from(x_off, y_off, column, ctx, slots, nodes_map){
             draw_actions.push(() => {
                 ctx.beginPath();
                 ctx.moveTo(init.left, init.top);
+                ctx.lineTo(end.left - end_runway, init.top);
+                ctx.lineTo(end.left - end_runway, end.top);
                 ctx.lineTo(end.left, end.top);
                 ctx.stroke();
             });
