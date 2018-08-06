@@ -7,7 +7,6 @@
 <%= for step <- @project.steps do %>
     <tr>
       <td><%= step.title %></td>
-      <td><%= step.description %></td>
 
       <td class="text-right">
         <span><%= link "Show", to: project_step_path(@conn, :show, @project.id, step), class: "btn btn-default btn-xs" %></span>
