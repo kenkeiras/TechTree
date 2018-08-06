@@ -1,3 +1,5 @@
+const COMPLETED_STROKE_STYLE = '#548A00';
+
 class DependencyGraph {
     constructor(div) {
         this.div = div;
@@ -186,12 +188,19 @@ function draw_column_from(x_off, y_off, column, ctx, slots, nodes_map){
 
         draw_actions.push(() => {
             ctx.beginPath();
+            const prev_style = ctx.strokeStyle;
+            console.log(JSON.stringify(element));
             ctx.rect(x_off, row_height, per_row_width, per_row_height);
+            if (element.completed) {
+                ctx.strokeStyle = COMPLETED_STROKE_STYLE;
+            }
+            
             ctx.fillText(element.title,
                          x_off + box_padding,
                          row_height + box_padding + measure_height);
 
             ctx.stroke();
+            ctx.strokeStyle = prev_style;
         });
 
         if (per_row_width > width) {

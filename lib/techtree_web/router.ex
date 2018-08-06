@@ -28,6 +28,9 @@ defmodule TechtreeWeb.Router do
 
     resources "/", ProjectController, param: "project_id"
     resources "/:project_id/steps", StepController, param: "step_id"
+    post "/:project_id/steps/:step_id/state/completed", StepController, :mark_completed
+    post "/:project_id/steps/:step_id/state/uncompleted", StepController, :mark_uncompleted
+
     resources "/:project_id/steps/:step_id/dependencies", DependencyController, param: "dependency_id"
   end
 

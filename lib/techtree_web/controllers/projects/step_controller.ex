@@ -46,7 +46,34 @@ defmodule TechtreeWeb.Projects.StepController do
     render(conn, "edit.html", step: step, changeset: changeset)
   end
 
-  def update(conn, %{"step_id" => id, "step" => step_params}) do
+  ## TODO : Refactor marking as completed/uncomplete
+  def mark_completed(conn, %{"step_id" => id}) do
+    step = Projects.get_step!(id)
+    case Projects.update_step(step, %{ "completed" => true }) do
+      {:ok, step} ->
+        conn
+        |> put_flash(:info, "Step updated successfully.")
+        |> redirect(to: project_step_path(conn, :show, conn.assigns.project.id, step))
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+          render(conn, "edit.html", step: step, changeset: changeset)
+      end
+    end
+
+  def mark_uncompleted(conn, %{"step_id" => id}) do
+    step = Projects.get_step!(id)
+    case Projects.update_step(step, %{ "completed" => false }) do
+      {:ok, step} ->
+        conn
+        |> put_flash(:info, "Step updated successfully.")
+        |> redirect(to: project_step_path(conn, :show, conn.assigns.project.id, step))
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+          render(conn, "edit.html", step: step, changeset: changeset)
+      end
+    end
+  
+    def update(conn, %{"step_id" => id, "step" => step_params}) do
     step = Projects.get_step!(id)
 
     case Projects.update_step(step, step_params) do
