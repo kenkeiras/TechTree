@@ -471,6 +471,29 @@ defmodule Techtree.Projects do
   end
 
   @doc """
+  Deletes a Dependency.
+
+  ## Examples
+
+      iex> delete_dependency(dependency)
+      {:ok, %Dependency{}}
+
+      iex> delete_dependency(dependency)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_dependency(depender_id, depended_id) do
+    IO.inspect("Readying")
+    query = from d in "dependencies",
+              where: d.depended_id == ^depended_id and d.depender_id == ^depender_id
+
+    IO.inspect(query)
+    results = Repo.delete_all(query)
+    IO.inspect(results)
+    # delete_dependency(%Dependency{ depended: depended_id, depender: dependency_id })
+  end
+
+  @doc """
   Returns an `%Ecto.Changeset{}` for tracking dependency changes.
 
   ## Examples

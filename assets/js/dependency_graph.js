@@ -108,13 +108,14 @@ function prepare_draw_columns_in_canvas(columns, canvas) {
     const inter_column_separation = 20; // px
     let draw_actions = [];
     const slots = new RowAllocationSlots();
+    const nodes_map = {};
 
     let x_off = left_margin;
     let y_off = top_margin;
     let height = 0;
 
     for (const column of columns) {
-        const result = draw_column_from(x_off, y_off, column, ctx, slots);
+        const result = draw_column_from(x_off, y_off, column, ctx, slots, nodes_map);
         draw_actions = draw_actions.concat(result.draw_actions);
         slots.finish_column();
 
@@ -131,13 +132,11 @@ function prepare_draw_columns_in_canvas(columns, canvas) {
             for (const action of draw_actions) {
                 action();
             }
-
-            ctx.stroke();
         }
     };
 }
 
-function draw_column_from(x_off, y_off, column, ctx, slots){
+function draw_column_from(x_off, y_off, column, ctx, slots, nodes_map){
     const box_padding = 3; // px
     const inter_row_separation = 5; // px
     const draw_actions = [];
@@ -152,17 +151,45 @@ function draw_column_from(x_off, y_off, column, ctx, slots){
     for (const element of column) {
         const measure = ctx.measureText(element.title);
 
-
         const row_num = slots.get_position_for_element(element);
         const per_row_width = measure.width + box_padding * 2;
         const row_height = (y_off 
                             + row_num * per_row_height 
                             + (row_num - 1) * inter_row_separation);
 
-        draw_actions.push(() => ctx.rect(x_off, row_height, per_row_width, per_row_height));
-        draw_actions.push(() => ctx.fillText(element.title,
-                                             x_off + box_padding,
-                                             row_height + box_padding + measure_height));
+        nodes_map[element.id] = {
+            right_middle: {
+                left: x_off + per_row_width,
+                top: row_height + per_row_height / 2
+            },
+            left_middle: {
+                left: x_off,
+                top: row_height + per_row_height / 2
+            },
+        };
+
+        for (const dependency of element.dependencies) {
+            // Connect two points
+            const init = nodes_map[dependency].right_middle;
+            const end = nodes_map[element.id].left_middle;
+            
+            draw_actions.push(() => {
+                ctx.beginPath();
+                ctx.moveTo(init.left, init.top);
+                ctx.lineTo(end.left, end.top);
+                ctx.stroke();
+            });
+        }
+
+        draw_actions.push(() => {
+            ctx.beginPath();
+            ctx.rect(x_off, row_height, per_row_width, per_row_height);
+            ctx.fillText(element.title,
+                         x_off + box_padding,
+                         row_height + box_padding + measure_height);
+
+            ctx.stroke();
+        });
 
         if (per_row_width > width) {
             width = per_row_width;

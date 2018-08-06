@@ -57,13 +57,14 @@ defmodule TechtreeWeb.Projects.DependencyController do
     end
   end
 
-  def delete(conn, %{"step_id" => id}) do
-    step = Projects.get_step!(id)
-    {:ok, _step} = Projects.delete_step(step)
+  def delete(conn, %{"step_id" => step_id, "dependency_id" => dependency_id}) do
+    {depender_id, ""} = Integer.parse(step_id)
+    {depended_id, ""} = Integer.parse(dependency_id)
+    {1, _change} = Projects.delete_dependency(depended_id, depender_id)
 
     conn
-    |> put_flash(:info, "Step deleted successfully.")
-    |> redirect(to: project_step_path(conn, :index, conn.assigns.project.id))
+    |> put_flash(:info, "Dependency deleted successfully.")
+    |> redirect(to: project_project_path(conn, :show, conn.assigns.project.id))
   end
 
   def dependency_graph(conn, _params) do
