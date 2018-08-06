@@ -20,21 +20,103 @@ class DependencyGraph {
     }
 }
 
+class RowAllocationSlots {
+    UNDEPENDED(){ return 'UNDEPENDED'; }
+    SKIPPED() { return 'SKIPPED'; }
+
+    constructor() {
+        this.positions = [];
+    }
+
+    get_position_for_element(vanilla_element) {
+        // Prepare a copy of the element to insert
+        const element = {
+            id: vanilla_element.id,
+            depended_by: Array.from(vanilla_element.depended_by)
+        };
+
+        // Remove element from depended_by
+        const depending_on_this = [];
+        for (let i = 0; i < this.positions.length; i++) {
+            const slot = this.positions[i];
+
+            if (slot.depended_by === undefined) {
+                continue;
+            }
+
+            if (slot.depended_by.indexOf(element.id) !== -1) {
+                depending_on_this.push(i);
+
+                // Rebuild the array to undefined's in between
+                slot.depended_by = slot.depended_by.filter((v, _i, _a) => {
+                    const keep = v !== element.id;
+                    return keep;
+                });
+            }
+        }
+
+        // Remove elements which was undepended the step before
+        for (const i of depending_on_this) {
+            const slot = this.positions[i];
+            if (slot.depended_by.length === 0) {
+                this.positions[i] = this.UNDEPENDED;
+            }
+        }
+
+        // Get any element which only remaining dependence was this
+        for (const i of depending_on_this) {
+            const slot = this.positions[i];
+
+            if ((slot === this.UNDEPENDED) || (slot.depended_by.length === 0)) {
+                this.positions[i] = element;
+                return i;
+            }
+        }
+
+        // Get any available position
+        for (let i = 0; i < this.positions.length; i++) {
+            if (this.positions[i] === undefined) { // Empty position
+                this.positions[i] = element;
+                return i;
+            }
+        }
+
+        // Return the last position
+        const position = this.positions.length;
+        this.positions.push(element);
+        return position;
+    }
+
+    finish_column() {
+        for(let i=0; i < this.positions; i++) {
+            if (this.positions[i] == this.SKIPPED) {
+                delete this.positions[i];
+            }
+
+            if (this.positions[i] == this.UNDEPENDED) {
+                this.positions[i] = this.SKIPPED;
+            }
+        }
+    }
+}
+
 function prepare_draw_columns_in_canvas(columns, canvas) {
     const ctx = canvas.getContext("2d");
 
     const left_margin = 10; // px
     const top_margin = 10; // px
-    const inter_column_separation = 10; // px
+    const inter_column_separation = 20; // px
     let draw_actions = [];
+    const slots = new RowAllocationSlots();
 
     let x_off = left_margin;
     let y_off = top_margin;
     let height = 0;
 
     for (const column of columns) {
-        const result = draw_column_from(x_off, y_off, column, ctx);
+        const result = draw_column_from(x_off, y_off, column, ctx, slots);
         draw_actions = draw_actions.concat(result.draw_actions);
+        slots.finish_column();
 
         if (result.height > height) {
             height = result.height;
@@ -55,40 +137,42 @@ function prepare_draw_columns_in_canvas(columns, canvas) {
     };
 }
 
-function draw_column_from(x_off, y_off, column, ctx){
+function draw_column_from(x_off, y_off, column, ctx, slots){
     const box_padding = 3; // px
     const inter_row_separation = 5; // px
     const draw_actions = [];
 
+    let height = 0;
     let width = 0;
-    let height = y_off;
+
+    // TODO: do this calculation in a more reliable way
+    const measure_height = ctx.measureText('M').width;
+    const per_row_height = measure_height + box_padding * 2;
 
     for (const element of column) {
         const measure = ctx.measureText(element.title);
 
-        // TODO: do this calculation in a more reliable way
-        const measure_height = ctx.measureText('M').width;
 
-        const row_width = measure.width + box_padding * 2;
-        const row_height = measure_height + box_padding * 2;
+        const row_num = slots.get_position_for_element(element);
+        const per_row_width = measure.width + box_padding * 2;
+        const row_height = (y_off 
+                            + row_num * per_row_height 
+                            + (row_num - 1) * inter_row_separation);
 
-        // Closures are needed around the action push to "freeze" 
-        // the variable values (i.e. height)
-        ((height) => {
-            draw_actions.push(() => ctx.rect(x_off, height, row_width, row_height));
-        })(height);
+        draw_actions.push(() => ctx.rect(x_off, row_height, per_row_width, per_row_height));
+        draw_actions.push(() => ctx.fillText(element.title,
+                                             x_off + box_padding,
+                                             row_height + box_padding + measure_height));
 
-        ((height) => {
-            draw_actions.push(() => ctx.fillText(element.title, x_off + box_padding, height + box_padding + measure_height));
-        })(height);
-
-        if (row_width > width) {
-            width = row_width;
+        if (per_row_width > width) {
+            width = per_row_width;
         }
-        height += row_height + inter_row_separation;
+        if (row_height > height) {
+            height = row_height;
+        }
     }
 
-    return { width: width, height: height, draw_actions: draw_actions };
+    return { width: width, height: height + per_row_height, draw_actions: draw_actions };
 }
 
 function loops_back(graph, element_id, first_step, selector) {
@@ -167,6 +251,7 @@ function sort_by_dependency_columns(steps) {
         }
     }
 
+    const dependend_by = JSON.parse(JSON.stringify(depended));
     depended = clear_loops(depended);
 
     const undepended = [];
@@ -198,31 +283,32 @@ function sort_by_dependency_columns(steps) {
     // Then try to show items as soon as possible by prunning them
     const found = {};
     rows = rows.reverse();
-    for (const row of rows) {
-        for (let i = 0; i < row.length; i++) {
-            let step_id = row[i];
+    for (const row_num of rows) {
+        for (let i = 0; i < row_num.length; i++) {
+            let step_id = row_num[i];
             if (found[step_id] !== true) {
                 found[step_id] = true;
             }
             else {
-                delete row[i];
+                delete row_num[i];
             }
         }
     }
 
-    return resolve(rows, steps);
+    return resolve(rows, steps, depended);
 }
 
-function resolve(rows, steps) {
+function resolve(rows, steps, depended) {
     const steps_by_id = {};
     for(const step of steps) {
         steps_by_id[step.id] = step;
+        steps_by_id[step.id].depended_by = depended[step.id].depended_by;
     }
 
     const resolved = [];
-    for(const row of rows) {
+    for(const row_num of rows) {
         const resolved_row = [];
-        for (const step_id of row) {
+        for (const step_id of row_num) {
             if (step_id !== undefined){
                 resolved_row.push(steps_by_id[step_id]);
             }
