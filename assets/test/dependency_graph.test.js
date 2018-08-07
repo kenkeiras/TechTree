@@ -34,25 +34,29 @@ describe('Dependency graph', function() {
             [
                 {
                     "id":1,
-                    "dependencies":[]
+                    "dependencies":[],
+                    "depended_by":[2, 4]
                 }
             ],
             [
                 {
                     "id":2,
-                    "dependencies":[1]
+                    "dependencies":[1],
+                    "depended_by":[3, 4]
                 },
             ],
             [
                 {
                     "id":3,
-                    "dependencies":[2]
+                    "dependencies":[2],
+                    "depended_by":[4]
                 },
             ],
             [
                 {
                     "id":4,
-                    "dependencies":[1,2,3]
+                    "dependencies":[1,2,3],
+                    "depended_by":[]
                 }
             ]
         ];
@@ -79,7 +83,8 @@ describe('Dependency graph', function() {
             [
                 {
                     "id":1,
-                    "dependencies":[]
+                    "dependencies":[],
+                    "depended_by":[]
                 }
             ]
         ];
@@ -112,11 +117,13 @@ describe('Dependency graph', function() {
             [
                 {
                     "id":1,
-                    "dependencies":[2]
+                    "dependencies":[2],
+                    "depended_by":[] // Circular dependencies are removed
                 },
                 {
                     "id":2,
-                    "dependencies":[1]
+                    "dependencies":[1],
+                    "depended_by":[] // Circular dependencies are removed
                 }
             ]
         ];
@@ -155,15 +162,18 @@ describe('Dependency graph', function() {
             [
                 {
                     "id":1,
-                    "dependencies":[2]
+                    "dependencies":[2],
+                    "depended_by":[] // Circular dependencies are removed
                 },
                 {
                     "id":2,
-                    "dependencies":[3]
+                    "dependencies":[3],
+                    "depended_by":[] // Circular dependencies are removed
                 },
                 {
                     "id":3,
-                    "dependencies":[1]
+                    "dependencies":[1],
+                    "depended_by":[] // Circular dependencies are removed
                 }
             ]
         ];
