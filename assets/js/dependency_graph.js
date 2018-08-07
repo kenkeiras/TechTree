@@ -115,9 +115,13 @@ function prepare_draw_columns_in_canvas(columns, canvas) {
     let x_off = left_margin;
     let y_off = top_margin;
     let height = 0;
+    let column_num = 0;
 
     for (const column of columns) {
-        const result = draw_column_from(x_off, y_off, column, ctx, slots, nodes_map);
+
+        column_num++;
+
+        const result = draw_column_from(x_off, y_off, column, ctx, slots, nodes_map, column_num);
         draw_actions = draw_actions.concat(result.draw_actions);
         slots.finish_column();
 
@@ -138,7 +142,7 @@ function prepare_draw_columns_in_canvas(columns, canvas) {
     };
 }
 
-function draw_column_from(x_off, y_off, column, ctx, slots, nodes_map){
+function draw_column_from(x_off, y_off, column, ctx, slots, nodes_map, column_num){
     const box_padding = 3; // px
     const inter_row_separation = 5; // px
     const draw_actions = [];
@@ -169,20 +173,49 @@ function draw_column_from(x_off, y_off, column, ctx, slots, nodes_map){
                 left: x_off,
                 top: row_height + per_row_height / 2
             },
+            bottom_middle: {
+                left: x_off + per_row_width / 2,
+                top: row_height + per_row_height
+            },
+            top_middle: {
+                left: x_off + per_row_width / 2,
+                top: row_height
+            },
+            column_num: column_num,
+
+            _debug: element
         };
 
         for (const dependency of element.dependencies) {
             // Connect two points
-            const init = nodes_map[dependency].right_middle;
-            const end = nodes_map[element.id].left_middle;
             
             draw_actions.push(() => {
-                ctx.beginPath();
-                ctx.moveTo(init.left, init.top);
-                ctx.lineTo(end.left - end_runway, init.top);
-                ctx.lineTo(end.left - end_runway, end.top);
-                ctx.lineTo(end.left, end.top);
-                ctx.stroke();
+                console.log(nodes_map[dependency]._debug, "->", element);
+
+                const init_column = nodes_map[dependency].column_num;
+                const end_column = nodes_map[element.id].column_num;
+
+
+                if (init_column !== end_column) {
+                    const init = nodes_map[dependency].right_middle;
+                    const end = nodes_map[element.id].left_middle;
+
+                    ctx.beginPath();
+                    ctx.moveTo(init.left, init.top);
+                    ctx.lineTo(end.left - end_runway, init.top);
+                    ctx.lineTo(end.left - end_runway, end.top);
+                    ctx.lineTo(end.left, end.top);
+                    ctx.stroke();
+                }
+                else {
+                    const init = nodes_map[dependency].bottom_middle;
+                    const end = nodes_map[element.id].top_middle;
+
+                    ctx.beginPath();
+                    ctx.moveTo(init.left, init.top);
+                    ctx.lineTo(end.left, end.top);
+                    ctx.stroke();
+                }
             });
         }
 
