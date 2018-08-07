@@ -46,7 +46,7 @@ defmodule TechtreeWeb.Projects.ProjectController do
   end
 
   def show(conn, %{"project_id" => id}) do
-    project = Projects.get_project_with_dependencies!(id)
+    project = Projects.get_project_with_steps!(id)
     render(conn, "show.html", project: project)
   end
 

@@ -1,4 +1,4 @@
-defmodule TechtreeWeb.:"Elixir.project.Project"ControllerTest do
+defmodule TechtreeWeb.Project.ProjectControllerTest do
   use TechtreeWeb.ConnCase
 
   alias Techtree.Projects

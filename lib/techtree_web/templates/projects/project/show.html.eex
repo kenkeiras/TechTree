@@ -1,10 +1,12 @@
 <h2><%= author_name(@project) %>'s <%= @project.name %></h2>
 
+<div id="dependency_graph">
+</div>
+
 <table>
 <%= for step <- @project.steps do %>
     <tr>
       <td><%= step.title %></td>
-      <td><%= step.description %></td>
 
       <td class="text-right">
         <span><%= link "Show", to: project_step_path(@conn, :show, @project.id, step), class: "btn btn-default btn-xs" %></span>

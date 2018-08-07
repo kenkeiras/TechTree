@@ -309,8 +309,6 @@ defmodule Techtree.Accounts do
 
     case Repo.one(query) do
         {%User{} = user, %Password{} = stored_password} -> 
-            IO.inspect(user)
-            
             # TODO refactor this to make it more idiomatic
             case Password.check(password, stored_password) do
               true ->

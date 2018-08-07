@@ -184,4 +184,62 @@ defmodule Techtree.ProjectsTest do
       assert %Ecto.Changeset{} = Projects.change_step(step)
     end
   end
+
+  describe "dependencies" do
+    alias Techtree.Projects.Dependency
+
+    @valid_attrs %{}
+    @update_attrs %{}
+    @invalid_attrs %{}
+
+    def dependency_fixture(attrs \\ %{}) do
+      {:ok, dependency} =
+        attrs
+        |> Enum.into(@valid_attrs)
+        |> Projects.create_dependency()
+
+      dependency
+    end
+
+    test "list_dependencies/0 returns all dependencies" do
+      dependency = dependency_fixture()
+      assert Projects.list_dependencies() == [dependency]
+    end
+
+    test "get_dependency!/1 returns the dependency with given id" do
+      dependency = dependency_fixture()
+      assert Projects.get_dependency!(dependency.id) == dependency
+    end
+
+    test "create_dependency/1 with valid data creates a dependency" do
+      assert {:ok, %Dependency{} = dependency} = Projects.create_dependency(@valid_attrs)
+    end
+
+    test "create_dependency/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Projects.create_dependency(@invalid_attrs)
+    end
+
+    test "update_dependency/2 with valid data updates the dependency" do
+      dependency = dependency_fixture()
+      assert {:ok, dependency} = Projects.update_dependency(dependency, @update_attrs)
+      assert %Dependency{} = dependency
+    end
+
+    test "update_dependency/2 with invalid data returns error changeset" do
+      dependency = dependency_fixture()
+      assert {:error, %Ecto.Changeset{}} = Projects.update_dependency(dependency, @invalid_attrs)
+      assert dependency == Projects.get_dependency!(dependency.id)
+    end
+
+    test "delete_dependency/1 deletes the dependency" do
+      dependency = dependency_fixture()
+      assert {:ok, %Dependency{}} = Projects.delete_dependency(dependency)
+      assert_raise Ecto.NoResultsError, fn -> Projects.get_dependency!(dependency.id) end
+    end
+
+    test "change_dependency/1 returns a dependency changeset" do
+      dependency = dependency_fixture()
+      assert %Ecto.Changeset{} = Projects.change_dependency(dependency)
+    end
+  end
 end

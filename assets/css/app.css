@@ -33,3 +33,36 @@
 form.bare {
     margin: 0 0 0 0;
 }
+
+.call-to-action:hover {
+    text-decoration: none;
+    background-color: #eee;
+}
+
+.call-to-action {
+    font-weight: bolder;
+    border-radius: 4px;
+}
+
+.call-to-action {
+    position: relative;
+    display: block;
+    padding: 10px 15px;
+}
+
+.call-to-action:focus {
+    outline: thin dotted;
+    outline: 5px auto -webkit-focus-ring-color;
+    outline-offset: -2px;
+}
+
+.call-to-action:focus, .call-to-action:hover {
+    color: #23527c;
+    text-decoration: underline;
+}
+
+.call-to-action {
+    border: none;
+    background: inherit;
+    color: #337ab7;
+}

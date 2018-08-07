@@ -58,7 +58,7 @@ defmodule Techtree.Projects do
       ** (Ecto.NoResultsError)
 
   """
-  def get_project_with_dependencies!(id) do
+  def get_project_with_steps!(id) do
     Project
     |> Repo.get!(id)
     |> Repo.preload(contributor: [user: :email], steps: [])
@@ -241,7 +241,7 @@ defmodule Techtree.Projects do
     Contributor.changeset(contributor, %{})
   end
 
-  alias Techtree.Projects.Step
+  alias Techtree.Projects.{Step, Dependency}
 
   @doc """
   Returns the list of steps.
@@ -286,6 +286,46 @@ defmodule Techtree.Projects do
 
   """
   def get_step!(id), do: Repo.get!(Step, id)
+
+  @doc """
+  Gets a single step.
+
+  Raises `Ecto.NoResultsError` if the Step does not exist.
+
+  ## Examples
+
+      iex> get_step!(123)
+      %Step{}
+
+      iex> get_step!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_step_with_project!(id) do
+    Step
+    |> Repo.get!(id)
+    |> Repo.preload(project: [])
+  end
+
+  @doc """
+  Gets a single step.
+
+  Raises `Ecto.NoResultsError` if the Step does not exist.
+
+  ## Examples
+
+      iex> get_step!(123)
+      %Step{}
+
+      iex> get_step!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_step_with_dependencies!(id) do
+    Step
+    |> Repo.get!(id)
+    |> Repo.preload([:project, :dependencies])
+  end
 
   @doc """
   Creates a step.
@@ -353,4 +393,134 @@ defmodule Techtree.Projects do
   def change_step(%Step{} = step) do
     Step.changeset(step, %{})
   end
+
+  alias Techtree.Projects.Dependency
+
+  @doc """
+  Returns the list of dependencies.
+
+  ## Examples
+
+      iex> list_dependencies()
+      [%Dependency{}, ...]
+
+  """
+  def list_dependencies do
+    Repo.all(Dependency)
+  end
+
+  @doc """
+  Gets a single dependency.
+
+  Raises `Ecto.NoResultsError` if the Dependency does not exist.
+
+  ## Examples
+
+      iex> get_dependency!(123)
+      %Dependency{}
+
+      iex> get_dependency!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_dependency!(id), do: Repo.get!(Dependency, id)
+
+  @doc """
+  Creates a dependency.
+  """
+  def create_dependency(depended, depender) do
+    depended
+    |> Repo.preload(:dependencies) # Load existing data
+    |> Ecto.Changeset.change() # Build the changeset
+    |> Ecto.Changeset.put_assoc(:dependencies, [depender | depended.dependencies]) # Set the association
+    |> Repo.update!
+  end
+
+  @doc """
+  Updates a dependency.
+
+  ## Examples
+
+      iex> update_dependency(dependency, %{field: new_value})
+      {:ok, %Dependency{}}
+
+      iex> update_dependency(dependency, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_dependency(%Dependency{} = dependency, attrs) do
+    dependency
+    |> Dependency.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a Dependency.
+
+  ## Examples
+
+      iex> delete_dependency(dependency)
+      {:ok, %Dependency{}}
+
+      iex> delete_dependency(dependency)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_dependency(%Dependency{} = dependency) do
+    Repo.delete(dependency)
+  end
+
+  @doc """
+  Deletes a Dependency.
+
+  ## Examples
+
+      iex> delete_dependency(dependency)
+      {:ok, %Dependency{}}
+
+      iex> delete_dependency(dependency)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_dependency(depender_id, depended_id) do
+    IO.inspect("Readying")
+    query = from d in "dependencies",
+              where: d.depended_id == ^depended_id and d.depender_id == ^depender_id
+
+    IO.inspect(query)
+    results = Repo.delete_all(query)
+    IO.inspect(results)
+    # delete_dependency(%Dependency{ depended: depended_id, depender: dependency_id })
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking dependency changes.
+
+  ## Examples
+
+      iex> change_dependency(dependency)
+      %Ecto.Changeset{source: %Dependency{}}
+
+  """
+  def change_dependency(%Dependency{} = dependency) do
+    Dependency.changeset(dependency, %{})
+  end
+
+  @doc """
+  Returns the list of steps on a specific project.
+
+  ## Examples
+
+      iex> list_steps_in_project(%Project{ id=42 })
+      [%Step{}, ...]
+
+  """
+  def get_dependency_graph(%Project{} = project) do
+    Step
+    |> Ecto.Query.where(project_id: ^project.id)
+    |> Repo.all()
+    |> Repo.preload([:dependencies])
+  end
+
+
 end
