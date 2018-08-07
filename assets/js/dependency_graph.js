@@ -190,7 +190,6 @@ function draw_column_from(x_off, y_off, column, ctx, slots, nodes_map, column_nu
             // Connect two points
             
             draw_actions.push(() => {
-                console.log(nodes_map[dependency]._debug, "->", element);
 
                 const init_column = nodes_map[dependency].column_num;
                 const end_column = nodes_map[element.id].column_num;
@@ -222,7 +221,6 @@ function draw_column_from(x_off, y_off, column, ctx, slots, nodes_map, column_nu
         draw_actions.push(() => {
             ctx.beginPath();
             const prev_style = ctx.strokeStyle;
-            console.log(JSON.stringify(element));
             ctx.rect(x_off, row_height, per_row_width, per_row_height);
             if (element.completed) {
                 ctx.strokeStyle = COMPLETED_STROKE_STYLE;
