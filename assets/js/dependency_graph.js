@@ -1,6 +1,5 @@
 const COMPLETED_STROKE_STYLE = '#548A00';
 const UNDEPENDED = 'UNDEPENDED';
-const SKIPPED = 'SKIPPED';
 
 class DependencyGraph {
     constructor(div) {
@@ -91,15 +90,9 @@ class RowAllocationSlots {
     }
 
     finish_column() {
-        console.log("Finishing column");
         for(let i=0; i < this.positions.length; i++) {
-            console.log(this.positions[i], UNDEPENDED, this.positions[i] === UNDEPENDED);
-            if (this.positions[i] === SKIPPED) {
-                this.positions[i] = undefined;
-            }
-
             if (this.positions[i] === UNDEPENDED) {
-                this.positions[i] = SKIPPED;
+                this.positions[i] = undefined;
             }
         }
     }
