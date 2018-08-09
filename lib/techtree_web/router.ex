@@ -28,6 +28,7 @@ defmodule TechtreeWeb.Router do
 
     resources "/", ProjectController, param: "project_id"
     resources "/:project_id/steps", StepController, param: "step_id"
+    get "/:project_id/export", ProjectController, :export
     post "/:project_id/steps/:step_id/state/completed", StepController, :mark_completed
     post "/:project_id/steps/:step_id/state/uncompleted", StepController, :mark_uncompleted
 

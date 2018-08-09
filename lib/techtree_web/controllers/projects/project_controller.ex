@@ -50,6 +50,12 @@ defmodule TechtreeWeb.Projects.ProjectController do
     render(conn, "show.html", project: project)
   end
 
+  def export(conn, %{"project_id" => id}) do
+    project = Projects.get_full_project!(id)
+    IO.inspect(project)
+    render(conn, "export-project.json", project: project)
+  end
+
   def edit(conn, _) do
     changeset = Projects.change_project(conn.assigns.project)
     render(conn, "edit.html", changeset: changeset)
