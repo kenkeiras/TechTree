@@ -1,4 +1,6 @@
 const COMPLETED_STROKE_STYLE = '#548A00';
+const UNDEPENDED = 'UNDEPENDED';
+const SKIPPED = 'SKIPPED';
 
 class DependencyGraph {
     constructor(div) {
@@ -23,8 +25,6 @@ class DependencyGraph {
 }
 
 class RowAllocationSlots {
-    UNDEPENDED(){ return 'UNDEPENDED'; }
-    SKIPPED() { return 'SKIPPED'; }
 
     constructor() {
         this.positions = [];
@@ -42,7 +42,7 @@ class RowAllocationSlots {
         for (let i = 0; i < this.positions.length; i++) {
             const slot = this.positions[i];
 
-            if (slot.depended_by === undefined) {
+            if ((slot === undefined) || (slot.depended_by === undefined)) {
                 continue;
             }
 
@@ -61,7 +61,7 @@ class RowAllocationSlots {
         for (const i of depending_on_this) {
             const slot = this.positions[i];
             if (slot.depended_by.length === 0) {
-                this.positions[i] = this.UNDEPENDED;
+                this.positions[i] = UNDEPENDED;
             }
         }
 
@@ -69,7 +69,7 @@ class RowAllocationSlots {
         for (const i of depending_on_this) {
             const slot = this.positions[i];
 
-            if ((slot === this.UNDEPENDED) || (slot.depended_by.length === 0)) {
+            if ((slot === UNDEPENDED) || (slot.depended_by.length === 0)) {
                 this.positions[i] = element;
                 return i;
             }
@@ -77,6 +77,7 @@ class RowAllocationSlots {
 
         // Get any available position
         for (let i = 0; i < this.positions.length; i++) {
+            console.log(i, this.positions[i]);
             if (this.positions[i] === undefined) { // Empty position
                 this.positions[i] = element;
                 return i;
@@ -90,13 +91,15 @@ class RowAllocationSlots {
     }
 
     finish_column() {
-        for(let i=0; i < this.positions; i++) {
-            if (this.positions[i] == this.SKIPPED) {
-                delete this.positions[i];
+        console.log("Finishing column");
+        for(let i=0; i < this.positions.length; i++) {
+            console.log(this.positions[i], UNDEPENDED, this.positions[i] === UNDEPENDED);
+            if (this.positions[i] === SKIPPED) {
+                this.positions[i] = undefined;
             }
 
-            if (this.positions[i] == this.UNDEPENDED) {
-                this.positions[i] = this.SKIPPED;
+            if (this.positions[i] === UNDEPENDED) {
+                this.positions[i] = SKIPPED;
             }
         }
     }
