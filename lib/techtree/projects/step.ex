@@ -10,7 +10,7 @@ defmodule Techtree.Projects.Step do
     field :completed, :boolean
     belongs_to :project, Project
     many_to_many :dependencies, Step, join_through: "dependencies",
-                                      join_keys: [depended_id: :id, depender_id: :id]
+                                      join_keys: [depender_id: :id, depended_id: :id]
 
     timestamps()
   end

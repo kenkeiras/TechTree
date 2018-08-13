@@ -449,10 +449,10 @@ defmodule Techtree.Projects do
   Creates a dependency.
   """
   def create_dependency(depended, depender) do
-    depended
+    depender
     |> Repo.preload(:dependencies) # Load existing data
     |> Ecto.Changeset.change() # Build the changeset
-    |> Ecto.Changeset.put_assoc(:dependencies, [depender | depended.dependencies]) # Set the association
+    |> Ecto.Changeset.put_assoc(:dependencies, [depended | depender.dependencies]) # Set the association
     |> Repo.update!
   end
 
@@ -557,7 +557,7 @@ defmodule Techtree.Projects do
     Enum.each(dependencies, fn dep_import_id ->
       new_id = Map.get(map, dep_import_id)
       depended_step = get_step!(new_id)
-      %Step{} = create_dependency(step, depended_step)
+      %Step{} = create_dependency(depended_step, step)
     end)
   end
 

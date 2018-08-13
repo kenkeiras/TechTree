@@ -37,11 +37,11 @@ defmodule TechtreeWeb.Projects.DependencyController do
     render(conn, "new.html", step: step, available_steps: available_steps)
   end
 
-  def create(conn, %{"dependency" => depender_id, "step_id" => step_id}) do
+  def create(conn, %{"dependency" => depended_id, "step_id" => step_id}) do
     step = Projects.get_step_with_dependencies!(step_id)
-    depender = Projects.get_step!(depender_id)
+    depended = Projects.get_step!(depended_id)
 
-    case Projects.create_dependency(step, depender) do
+    case Projects.create_dependency(depended, step) do
       %Step{} ->
         conn
         |> put_flash(:info, "Dependency added successfully.")
