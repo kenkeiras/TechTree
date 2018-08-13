@@ -43,6 +43,7 @@ defmodule Techtree.Mixfile do
       {:cowboy, "~> 1.0"},
       {:comeonin, "~> 4.0"},
       {:argon2_elixir, "~> 1.2"},
+      {:distillery, "~> 2.0-pre"},
     ]
   end
 
