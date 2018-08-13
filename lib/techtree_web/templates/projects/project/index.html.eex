@@ -24,3 +24,4 @@
 </table>
 
 <span><%= link "New Project", to: project_project_path(@conn, :new) %></span>
+<span><%= link "Import", to: project_project_path(@conn, :new_import) %></span>
