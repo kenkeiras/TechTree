@@ -27,6 +27,8 @@ defmodule TechtreeWeb.Router do
     pipe_through [:browser, :authenticate_user]
 
     resources "/", ProjectController, param: "project_id"
+    get "/new/import", ProjectController, :import
+    post "/new/import", ProjectController, :new_import
     resources "/:project_id/steps", StepController, param: "step_id"
     get "/:project_id/export", ProjectController, :export
     post "/:project_id/steps/:step_id/state/completed", StepController, :mark_completed

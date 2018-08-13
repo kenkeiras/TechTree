@@ -34,6 +34,21 @@ defmodule TechtreeWeb.Projects.ProjectController do
     render(conn, "new.html", changeset: changeset)
   end
 
+  def import(conn, _params) do
+    render(conn, "import.html")
+  end
+
+  def new_import(conn, %{ "file" => %Plug.Upload{ path: path } }) do
+    case Projects.import_project_from_file(conn, path) do
+      {:ok, project} ->
+        conn
+        |> put_flash(:info, "Project imported successfully.")
+        |> redirect(to: project_project_path(conn, :show, project))
+      {:error, %Ecto.Changeset{} = changeset} ->
+        render(conn, "new.html", changeset: changeset)
+    end
+  end
+
   def create(conn, %{ "project" => project_params }) do
     case Projects.create_project(conn.assigns.current_contributor, project_params) do
       {:ok, project} ->

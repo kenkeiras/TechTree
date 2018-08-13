@@ -503,13 +503,10 @@ defmodule Techtree.Projects do
 
   """
   def delete_dependency(depender_id, depended_id) do
-    IO.inspect("Readying")
     query = from d in "dependencies",
               where: d.depended_id == ^depended_id and d.depender_id == ^depender_id
 
-    IO.inspect(query)
     results = Repo.delete_all(query)
-    IO.inspect(results)
     # delete_dependency(%Dependency{ depended: depended_id, depender: dependency_id })
   end
 
@@ -542,5 +539,46 @@ defmodule Techtree.Projects do
     |> Repo.preload([:dependencies])
   end
 
+  def import_project(conn, %{ "name" => name, "steps" => steps }) do
+    {:ok, project} = create_project(conn.assigns.current_contributor, %{ "name" => name })
+    
+    mapzip = for step <- steps, do: import_step(conn, project, step)
+    map = Enum.reduce(mapzip, %{}, fn {import_id, new_id}, acc ->
+      Map.put(acc, import_id, new_id)
+    end)
 
+    for step <- steps, do: add_dependencies(conn, project, map, step)
+
+    {:ok, project}
+  end
+
+  def add_dependencies(conn, project, map, %{ "id" => import_id, "dependencies" => dependencies }) do
+    step = get_step_with_dependencies!(Map.get(map, import_id))
+    Enum.each(dependencies, fn dep_import_id ->
+      new_id = Map.get(map, dep_import_id)
+      depended_step = get_step!(new_id)
+      %Step{} = create_dependency(step, depended_step)
+    end)
+  end
+
+  def import_step(conn, project, %{"title" => title,
+    "id" => import_id,
+    "description" => description,
+    "dependencies" => _import_dependencies,
+    "completed" => completed
+  })do
+    {:ok, new_step } = create_step(conn.assigns.current_contributor, project, 
+                                    %{
+                                      "title" => title,
+                                      "description" => description,
+                                      "completed" => completed
+                                    })
+    { import_id, new_step.id }
+  end
+
+  def import_project_from_file(conn, path) do
+    content = File.read!(path)
+    decoded = Poison.decode!(content)
+    import_project(conn, decoded)
+  end
 end
