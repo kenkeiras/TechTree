@@ -15,8 +15,17 @@ use Mix.Config
 # which you typically run after static files are built.
 config :techtree, TechtreeWeb.Endpoint,
   load_from_system_env: true,
-  url: [host: "example.com", port: 80],
-  cache_static_manifest: "priv/static/cache_manifest.json"
+  url: [host: "techtree.spiral.systems", port: 80],
+  cache_static_manifest: "priv/static/cache_manifest.json",
+  secret_key_base: "${SECRET_KEY_BASE}"
+
+# Configure your database
+config :techtree, Techtree.Repo,
+  adapter: Ecto.Adapters.Postgres,
+  username: "${POSTGRES_USER}",
+  password: "${POSTGRES_PASSWORD}",
+  database: "${POSTGRES_DB}",
+  pool_size: 15
 
 # Do not print debug messages in production
 config :logger, level: :info
@@ -58,7 +67,3 @@ config :logger, level: :info
 #
 #     config :techtree, TechtreeWeb.Endpoint, server: true
 #
-
-# Finally import the config/prod.secret.exs
-# which should be versioned separately.
-import_config "prod.secret.exs"
