@@ -24,19 +24,23 @@ COPY . /app
 # Get dependencies
 RUN mix deps.get
 
+RUN mix deps.get --only prod
+RUN MIX_ENV=prod mix compile
+
 WORKDIR /app/assets
 RUN npm install
+RUN npm run deploy
 WORKDIR /app
 
-RUN MIX_ENV=prod mix release.init
-RUN MIX_ENV=prod mix release --executable
+RUN mix phx.digest
+# RUN MIX_ENV=prod mix release --executable
 
 ## Runner stage
-FROM elixir:alpine as runner
-RUN apk --no-cache add ca-certificates bash
+# FROM elixir:alpine as runner
+# RUN apk --no-cache add ca-certificates bash
 
-WORKDIR /app
+# COPY --from=builder /app/_build/prod/rel/ /app
 
-COPY --from=builder /app/_build/prod/rel/techtree /app
+# WORKDIR /app/techtree
 
-CMD ["bin/techtree", "foreground"]
+CMD ["mix", "phx.server"]
