@@ -16,7 +16,6 @@
       <header class="header">
         <nav role="navigation">
           <ul class="nav nav-pills pull-right">
-            <li><a href="http://www.phoenixframework.org/docs">Get Started</a></li>
             <%= if is_logged(@conn) do %>
             <li>
               <%= form_for @conn, session_path(@conn, :delete), [method: :delete, as: :user, class: ["bare"]],  fn _ -> %>
