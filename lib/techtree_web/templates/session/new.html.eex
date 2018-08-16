@@ -12,4 +12,6 @@
   <div class="form-group">
     <%= submit "Login" %>
   </div>
+  <%= link "Register", to: user_path(@conn, :new) %>
+
 <% end %>
