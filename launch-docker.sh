@@ -10,9 +10,9 @@ USERNAME=techtree
 DB_NAME=techtree
 DB_DOCKER_NAME=techtree-postgres
 PORT=4000
-OUT_PORT=8080
+OUT_PORT=${OUT_PORT:-8080}
 
-TT_DOCKER_NAME=techtree
+TT_DOCKER_NAME=${TT_DOCKER_NAME;-techtree}
 
 if [ `docker ps -a --filter=name="${DB_DOCKER_NAME}"|wc -l` -eq 1 ]; then
     PASSWORD="`GENPASSWD`"
