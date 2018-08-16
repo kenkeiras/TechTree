@@ -138,11 +138,11 @@ function prepare_draw_columns_in_canvas(columns, canvas) {
     };
 }
 
-function draw_column_from(x_off, y_off, column, ctx, slots, nodes_map, column_num){
+function draw_column_from(base_x_off, base_y_off, column, ctx, slots, nodes_map, column_num){
     const box_padding = 3; // px
     const inter_row_separation = 5; // px
     const draw_actions = [];
-    const end_runway = 5; // px
+    const base_end_runway = 5; // px
 
     let height = 0;
     let width = 0;
@@ -150,6 +150,25 @@ function draw_column_from(x_off, y_off, column, ctx, slots, nodes_map, column_nu
     // TODO: do this calculation in a more reliable way
     const measure_height = ctx.measureText('M').width;
     const per_row_height = measure_height + box_padding * 2;
+    const dependency_line_padding = 1; // px
+    const dependency_line_size = 1; // px
+
+    const dependency_positions = {};
+    let dependency_count = 0;
+
+    for (const element of column) {
+        for (const dependency of element.dependencies) {
+            if (dependency_positions[dependency] === undefined) {
+                dependency_positions[dependency] = dependency_count++;
+            }
+        }
+    }
+
+    const dependency_line_offset = (dependency_count * (dependency_line_padding * 2)
+                                                     + dependency_line_size);
+
+    const x_off = base_x_off + dependency_line_offset;
+    const y_off = base_y_off;
 
     for (const element of column) {
         const measure = ctx.measureText(element.title);
@@ -184,7 +203,12 @@ function draw_column_from(x_off, y_off, column, ctx, slots, nodes_map, column_nu
 
         for (const dependency of element.dependencies) {
             // Connect two points
-            
+
+            const dependency_index = dependency_positions[dependency];
+            const end_runway = base_end_runway + dependency_line_offset
+                                               - (dependency_index * ((dependency_line_padding * 2)
+                                                                      + 1)); // px
+
             draw_actions.push(() => {
 
                 const init_column = nodes_map[dependency].column_num;
