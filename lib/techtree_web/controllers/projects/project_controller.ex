@@ -25,7 +25,7 @@ defmodule TechtreeWeb.Projects.ProjectController do
   end
 
   def index(conn, _params) do
-    projects = Projects.list_projects()
+    projects = Projects.list_projects(conn.assigns.current_contributor)
     render(conn, "index.html", projects: projects)
   end
 

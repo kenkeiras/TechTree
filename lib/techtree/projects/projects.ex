@@ -18,8 +18,9 @@ defmodule Techtree.Projects do
       [%Project{}, ...]
 
   """
-  def list_projects do
+  def list_projects(contributor=%Contributor{}) do
     Project
+    |> Ecto.Query.where(contributor_id: ^contributor.id)
     |> Repo.all()
     |> Repo.preload(contributor: [user: :email])
   end
@@ -503,7 +504,7 @@ defmodule Techtree.Projects do
 
   """
   def delete_dependency(depender_id, depended_id) do
-    query = from d in "dependencies",
+    query = from d in Dependency,
               where: d.depended_id == ^depended_id and d.depender_id == ^depender_id
 
     results = Repo.delete_all(query)
