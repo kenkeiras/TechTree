@@ -9,16 +9,23 @@
     </tr>
   </thead>
   <tbody>
-<%= for project <- @projects do %>
-    <tr>
-      <td><%= project.name %></td>
 
-      <td class="text-right">
-        <span><%= link "Show", to: project_project_path(@conn, :show, project), class: "btn btn-default btn-xs" %></span>
-        <span><%= link "Edit", to: project_project_path(@conn, :edit, project), class: "btn btn-default btn-xs" %></span>
-        <span><%= link "Delete", to: project_project_path(@conn, :delete, project), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
-      </td>
-    </tr>
+<%= if length(@projects) > 0 do %>
+  <%= for project <- @projects do %>
+      <tr>
+        <td><%= project.name %></td>
+
+        <td class="text-right">
+          <span><%= link "Show", to: project_project_path(@conn, :show, project), class: "btn btn-default btn-xs" %></span>
+          <span><%= link "Edit", to: project_project_path(@conn, :edit, project), class: "btn btn-default btn-xs" %></span>
+          <span><%= link "Delete", to: project_project_path(@conn, :delete, project), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
+        </td>
+      </tr>
+  <% end %>
+<% else %>
+    <div class="call-to-action">
+      <%= link "Create a new project", to: project_project_path(@conn, :new) %>
+    </div>
 <% end %>
   </tbody>
 </table>
