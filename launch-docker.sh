@@ -50,4 +50,4 @@ docker run --name ${TT_DOCKER_NAME} -m 500m -p ${OUT_PORT}:${PORT} \
                                     -e SECRET_KEY_BASE="`GENPASSWD`" \
                                     -e PORT=${PORT} \
                                     -e MIX_ENV=prod \
-                                    ${TT_DOCKER_NAME}
+                                    techtree
