@@ -18,7 +18,7 @@ defmodule TechtreeWeb.Router do
 
     get "/", IndexRedirectionController, :index
 
-    resources "/users", UserController
+    resources "/users", UserController, only: [:new, :create]
     resources "/sessions", SessionController, only: [:new, :create, :delete],
                                               singleton: true
   end
