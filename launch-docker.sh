@@ -10,9 +10,9 @@ USERNAME=techtree
 DB_NAME=techtree
 DB_DOCKER_NAME=techtree-postgres
 PORT=4000
-OUT_PORT=8080
+OUT_PORT=${OUT_PORT:-8080}
 
-TT_DOCKER_NAME=techtree
+TT_DOCKER_NAME=${TT_DOCKER_NAME:-techtree}
 
 if [ `docker ps -a --filter=name="${DB_DOCKER_NAME}"|wc -l` -eq 1 ]; then
     PASSWORD="`GENPASSWD`"
@@ -44,9 +44,10 @@ DB_DOCKER_ID=`docker ps -a --filter=name="${DB_DOCKER_NAME}"|tail -n+2|cut -d\  
 
 PASSWORD=`docker inspect ${DB_DOCKER_ID} | jq '.[0].Config.Env'|grep POSTGRES_PASSWD|cut -d= -f2|cut -d\" -f1`
 
-docker run -it --rm --name ${TT_DOCKER_NAME} -m 500m -p ${OUT_PORT}:${PORT} \
+docker run -d --name ${TT_DOCKER_NAME} -m 500m -p ${OUT_PORT}:${PORT} \
                                     --link=${DB_DOCKER_NAME}:db \
                                     -e DATABASE_URL=postgres://${USERNAME}:${PASSWORD}@db:5432/${DB_NAME} \
                                     -e SECRET_KEY_BASE="`GENPASSWD`" \
                                     -e PORT=${PORT} \
-                                    ${TT_DOCKER_NAME}
+                                    -e MIX_ENV=prod \
+                                    techtree
