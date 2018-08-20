@@ -225,9 +225,9 @@ function draw_column_from(base_x_off, base_y_off, column, ctx, slots, nodes_map,
 
                     ctx.beginPath();
                     ctx.moveTo(init.left, init.top);
-                    ctx.lineTo(end.left - end_runway, init.top);
-                    ctx.lineTo(end.left - end_runway, end.top);
-                    ctx.lineTo(end.left, end.top);
+                    ctx.bezierCurveTo(end.left - end_runway, init.top,
+                                      end.left - end_runway, end.top,
+                                      end.left, end.top);
                     ctx.stroke();
                 }
                 else {
