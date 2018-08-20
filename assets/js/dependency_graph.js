@@ -155,19 +155,23 @@ function draw_column_from(base_x_off, base_y_off, column, ctx, slots, nodes_map,
 
     const dependency_positions = {};
     let dependency_count = 0;
+    let line_count = 0;
 
     for (const element of column) {
         for (const dependency of element.dependencies) {
             if (dependency_positions[dependency] === undefined) {
                 dependency_positions[dependency] = dependency_count++;
             }
+
+            line_count++;
         }
     }
 
-    const dependency_line_offset = (dependency_count * (dependency_line_padding * 2)
-                                                     + dependency_line_size);
+    const dependency_line_offset = (line_count * ((dependency_line_padding * 2)
+                                                  + dependency_line_size));
 
-    const x_off = base_x_off + dependency_line_offset;
+    const left_padding = dependency_line_offset;
+    const x_off = base_x_off + left_padding;
     const y_off = base_y_off;
 
     for (const element of column) {
@@ -262,7 +266,11 @@ function draw_column_from(base_x_off, base_y_off, column, ctx, slots, nodes_map,
         }
     }
 
-    return { width: width, height: height + per_row_height, draw_actions: draw_actions };
+    return { 
+        width: width + left_padding,
+        height: height + per_row_height,
+        draw_actions: draw_actions
+    };
 }
 
 function loops_back(graph, element_id, first_step, selector) {
