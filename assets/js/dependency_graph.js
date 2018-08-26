@@ -1,5 +1,6 @@
 const COMPLETED_STROKE_STYLE = '#548A00';
 const UNDEPENDED = 'UNDEPENDED';
+const SvgNS = "http://www.w3.org/2000/svg";
 
 class DependencyGraph {
     constructor(div) {
@@ -10,14 +11,20 @@ class DependencyGraph {
     render(data) {
         const columns = sort_by_dependency_columns(data.steps);
         
-        this.canvas = document.createElement("canvas");
+        this.canvas = document.createElementNS(SvgNS, "svg");
+        
+        this.canvas.style.width = '500px';
+        this.canvas.style.height = '500px';
+
         this.div.appendChild(this.canvas);
 
         const prepared_draw = prepare_draw_columns_in_canvas(columns, this.canvas);
-        this.canvas.width = prepared_draw.width;
-        this.canvas.height = prepared_draw.height;
-        this.canvas.style.width = prepared_draw.width + 'px';
-        this.canvas.style.height = prepared_draw.height + 'px';
+        // this.canvas.width = prepared_draw.width;
+        // this.canvas.height = prepared_draw.height;
+        // this.canvas.style.width = prepared_draw.width + 'px';
+        // this.canvas.style.height = prepared_draw.height + 'px';
+        this.div.style.width = prepared_draw.width + 'px';
+        this.div.style.height = prepared_draw.height + 'px';
 
         prepared_draw.draw();
     }
@@ -99,8 +106,6 @@ class RowAllocationSlots {
 }
 
 function prepare_draw_columns_in_canvas(columns, canvas) {
-    const ctx = canvas.getContext("2d");
-
     const left_margin = 10; // px
     const top_margin = 10; // px
     const inter_column_separation = 20; // px
@@ -117,7 +122,7 @@ function prepare_draw_columns_in_canvas(columns, canvas) {
 
         column_num++;
 
-        const result = draw_column_from(x_off, y_off, column, ctx, slots, nodes_map, column_num);
+        const result = draw_column_from(x_off, y_off, column, canvas, slots, nodes_map, column_num);
         draw_actions = draw_actions.concat(result.draw_actions);
         slots.finish_column();
 
@@ -125,6 +130,7 @@ function prepare_draw_columns_in_canvas(columns, canvas) {
             height = result.height;
         }
         x_off += result.width + inter_column_separation;
+        break;
     }
 
     return { 
@@ -138,7 +144,49 @@ function prepare_draw_columns_in_canvas(columns, canvas) {
     };
 }
 
-function draw_column_from(base_x_off, base_y_off, column, ctx, slots, nodes_map, column_num){
+let textCorrection = undefined;
+
+function add_node(canvas, title, bx) {
+    const x_padding = 0;
+    const y_padding = 0;
+
+    var rect = document.createElementNS(SvgNS, 'rect');
+    var textBox = document.createElementNS(SvgNS, 'text');
+    canvas.appendChild(rect);
+
+    canvas.appendChild(textBox);
+
+    textBox.setAttributeNS(null, 'stroke', "black");
+    textBox.setAttributeNS(null,'stroke-width',"1");
+    textBox.textContent = title;
+    textBox.setAttributeNS(null,'textlength', '100%');
+
+    if (textCorrection === undefined) {
+        textBox.setAttributeNS(null,'x', 0);
+        textBox.setAttributeNS(null,'y', 0);
+
+        textCorrection = { 
+            X: -(textBox.getClientRects()[0].left - textBox.parentElement.getClientRects()[0].left),
+            Y: -(textBox.getClientRects()[0].top - textBox.parentElement.getClientRects()[0].top)
+        }
+    }
+
+    console.log(textCorrection);
+
+    textBox.setAttributeNS(null,'x', x_padding + 55 + bx + textCorrection.X);
+    textBox.setAttributeNS(null,'y', y_padding + 55 + textCorrection.Y);
+
+
+    rect.setAttributeNS(null,'x', 55 + bx);
+    rect.setAttributeNS(null,'y', 55);
+    rect.setAttributeNS(null,'stroke','black');
+    rect.setAttributeNS(null,'stroke-width','1');
+    rect.setAttributeNS(null, 'fill', 'none');
+    rect.setAttributeNS(null,'width', textBox.getClientRects()[0].width + x_padding * 2);
+    rect.setAttributeNS(null,'height', textBox.getClientRects()[0].height + y_padding * 2);
+}
+
+function draw_column_from(base_x_off, base_y_off, column, canvas, slots, nodes_map, column_num){
     const box_padding = 3; // px
     const inter_row_separation = 5; // px
     const draw_actions = [];
@@ -146,6 +194,13 @@ function draw_column_from(base_x_off, base_y_off, column, ctx, slots, nodes_map,
 
     let height = 0;
     let width = 0;
+
+    add_node(canvas, "test", base_x_off);
+    return { 
+        width: 50,
+        height: 500,
+        draw_actions: []
+    };
 
     // TODO: do this calculation in a more reliable way
     const measure_height = ctx.measureText('M').width;
@@ -245,7 +300,7 @@ function draw_column_from(base_x_off, base_y_off, column, ctx, slots, nodes_map,
         draw_actions.push(() => {
             ctx.beginPath();
             const prev_style = ctx.strokeStyle;
-            ctx.rect(x_off, row_height, per_row_width, per_row_height);
+            ctx.text(x_off, row_height, per_row_width, per_row_height);
             if (element.completed) {
                 ctx.strokeStyle = COMPLETED_STROKE_STYLE;
             }
