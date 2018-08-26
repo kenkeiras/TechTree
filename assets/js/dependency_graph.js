@@ -140,7 +140,7 @@ function prepare_draw_columns_in_canvas(columns, canvas) {
 
 let textCorrection = undefined;
 
-function add_node(canvas, title, left, top, completed) {
+function add_node(canvas, element, left, top, completed) {
     const x_padding = 2; // px
     const y_padding = 2; // px
 
@@ -155,9 +155,9 @@ function add_node(canvas, title, left, top, completed) {
 
     canvas.appendChild(textBox);
 
-    textBox.setAttributeNS(null, 'stroke', strike_color);
+    textBox.setAttribute('class', 'actionable');
     textBox.setAttributeNS(null,'stroke-width',"1");
-    textBox.textContent = title;
+    textBox.textContent = element.title;
     textBox.setAttributeNS(null,'textlength', '100%');
 
     // First time we draw this we have to calculate the correction
@@ -181,11 +181,30 @@ function add_node(canvas, title, left, top, completed) {
 
     rect.setAttributeNS(null,'x', left);
     rect.setAttributeNS(null,'y', top);
-    rect.setAttributeNS(null,'stroke',strike_color);
     rect.setAttributeNS(null,'stroke-width','1');
-    rect.setAttributeNS(null, 'fill', 'none');
     rect.setAttributeNS(null,'width', textBox.getClientRects()[0].width + x_padding * 2);
     rect.setAttributeNS(null,'height', textBox.getClientRects()[0].height + y_padding * 2);
+
+    const onHover = () => {
+        textBox.setAttributeNS(null, 'stroke', 'white');
+        textBox.setAttributeNS(null, 'fill', 'white');
+        rect.setAttributeNS(null, 'fill', strike_color);
+    };
+
+    const onRestore = () => {
+        rect.setAttributeNS(null,'stroke',strike_color);
+        rect.setAttributeNS(null, 'fill', 'none');
+        textBox.setAttributeNS(null, 'stroke', strike_color);
+        textBox.setAttributeNS(null, 'fill', strike_color);
+    };
+
+    onRestore();
+
+    textBox.onmouseenter = onHover;
+    textBox.onmouseleave = onRestore;
+    textBox.onclick = () => {
+        document.location = element.location;
+    };
 
     return {
         width: rect.getClientRects()[0].width,
@@ -196,7 +215,7 @@ function add_node(canvas, title, left, top, completed) {
 
 function calculate_per_row_height(svg) {
     if (svg.per_row_height === undefined) {
-        const test = add_node(svg, "test", 0, 0, false);
+        const test = add_node(svg, {title: "test"}, 0, 0, false);
         for (const node of test.node_list){
             svg.removeChild(node);
         }
@@ -248,9 +267,7 @@ function draw_column_from(base_x_off, base_y_off, column, svg, slots, nodes_map,
                             + row_num * per_row_height
                             + (row_num - 1) * inter_row_separation);
 
-        console.log(row_height, element.title, (row_num - 1) * inter_row_separation);
-
-        const measure = add_node(svg, element.title, x_off, row_height, element.completed);
+        const measure = add_node(svg, element, x_off, row_height, element.completed);
 
         const per_row_width = measure.width;
 
@@ -313,7 +330,7 @@ function draw_column_from(base_x_off, base_y_off, column, svg, slots, nodes_map,
                         " C", end.left, ",", end.top
                     ].join("");
                 }
-                console.log(curve);
+
                 path_element.setAttributeNS(null, "d", curve);
                 path_element.setAttributeNS(null, 'fill', 'none');
                 path_element.setAttributeNS(null, 'stroke', 'black');
@@ -483,6 +500,12 @@ function resolve(rows, steps, depended) {
 }
 
 function get_project_graph(project_id, cb) {
+    function process(project_id, stepsResult) {
+        for (const step of stepsResult.steps){
+            step.location = "/projects/" + project_id + "/steps/" + step.id;
+        }
+    }
+    
     const xhr = new XMLHttpRequest(),
           method = "GET",
           url = "/api/projects/" + project_id + "/dependencies";
@@ -490,7 +513,9 @@ function get_project_graph(project_id, cb) {
     xhr.open(method, url, true);
     xhr.onreadystatechange = function () {
         if(xhr.readyState === 4 && xhr.status === 200) {
-            cb(JSON.parse(xhr.responseText));
+            const result = JSON.parse(xhr.responseText);
+            process(project_id, result);
+            cb(result);
         }
         else if (xhr.readyState === 4) {
             console.error("Request returned code", xhr.status, "text", xhr.responseText);

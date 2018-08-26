@@ -75,3 +75,7 @@ input.form-control[type="file"] {
     background: inherit;
     color: #337ab7;
 }
+
+.actionable {
+    cursor: pointer;
+}
