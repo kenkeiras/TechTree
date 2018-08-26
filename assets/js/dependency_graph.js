@@ -1,5 +1,6 @@
 const COMPLETED_STROKE_STYLE = '#548A00';
 const UNDEPENDED = 'UNDEPENDED';
+const SvgNS = "http://www.w3.org/2000/svg";
 
 class DependencyGraph {
     constructor(div) {
@@ -10,14 +11,15 @@ class DependencyGraph {
     render(data) {
         const columns = sort_by_dependency_columns(data.steps);
         
-        this.canvas = document.createElement("canvas");
+        this.canvas = document.createElementNS(SvgNS, "svg");
+        
         this.div.appendChild(this.canvas);
 
         const prepared_draw = prepare_draw_columns_in_canvas(columns, this.canvas);
-        this.canvas.width = prepared_draw.width;
-        this.canvas.height = prepared_draw.height;
         this.canvas.style.width = prepared_draw.width + 'px';
         this.canvas.style.height = prepared_draw.height + 'px';
+        this.div.style.width = prepared_draw.width + 'px';
+        this.div.style.height = prepared_draw.height + 'px';
 
         prepared_draw.draw();
     }
@@ -99,8 +101,6 @@ class RowAllocationSlots {
 }
 
 function prepare_draw_columns_in_canvas(columns, canvas) {
-    const ctx = canvas.getContext("2d");
-
     const left_margin = 10; // px
     const top_margin = 10; // px
     const inter_column_separation = 20; // px
@@ -117,7 +117,7 @@ function prepare_draw_columns_in_canvas(columns, canvas) {
 
         column_num++;
 
-        const result = draw_column_from(x_off, y_off, column, ctx, slots, nodes_map, column_num);
+        const result = draw_column_from(x_off, y_off, column, canvas, slots, nodes_map, column_num);
         draw_actions = draw_actions.concat(result.draw_actions);
         slots.finish_column();
 
@@ -138,7 +138,76 @@ function prepare_draw_columns_in_canvas(columns, canvas) {
     };
 }
 
-function draw_column_from(base_x_off, base_y_off, column, ctx, slots, nodes_map, column_num){
+let textCorrection = undefined;
+
+function add_node(canvas, title, left, top, completed) {
+    const x_padding = 2; // px
+    const y_padding = 2; // px
+
+    let strike_color = 'black';
+    if (completed) {
+        strike_color = COMPLETED_STROKE_STYLE;
+    }
+
+    var rect = document.createElementNS(SvgNS, 'rect');
+    var textBox = document.createElementNS(SvgNS, 'text');
+    canvas.appendChild(rect);
+
+    canvas.appendChild(textBox);
+
+    textBox.setAttributeNS(null, 'stroke', strike_color);
+    textBox.setAttributeNS(null,'stroke-width',"1");
+    textBox.textContent = title;
+    textBox.setAttributeNS(null,'textlength', '100%');
+
+    // First time we draw this we have to calculate the correction
+    // to apply over the text position. This translates from whatever
+    // the text element considers as .X/.Y properties to the coordinates
+    // of it's left-top corner relative to the SVG element.
+    // Looks like text .X/.Y positions the baseline?
+
+    if (textCorrection === undefined) {
+        textBox.setAttributeNS(null,'x', 0);
+        textBox.setAttributeNS(null,'y', 0);
+
+        textCorrection = { 
+            X: -(textBox.getClientRects()[0].left - textBox.parentElement.getClientRects()[0].left),
+            Y: -(textBox.getClientRects()[0].top - textBox.parentElement.getClientRects()[0].top)
+        }
+    }
+
+    textBox.setAttributeNS(null,'x', x_padding + left + textCorrection.X);
+    textBox.setAttributeNS(null,'y', y_padding + top + textCorrection.Y);
+
+    rect.setAttributeNS(null,'x', left);
+    rect.setAttributeNS(null,'y', top);
+    rect.setAttributeNS(null,'stroke',strike_color);
+    rect.setAttributeNS(null,'stroke-width','1');
+    rect.setAttributeNS(null, 'fill', 'none');
+    rect.setAttributeNS(null,'width', textBox.getClientRects()[0].width + x_padding * 2);
+    rect.setAttributeNS(null,'height', textBox.getClientRects()[0].height + y_padding * 2);
+
+    return {
+        width: rect.getClientRects()[0].width,
+        height: rect.getClientRects()[0].height,
+        node_list: [textBox, rect]
+    }
+}
+
+function calculate_per_row_height(svg) {
+    if (svg.per_row_height === undefined) {
+        const test = add_node(svg, "test", 0, 0, false);
+        for (const node of test.node_list){
+            svg.removeChild(node);
+        }
+    
+        svg.per_row_height = test.height;
+    }
+
+    return svg.per_row_height;
+}
+
+function draw_column_from(base_x_off, base_y_off, column, svg, slots, nodes_map, column_num){
     const box_padding = 3; // px
     const inter_row_separation = 5; // px
     const draw_actions = [];
@@ -147,9 +216,7 @@ function draw_column_from(base_x_off, base_y_off, column, ctx, slots, nodes_map,
     let height = 0;
     let width = 0;
 
-    // TODO: do this calculation in a more reliable way
-    const measure_height = ctx.measureText('M').width;
-    const per_row_height = measure_height + box_padding * 2;
+    const per_row_height = calculate_per_row_height(svg);
     const dependency_line_padding = 1; // px
     const dependency_line_size = 1; // px
 
@@ -175,13 +242,17 @@ function draw_column_from(base_x_off, base_y_off, column, ctx, slots, nodes_map,
     const y_off = base_y_off;
 
     for (const element of column) {
-        const measure = ctx.measureText(element.title);
-
         const row_num = slots.get_position_for_element(element);
-        const per_row_width = measure.width + box_padding * 2;
+
         const row_height = (y_off 
-                            + row_num * per_row_height 
+                            + row_num * per_row_height
                             + (row_num - 1) * inter_row_separation);
+
+        console.log(row_height, element.title, (row_num - 1) * inter_row_separation);
+
+        const measure = add_node(svg, element.title, x_off, row_height, element.completed);
+
+        const per_row_width = measure.width;
 
         nodes_map[element.id] = {
             right_middle: {
@@ -213,50 +284,43 @@ function draw_column_from(base_x_off, base_y_off, column, ctx, slots, nodes_map,
                                                - (dependency_index * ((dependency_line_padding * 2)
                                                                       + 1)); // px
 
+            const init_column = nodes_map[dependency].column_num;
+            const end_column = nodes_map[element.id].column_num;
+
             draw_actions.push(() => {
-
-                const init_column = nodes_map[dependency].column_num;
-                const end_column = nodes_map[element.id].column_num;
-
+                const path_element = document.createElementNS(SvgNS, 'path');
+                let curve;
 
                 if (init_column !== end_column) {
                     const init = nodes_map[dependency].right_middle;
                     const end = nodes_map[element.id].left_middle;
 
-                    ctx.beginPath();
-                    ctx.moveTo(init.left, init.top);
-                    ctx.bezierCurveTo(end.left - end_runway, init.top,
-                                      end.left - end_runway, end.top,
-                                      end.left, end.top);
-                    ctx.stroke();
+
+                    curve = [
+                        "M", init.left, ",", init.top,
+                        " C", end.left - end_runway, ",", init.top,
+                        " ", end.left - end_runway, ",", end.top,
+                        " ", end.left, ",", end.top
+                    ].join("");
+
                 }
                 else {
                     const init = nodes_map[dependency].bottom_middle;
                     const end = nodes_map[element.id].top_middle;
 
-                    ctx.beginPath();
-                    ctx.moveTo(init.left, init.top);
-                    ctx.lineTo(end.left, end.top);
-                    ctx.stroke();
+                    curve = [
+                        "M", init.left, ",", init.top,
+                        " C", end.left, ",", end.top
+                    ].join("");
                 }
+                console.log(curve);
+                path_element.setAttributeNS(null, "d", curve);
+                path_element.setAttributeNS(null, 'fill', 'none');
+                path_element.setAttributeNS(null, 'stroke', 'black');
+                path_element.setAttributeNS(null, 'stroke-width', '1');
+                svg.appendChild(path_element);
             });
         }
-
-        draw_actions.push(() => {
-            ctx.beginPath();
-            const prev_style = ctx.strokeStyle;
-            ctx.rect(x_off, row_height, per_row_width, per_row_height);
-            if (element.completed) {
-                ctx.strokeStyle = COMPLETED_STROKE_STYLE;
-            }
-            
-            ctx.fillText(element.title,
-                         x_off + box_padding,
-                         row_height + box_padding + measure_height);
-
-            ctx.stroke();
-            ctx.strokeStyle = prev_style;
-        });
 
         if (per_row_width > width) {
             width = per_row_width;
