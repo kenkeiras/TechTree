@@ -13,16 +13,11 @@ class DependencyGraph {
         
         this.canvas = document.createElementNS(SvgNS, "svg");
         
-        this.canvas.style.width = '500px';
-        this.canvas.style.height = '500px';
-
         this.div.appendChild(this.canvas);
 
         const prepared_draw = prepare_draw_columns_in_canvas(columns, this.canvas);
-        // this.canvas.width = prepared_draw.width;
-        // this.canvas.height = prepared_draw.height;
-        // this.canvas.style.width = prepared_draw.width + 'px';
-        // this.canvas.style.height = prepared_draw.height + 'px';
+        this.canvas.style.width = prepared_draw.width + 'px';
+        this.canvas.style.height = prepared_draw.height + 'px';
         this.div.style.width = prepared_draw.width + 'px';
         this.div.style.height = prepared_draw.height + 'px';
 
@@ -130,7 +125,6 @@ function prepare_draw_columns_in_canvas(columns, canvas) {
             height = result.height;
         }
         x_off += result.width + inter_column_separation;
-        break;
     }
 
     return { 
@@ -146,9 +140,14 @@ function prepare_draw_columns_in_canvas(columns, canvas) {
 
 let textCorrection = undefined;
 
-function add_node(canvas, title, bx) {
-    const x_padding = 0;
-    const y_padding = 0;
+function add_node(canvas, title, left, top, completed) {
+    const x_padding = 2; // px
+    const y_padding = 2; // px
+
+    let strike_color = 'black';
+    if (completed) {
+        strike_color = COMPLETED_STROKE_STYLE;
+    }
 
     var rect = document.createElementNS(SvgNS, 'rect');
     var textBox = document.createElementNS(SvgNS, 'text');
@@ -156,10 +155,16 @@ function add_node(canvas, title, bx) {
 
     canvas.appendChild(textBox);
 
-    textBox.setAttributeNS(null, 'stroke', "black");
+    textBox.setAttributeNS(null, 'stroke', strike_color);
     textBox.setAttributeNS(null,'stroke-width',"1");
     textBox.textContent = title;
     textBox.setAttributeNS(null,'textlength', '100%');
+
+    // First time we draw this we have to calculate the correction
+    // to apply over the text position. This translates from whatever
+    // the text element considers as .X/.Y properties to the coordinates
+    // of it's left-top corner relative to the SVG element.
+    // Looks like text .X/.Y positions the baseline?
 
     if (textCorrection === undefined) {
         textBox.setAttributeNS(null,'x', 0);
@@ -171,22 +176,38 @@ function add_node(canvas, title, bx) {
         }
     }
 
-    console.log(textCorrection);
+    textBox.setAttributeNS(null,'x', x_padding + left + textCorrection.X);
+    textBox.setAttributeNS(null,'y', y_padding + top + textCorrection.Y);
 
-    textBox.setAttributeNS(null,'x', x_padding + 55 + bx + textCorrection.X);
-    textBox.setAttributeNS(null,'y', y_padding + 55 + textCorrection.Y);
-
-
-    rect.setAttributeNS(null,'x', 55 + bx);
-    rect.setAttributeNS(null,'y', 55);
-    rect.setAttributeNS(null,'stroke','black');
+    rect.setAttributeNS(null,'x', left);
+    rect.setAttributeNS(null,'y', top);
+    rect.setAttributeNS(null,'stroke',strike_color);
     rect.setAttributeNS(null,'stroke-width','1');
     rect.setAttributeNS(null, 'fill', 'none');
     rect.setAttributeNS(null,'width', textBox.getClientRects()[0].width + x_padding * 2);
     rect.setAttributeNS(null,'height', textBox.getClientRects()[0].height + y_padding * 2);
+
+    return {
+        width: rect.getClientRects()[0].width,
+        height: rect.getClientRects()[0].height,
+        node_list: [textBox, rect]
+    }
 }
 
-function draw_column_from(base_x_off, base_y_off, column, canvas, slots, nodes_map, column_num){
+function calculate_per_row_height(svg) {
+    if (svg.per_row_height === undefined) {
+        const test = add_node(svg, "test", 0, 0, false);
+        for (const node of test.node_list){
+            svg.removeChild(node);
+        }
+    
+        svg.per_row_height = test.height;
+    }
+
+    return svg.per_row_height;
+}
+
+function draw_column_from(base_x_off, base_y_off, column, svg, slots, nodes_map, column_num){
     const box_padding = 3; // px
     const inter_row_separation = 5; // px
     const draw_actions = [];
@@ -195,16 +216,7 @@ function draw_column_from(base_x_off, base_y_off, column, canvas, slots, nodes_m
     let height = 0;
     let width = 0;
 
-    add_node(canvas, "test", base_x_off);
-    return { 
-        width: 50,
-        height: 500,
-        draw_actions: []
-    };
-
-    // TODO: do this calculation in a more reliable way
-    const measure_height = ctx.measureText('M').width;
-    const per_row_height = measure_height + box_padding * 2;
+    const per_row_height = calculate_per_row_height(svg);
     const dependency_line_padding = 1; // px
     const dependency_line_size = 1; // px
 
@@ -230,13 +242,17 @@ function draw_column_from(base_x_off, base_y_off, column, canvas, slots, nodes_m
     const y_off = base_y_off;
 
     for (const element of column) {
-        const measure = ctx.measureText(element.title);
-
         const row_num = slots.get_position_for_element(element);
-        const per_row_width = measure.width + box_padding * 2;
+
         const row_height = (y_off 
-                            + row_num * per_row_height 
+                            + row_num * per_row_height
                             + (row_num - 1) * inter_row_separation);
+
+        console.log(row_height, element.title, (row_num - 1) * inter_row_separation);
+
+        const measure = add_node(svg, element.title, x_off, row_height, element.completed);
+
+        const per_row_width = measure.width + box_padding * 2;
 
         nodes_map[element.id] = {
             right_middle: {
@@ -278,40 +294,40 @@ function draw_column_from(base_x_off, base_y_off, column, canvas, slots, nodes_m
                     const init = nodes_map[dependency].right_middle;
                     const end = nodes_map[element.id].left_middle;
 
-                    ctx.beginPath();
-                    ctx.moveTo(init.left, init.top);
-                    ctx.bezierCurveTo(end.left - end_runway, init.top,
-                                      end.left - end_runway, end.top,
-                                      end.left, end.top);
-                    ctx.stroke();
+                    // ctx.beginPath();
+                    // ctx.moveTo(init.left, init.top);
+                    // ctx.bezierCurveTo(end.left - end_runway, init.top,
+                    //                   end.left - end_runway, end.top,
+                    //                   end.left, end.top);
+                    // ctx.stroke();
                 }
                 else {
                     const init = nodes_map[dependency].bottom_middle;
                     const end = nodes_map[element.id].top_middle;
 
-                    ctx.beginPath();
-                    ctx.moveTo(init.left, init.top);
-                    ctx.lineTo(end.left, end.top);
-                    ctx.stroke();
+                    // ctx.beginPath();
+                    // ctx.moveTo(init.left, init.top);
+                    // ctx.lineTo(end.left, end.top);
+                    // ctx.stroke();
                 }
             });
         }
 
-        draw_actions.push(() => {
-            ctx.beginPath();
-            const prev_style = ctx.strokeStyle;
-            ctx.text(x_off, row_height, per_row_width, per_row_height);
-            if (element.completed) {
-                ctx.strokeStyle = COMPLETED_STROKE_STYLE;
-            }
+        // draw_actions.push(() => {
+        //     ctx.beginPath();
+        //     const prev_style = ctx.strokeStyle;
+        //     ctx.text(x_off, row_height, per_row_width, per_row_height);
+        //     if (element.completed) {
+        //         ctx.strokeStyle = COMPLETED_STROKE_STYLE;
+        //     }
             
-            ctx.fillText(element.title,
-                         x_off + box_padding,
-                         row_height + box_padding + measure_height);
+        //     ctx.fillText(element.title,
+        //                  x_off + box_padding,
+        //                  row_height + box_padding + measure_height);
 
-            ctx.stroke();
-            ctx.strokeStyle = prev_style;
-        });
+        //     ctx.stroke();
+        //     ctx.strokeStyle = prev_style;
+        // });
 
         if (per_row_width > width) {
             width = per_row_width;
