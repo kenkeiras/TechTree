@@ -252,7 +252,7 @@ function draw_column_from(base_x_off, base_y_off, column, svg, slots, nodes_map,
 
         const measure = add_node(svg, element.title, x_off, row_height, element.completed);
 
-        const per_row_width = measure.width + box_padding * 2;
+        const per_row_width = measure.width;
 
         nodes_map[element.id] = {
             right_middle: {
@@ -284,50 +284,43 @@ function draw_column_from(base_x_off, base_y_off, column, svg, slots, nodes_map,
                                                - (dependency_index * ((dependency_line_padding * 2)
                                                                       + 1)); // px
 
+            const init_column = nodes_map[dependency].column_num;
+            const end_column = nodes_map[element.id].column_num;
+
             draw_actions.push(() => {
-
-                const init_column = nodes_map[dependency].column_num;
-                const end_column = nodes_map[element.id].column_num;
-
+                const path_element = document.createElementNS(SvgNS, 'path');
+                let curve;
 
                 if (init_column !== end_column) {
                     const init = nodes_map[dependency].right_middle;
                     const end = nodes_map[element.id].left_middle;
 
-                    // ctx.beginPath();
-                    // ctx.moveTo(init.left, init.top);
-                    // ctx.bezierCurveTo(end.left - end_runway, init.top,
-                    //                   end.left - end_runway, end.top,
-                    //                   end.left, end.top);
-                    // ctx.stroke();
+
+                    curve = [
+                        "M", init.left, ",", init.top,
+                        " C", end.left - end_runway, ",", init.top,
+                        " ", end.left - end_runway, ",", end.top,
+                        " ", end.left, ",", end.top
+                    ].join("");
+
                 }
                 else {
                     const init = nodes_map[dependency].bottom_middle;
                     const end = nodes_map[element.id].top_middle;
 
-                    // ctx.beginPath();
-                    // ctx.moveTo(init.left, init.top);
-                    // ctx.lineTo(end.left, end.top);
-                    // ctx.stroke();
+                    curve = [
+                        "M", init.left, ",", init.top,
+                        " C", end.left, ",", end.top
+                    ].join("");
                 }
+                console.log(curve);
+                path_element.setAttributeNS(null, "d", curve);
+                path_element.setAttributeNS(null, 'fill', 'none');
+                path_element.setAttributeNS(null, 'stroke', 'black');
+                path_element.setAttributeNS(null, 'stroke-width', '1');
+                svg.appendChild(path_element);
             });
         }
-
-        // draw_actions.push(() => {
-        //     ctx.beginPath();
-        //     const prev_style = ctx.strokeStyle;
-        //     ctx.text(x_off, row_height, per_row_width, per_row_height);
-        //     if (element.completed) {
-        //         ctx.strokeStyle = COMPLETED_STROKE_STYLE;
-        //     }
-            
-        //     ctx.fillText(element.title,
-        //                  x_off + box_padding,
-        //                  row_height + box_padding + measure_height);
-
-        //     ctx.stroke();
-        //     ctx.strokeStyle = prev_style;
-        // });
 
         if (per_row_width > width) {
             width = per_row_width;
