@@ -12,6 +12,7 @@ class DependencyGraph {
         const columns = sort_by_dependency_columns(data.steps);
         
         this.canvas = document.createElementNS(SvgNS, "svg");
+        this.canvas.setAttribute("id", "techtree-graph");
         
         this.div.appendChild(this.canvas);
 
@@ -20,6 +21,16 @@ class DependencyGraph {
         this.canvas.style.height = prepared_draw.height + 'px';
         this.div.style.width = prepared_draw.width + 'px';
         this.div.style.height = prepared_draw.height + 'px';
+
+        const center_canvas = () => {
+            this.canvas.style.left = Math.max(
+                0,
+                (window.outerWidth - prepared_draw.width) / 2) + 'px';
+        }
+
+        window.on_resize = center_canvas();
+        center_canvas();
+
 
         prepared_draw.draw();
     }

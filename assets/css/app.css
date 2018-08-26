@@ -79,3 +79,11 @@ input.form-control[type="file"] {
 .actionable {
     cursor: pointer;
 }
+
+#dependency_graph {
+    display: table-cell;
+}
+
+svg#techtree-graph {
+    position: absolute;
+}
