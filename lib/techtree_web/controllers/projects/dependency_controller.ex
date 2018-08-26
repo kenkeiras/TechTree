@@ -60,7 +60,7 @@ defmodule TechtreeWeb.Projects.DependencyController do
   def delete(conn, %{"step_id" => step_id, "dependency_id" => dependency_id}) do
     {depender_id, ""} = Integer.parse(step_id)
     {depended_id, ""} = Integer.parse(dependency_id)
-    {1, _change} = Projects.delete_dependency(depended_id, depender_id)
+    {:ok, %Postgrex.Result{ num_rows: 1 }} = Projects.delete_dependency(depender_id, depended_id)
 
     conn
     |> put_flash(:info, "Dependency deleted successfully.")

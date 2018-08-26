@@ -503,12 +503,18 @@ defmodule Techtree.Projects do
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_dependency(depender_id, depended_id) do
-    query = from d in Dependency,
-              where: d.depended_id == ^depended_id and d.depender_id == ^depender_id
+  def delete_dependency(depender_id, depended_id) when is_number(depender_id) and is_number(depended_id) do
+    # This is built as a custom query to avoid having to resolve
+    # depender_id and depended_id 
+    query = """
+    DELETE
+    FROM dependencies
+    WHERE depender_id = $1
+      AND depended_id = $2
+    ;
+    """
 
-    results = Repo.delete_all(query)
-    # delete_dependency(%Dependency{ depended: depended_id, depender: dependency_id })
+    Ecto.Adapters.SQL.query(Repo, query, [depender_id, depended_id])
   end
 
   @doc """

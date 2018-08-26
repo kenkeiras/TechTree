@@ -13,9 +13,6 @@ defmodule Techtree.Projects.Dependency do
 
   @doc false
   def changeset(dependency, attrs) do
-    IO.inspect(dependency)
-    IO.inspect(attrs)
-    IO.inspect({123, cast(dependency, attrs, [])})
     dependency
     |> cast(attrs, [])
     # |> validate_required([:depended, :depender])
