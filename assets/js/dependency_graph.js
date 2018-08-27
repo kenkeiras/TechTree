@@ -16,7 +16,7 @@ class DependencyGraph {
         
         this.div.appendChild(this.canvas);
 
-        const prepared_draw = prepare_draw_columns_in_canvas(columns, this.canvas);
+        const prepared_draw = prepare_draw_columns_in_canvas(columns, this.canvas, to_graph(data.steps));
         this.canvas.style.width = prepared_draw.width + 'px';
         this.canvas.style.height = prepared_draw.height + 'px';
         this.div.style.width = prepared_draw.width + 'px';
@@ -34,6 +34,15 @@ class DependencyGraph {
 
         prepared_draw.draw();
     }
+}
+
+function to_graph(base) {
+    const result = {};
+    for (const step of base) {
+        result[step.id] = step;
+    }
+
+    return result;
 }
 
 class RowAllocationSlots {
@@ -111,7 +120,7 @@ class RowAllocationSlots {
     }
 }
 
-function prepare_draw_columns_in_canvas(columns, canvas) {
+function prepare_draw_columns_in_canvas(columns, canvas, graph) {
     const left_margin = 10; // px
     const top_margin = 10; // px
     const inter_column_separation = 20; // px
@@ -128,7 +137,7 @@ function prepare_draw_columns_in_canvas(columns, canvas) {
 
         column_num++;
 
-        const result = draw_column_from(x_off, y_off, column, canvas, slots, nodes_map, column_num);
+        const result = draw_column_from(x_off, y_off, column, canvas, slots, nodes_map, column_num, graph);
         draw_actions = draw_actions.concat(result.draw_actions);
         slots.finish_column();
 
@@ -151,12 +160,12 @@ function prepare_draw_columns_in_canvas(columns, canvas) {
 
 let textCorrection = undefined;
 
-function add_node(canvas, element, left, top, completed) {
+function add_node(canvas, element, left, top, graph) {
     const x_padding = 2; // px
     const y_padding = 2; // px
 
     let strike_color = 'black';
-    if (completed) {
+    if (element.completed) {
         strike_color = COMPLETED_STROKE_STYLE;
     }
 
@@ -220,7 +229,7 @@ function add_node(canvas, element, left, top, completed) {
     node.onmouseenter = onHover;
     node.onmouseleave = onRestore;
     node.onclick = () => {
-        popup_element(element);
+        popup_element(element, graph);
     };
 
     return {
@@ -230,7 +239,7 @@ function add_node(canvas, element, left, top, completed) {
     }
 }
 
-function build_fast_element_form(element, base) {
+function build_fast_element_form(element, base, graph) {
     const titleBar = document.createElement('h1');
     const title = document.createElement('span');
     title.innerText = element.title;
@@ -246,23 +255,83 @@ function build_fast_element_form(element, base) {
 
     base.appendChild(titleBar);
 
+    const body = document.createElement('div');
+    body.setAttribute('class', 'body');
+    base.appendChild(body);
+
     if (element.description !== null) {
         const descriptionLabel = document.createElement('h2');
         descriptionLabel.innerText = 'Description';
-        base.appendChild(descriptionLabel);
+        body.appendChild(descriptionLabel);
 
         const description = document.createElement('div');
         description.setAttribute('class', 'description')
         const descriptionText = document.createElement('pre');
         descriptionText.innerText = element.description;
         description.appendChild(descriptionText);
-        base.appendChild(description);
+        body.appendChild(description);
+    }
+    else {
+        const addDescriptionButton = document.createElement('span');
+        addDescriptionButton.setAttribute('class', 'actionable-suggestion');
+        addDescriptionButton.innerText = 'Add a description...';
+        body.appendChild(addDescriptionButton);
     }
 
-    console.log(element);
+    const completedRow = document.createElement('div');
+    const completedLabel = document.createElement('label');
+    const state = document.createElement('span');
+    const toggleButton = document.createElement('button');
+
+    completedLabel.innerText = 'State:';
+    completedRow.appendChild(completedLabel);
+    completedRow.appendChild(state);
+    completedRow.appendChild(toggleButton);
+
+    body.appendChild(completedRow);
+
+    state.setAttribute('class', 'value');
+    toggleButton.setAttribute('class', 'action-button');
+
+    let completedClass = '';
+
+    if (element.completed) {
+        state.innerText = 'COMPLETE';
+        completedClass = 'completed';
+        toggleButton.innerText = 'Mark To-Do';
+    }
+    else {
+        state.innerHTML = 'TO-DO';
+        toggleButton.innerText = 'Mark Completed';
+    }
+
+    completedRow.setAttribute('class', 'completion ' + completedClass);
+
+    if (element.dependencies.length > 0) {
+        const dependenciesSection = document.createElement('div');
+        const dependenciesLabel = document.createElement('h2');
+        dependenciesLabel.innerText = 'Dependencies';
+        dependenciesSection.appendChild(dependenciesLabel);
+
+        const dependencies = document.createElement('ul');
+        for(const dep of element.dependencies) {
+            const dependency = document.createElement('li');
+            dependency.innerText = graph[dep].title;
+
+            dependencies.appendChild(dependency);
+        }
+
+        dependenciesSection.appendChild(dependencies);
+        body.appendChild(dependenciesSection);
+    }
+
+    const addDependencyButton = document.createElement('button');
+    addDependencyButton.setAttribute('class', 'action-button');
+    addDependencyButton.innerText = 'Add dependency';
+    body.appendChild(addDependencyButton);
 }
 
-function build_popup(element){ 
+function build_popup(element, graph){ 
     const overlay = document.createElement("div");
     overlay.setAttribute('class', 'overlay');    
     const popup = document.createElement("div");
@@ -282,13 +351,13 @@ function build_popup(element){
     overlay.style.height = document.body.offsetHeight + 'px';
     overlay.style.width = document.body.offsetWidth + 'px';
 
-    build_fast_element_form(element, popup);
+    build_fast_element_form(element, popup, graph);
 
     return popup;
 }
 
-function popup_element(element) {
-    const popup = build_popup(element);
+function popup_element(element, graph) {
+    const popup = build_popup(element, graph);
 
     window.scrollTo({
         top: popup.top,
@@ -299,7 +368,7 @@ function popup_element(element) {
 
 function calculate_per_row_height(svg) {
     if (svg.per_row_height === undefined) {
-        const test = add_node(svg, {title: "test"}, 0, 0, false);
+        const test = add_node(svg, {title: "test", completed: false}, 0, 0, {});
         for (const node of test.node_list){
             svg.removeChild(node);
         }
@@ -310,7 +379,10 @@ function calculate_per_row_height(svg) {
     return svg.per_row_height;
 }
 
-function draw_column_from(base_x_off, base_y_off, column, svg, slots, nodes_map, column_num){
+function draw_column_from(base_x_off, base_y_off,
+                          column, svg,
+                          slots, nodes_map,
+                          column_num, graph){
     const box_padding = 3; // px
     const inter_row_separation = 5; // px
     const draw_actions = [];
@@ -351,7 +423,7 @@ function draw_column_from(base_x_off, base_y_off, column, svg, slots, nodes_map,
                             + row_num * per_row_height
                             + (row_num - 1) * inter_row_separation);
 
-        const measure = add_node(svg, element, x_off, row_height, element.completed);
+        const measure = add_node(svg, element, x_off, row_height, graph);
 
         const per_row_width = measure.width;
 

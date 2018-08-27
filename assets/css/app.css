@@ -109,6 +109,49 @@ svg#techtree-graph a {
     padding: 2ex;
 }
 
+.popup h1 {
+    margin-top: 2ex;
+    margin-bottom: 2ex;
+}
+
+.popup .body {
+    margin-left: 2ex;
+    margin-right: 2ex;
+}
+
 .popup h1 a {
+    cursor: pointer;
+}
+
+.popup h1 span {
+    text-decoration: underline;
+}
+
+.action-button {
+    border: 1px solid #888;
+    margin: 1ex;
+    padding: 0.5ex;
+    background: rgba(0,0,0,0.1);
+    border-radius: 3px;
+}
+
+.action-button:hover {
+    background: rgba(0,0,0,0.8);
+    color: #eee;
+}
+
+.value {
+    font-weight: bold;
+    text-decoration: underline;
+    margin: 2ex;
+}
+
+.completion label {
+    font-weight: normal;
+}
+
+.actionable-suggestion {
+    font-style: italic;
+    text-decoration: underline;
     cursor: pointer;
 }
