@@ -8,7 +8,7 @@
     <meta name="author" content="">
     
     <title>Technology tree</title>
-    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" sizes="64x64" />
+    <link href="<%= static_path(@conn, "/favicon.ico") %>" rel="shortcut icon" type="image/x-icon" sizes="64x64" />
     <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
   </head>
 
