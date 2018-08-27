@@ -167,9 +167,11 @@ function add_node(canvas, element, left, top, completed) {
     canvas.appendChild(textBox);
 
     textBox.setAttribute('class', 'actionable');
-    textBox.setAttributeNS(null,'stroke-width',"1");
+    textBox.setAttributeNS(null,'stroke',"none");
     textBox.textContent = element.title;
     textBox.setAttributeNS(null,'textlength', '100%');
+    textBox.style.fontWeight = "bold";
+    textBox.setAttributeNS(null, 'fill', 'black');
 
     // First time we draw this we have to calculate the correction
     // to apply over the text position. This translates from whatever
@@ -197,7 +199,6 @@ function add_node(canvas, element, left, top, completed) {
     rect.setAttributeNS(null,'height', textBox.getClientRects()[0].height + y_padding * 2);
 
     const onHover = () => {
-        textBox.setAttributeNS(null, 'stroke', 'white');
         textBox.setAttributeNS(null, 'fill', 'white');
         rect.setAttributeNS(null, 'fill', strike_color);
     };
@@ -205,7 +206,6 @@ function add_node(canvas, element, left, top, completed) {
     const onRestore = () => {
         rect.setAttributeNS(null,'stroke',strike_color);
         rect.setAttributeNS(null, 'fill', 'none');
-        textBox.setAttributeNS(null, 'stroke', strike_color);
         textBox.setAttributeNS(null, 'fill', strike_color);
     };
 
