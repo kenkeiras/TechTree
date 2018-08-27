@@ -164,7 +164,7 @@ function add_node(canvas, element, left, top, completed) {
     const rect = document.createElementNS(SvgNS, 'rect');
     const textBox = document.createElementNS(SvgNS, 'text');
 
-    node.setAttributeNS(null, 'href', element.location);
+    // node.setAttributeNS(null, 'href', element.location);
 
     canvas.appendChild(node);
 
@@ -219,15 +219,82 @@ function add_node(canvas, element, left, top, completed) {
 
     node.onmouseenter = onHover;
     node.onmouseleave = onRestore;
-    // textBox.onclick = () => {
-    //     document.location = element.location;
-    // };
+    node.onclick = () => {
+        popup_element(element);
+    };
 
     return {
         width: rect.getClientRects()[0].width,
         height: rect.getClientRects()[0].height,
         node_list: [node]
     }
+}
+
+function build_fast_element_form(element, base) {
+    const titleBar = document.createElement('h1');
+    const title = document.createElement('span');
+    title.innerText = element.title;
+
+    const backButton = document.createElement('a');
+    backButton.innerText = '←';
+    backButton.onclick = () => {
+        base.close();
+    };
+
+    titleBar.appendChild(backButton);
+    titleBar.appendChild(title);
+
+    base.appendChild(titleBar);
+
+    if (element.description !== null) {
+        const descriptionLabel = document.createElement('h2');
+        descriptionLabel.innerText = 'Description';
+        base.appendChild(descriptionLabel);
+
+        const description = document.createElement('div');
+        description.setAttribute('class', 'description')
+        const descriptionText = document.createElement('pre');
+        descriptionText.innerText = element.description;
+        description.appendChild(descriptionText);
+        base.appendChild(description);
+    }
+
+    console.log(element);
+}
+
+function build_popup(element){ 
+    const overlay = document.createElement("div");
+    overlay.setAttribute('class', 'overlay');    
+    const popup = document.createElement("div");
+    popup.setAttribute('class', 'popup');
+
+    popup.close = () => {
+        document.body.removeChild(overlay);
+    }
+
+    overlay.onclick = popup.close;
+    popup.onclick = (ev) => {
+        ev.stopPropagation();
+    }
+
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+    overlay.style.height = document.body.offsetHeight + 'px';
+    overlay.style.width = document.body.offsetWidth + 'px';
+
+    build_fast_element_form(element, popup);
+
+    return popup;
+}
+
+function popup_element(element) {
+    const popup = build_popup(element);
+
+    window.scrollTo({
+        top: popup.top,
+        left: popup.left,
+        behavior: "smooth"
+    });
 }
 
 function calculate_per_row_height(svg) {

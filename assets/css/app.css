@@ -91,3 +91,24 @@ svg#techtree-graph {
 svg#techtree-graph a {
     text-decoration: none;
 }
+
+.overlay {
+    background: rgba(255, 255, 255, 0.5);
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+.popup {
+    background-color: white;
+    margin: 2ex;
+    border: 1px solid #222;
+    border-radius: 2px;
+    padding: 2ex;
+}
+
+.popup h1 a {
+    cursor: pointer;
+}
