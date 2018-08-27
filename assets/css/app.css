@@ -87,3 +87,7 @@ input.form-control[type="file"] {
 svg#techtree-graph {
     position: absolute;
 }
+
+svg#techtree-graph a {
+    text-decoration: none;
+}

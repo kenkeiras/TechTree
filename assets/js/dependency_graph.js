@@ -160,11 +160,17 @@ function add_node(canvas, element, left, top, completed) {
         strike_color = COMPLETED_STROKE_STYLE;
     }
 
-    var rect = document.createElementNS(SvgNS, 'rect');
-    var textBox = document.createElementNS(SvgNS, 'text');
-    canvas.appendChild(rect);
+    const node = document.createElementNS(SvgNS, 'a');
+    const rect = document.createElementNS(SvgNS, 'rect');
+    const textBox = document.createElementNS(SvgNS, 'text');
 
-    canvas.appendChild(textBox);
+    node.setAttributeNS(null, 'href', element.location);
+
+    canvas.appendChild(node);
+
+    node.appendChild(rect);
+
+    node.appendChild(textBox);
 
     textBox.setAttribute('class', 'actionable');
     textBox.setAttributeNS(null,'stroke',"none");
@@ -184,8 +190,8 @@ function add_node(canvas, element, left, top, completed) {
         textBox.setAttributeNS(null,'y', 0);
 
         textCorrection = { 
-            X: -(textBox.getClientRects()[0].left - textBox.parentElement.getClientRects()[0].left),
-            Y: -(textBox.getClientRects()[0].top - textBox.parentElement.getClientRects()[0].top)
+            X: -(textBox.getClientRects()[0].left - canvas.getClientRects()[0].left),
+            Y: -(textBox.getClientRects()[0].top - canvas.getClientRects()[0].top)
         }
     }
 
@@ -211,16 +217,16 @@ function add_node(canvas, element, left, top, completed) {
 
     onRestore();
 
-    textBox.onmouseenter = onHover;
-    textBox.onmouseleave = onRestore;
-    textBox.onclick = () => {
-        document.location = element.location;
-    };
+    node.onmouseenter = onHover;
+    node.onmouseleave = onRestore;
+    // textBox.onclick = () => {
+    //     document.location = element.location;
+    // };
 
     return {
         width: rect.getClientRects()[0].width,
         height: rect.getClientRects()[0].height,
-        node_list: [textBox, rect]
+        node_list: [node]
     }
 }
 
