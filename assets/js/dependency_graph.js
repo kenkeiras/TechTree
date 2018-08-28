@@ -323,6 +323,11 @@ function build_fast_element_form(element, base, graph) {
     addDependencyButton.setAttribute('class', 'action-button');
     addDependencyButton.innerText = 'Add dependency';
     body.appendChild(addDependencyButton);
+
+    const removeStepButton = document.createElement('button');
+    removeStepButton.setAttribute('class', 'action-button dangerous');
+    removeStepButton.innerText = 'Remove step';
+    body.appendChild(removeStepButton);
 }
 
 function build_popup(element, graph){ 

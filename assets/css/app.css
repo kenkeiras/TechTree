@@ -155,3 +155,15 @@ svg#techtree-graph a {
     text-decoration: underline;
     cursor: pointer;
 }
+
+button.dangerous {
+    background-color: #ff4444;
+    border: 1px solid #ff0000;
+    color: white;
+}
+
+button.dangerous:hover {
+    background-color: #ff0000;
+    border: 1px solid #ff4444;
+    color: white;
+}
