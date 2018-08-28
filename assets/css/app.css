@@ -150,7 +150,7 @@ svg#techtree-graph a {
     font-weight: normal;
 }
 
-.actionable-suggestion {
+.description {
     font-style: italic;
     text-decoration: underline;
     cursor: pointer;

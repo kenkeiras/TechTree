@@ -260,20 +260,14 @@ function build_fast_element_form(element, base, graph) {
     base.appendChild(body);
 
     if (element.description !== null) {
-        const descriptionLabel = document.createElement('h2');
-        descriptionLabel.innerText = 'Description';
-        body.appendChild(descriptionLabel);
-
-        const description = document.createElement('div');
+        const description = document.createElement('span');
         description.setAttribute('class', 'description')
-        const descriptionText = document.createElement('pre');
-        descriptionText.innerText = element.description;
-        description.appendChild(descriptionText);
+        description.innerText = element.description;
         body.appendChild(description);
     }
     else {
         const addDescriptionButton = document.createElement('span');
-        addDescriptionButton.setAttribute('class', 'actionable-suggestion');
+        addDescriptionButton.setAttribute('class', 'description actionable-suggestion');
         addDescriptionButton.innerText = 'Add a description...';
         body.appendChild(addDescriptionButton);
     }
