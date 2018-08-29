@@ -41,6 +41,7 @@ defmodule TechtreeWeb.Router do
     pipe_through [:browser, :api, :authenticate_user]
 
     get "/:project_id/dependencies", DependencyController, :dependency_graph
+    patch "/:project_id/steps/:step_id", StepController, :api_patch
   end
 
   defp authenticate_user(conn, _) do

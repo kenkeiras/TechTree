@@ -385,6 +385,27 @@ defmodule Techtree.Projects do
     |> Step.changeset(attrs)
     |> Repo.update()
   end
+  
+  @doc """
+  Adds changes to a step.
+
+  ## Examples
+
+      iex> update_step(step, %{field: new_value})
+      {:ok, %Step{}}
+
+      iex> update_step(step, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def gen_step_patch(patch) do
+    %{}
+    |> patch_step_completion patch
+  end
+
+  def patch_step_completion(patch, %{ "completed" => completion }) do
+    Map.put(patch, "completed", completion)
+  end
 
   @doc """
   Deletes a Step.

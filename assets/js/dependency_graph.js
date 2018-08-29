@@ -1,3 +1,5 @@
+import * as Api from './api';
+
 const COMPLETED_STROKE_STYLE = '#548A00';
 const UNDEPENDED = 'UNDEPENDED';
 const SvgNS = "http://www.w3.org/2000/svg";
@@ -243,6 +245,7 @@ function build_fast_element_form(element, base, graph) {
     const titleBar = document.createElement('h1');
     const title = document.createElement('span');
     title.innerText = element.title;
+    let has_changed = false;
 
     const backButton = document.createElement('a');
     backButton.innerText = '←';
@@ -289,17 +292,44 @@ function build_fast_element_form(element, base, graph) {
 
     let completedClass = '';
 
-    if (element.completed) {
-        state.innerText = 'COMPLETE';
-        completedClass = 'completed';
-        toggleButton.innerText = 'Mark To-Do';
-    }
-    else {
-        state.innerHTML = 'TO-DO';
-        toggleButton.innerText = 'Mark Completed';
-    }
+    const set_completion = () => {
+        if (element.completed) {
+            state.innerText = 'COMPLETE';
+            completedClass = 'completed';
+            toggleButton.innerText = 'Mark To-Do';
+            toggleButton.onclick = () => {
+                has_changed = true;
+                Api.mark_step_todo(element.project_id,
+                                element.id,
+                                (success) => {
+                                    if (success) {
+                                        element.completed = false;
+                                        set_completion(element);
+                                    }
+                                });
+            }        
+        }
+        else {
+            state.innerHTML = 'TO-DO';
+            toggleButton.innerText = 'Mark Completed';
 
-    completedRow.setAttribute('class', 'completion ' + completedClass);
+            toggleButton.onclick = () => {
+                has_changed = true;
+                Api.mark_step_done(element.project_id, 
+                                   element.id,
+                                   (success) => {
+                                       if (success) {
+                                          element.completed = true;
+                                          set_completion(element);
+                                       }
+                                   });
+            }
+        }
+
+        completedRow.setAttribute('class', 'completion ' + completedClass);
+    };
+
+    set_completion();
 
     if (element.dependencies.length > 0) {
         const dependenciesSection = document.createElement('div');
@@ -328,6 +358,8 @@ function build_fast_element_form(element, base, graph) {
     removeStepButton.setAttribute('class', 'action-button dangerous');
     removeStepButton.innerText = 'Remove step';
     body.appendChild(removeStepButton);
+
+    return () => { return has_changed };
 }
 
 function build_popup(element, graph){ 
@@ -336,7 +368,18 @@ function build_popup(element, graph){
     const popup = document.createElement("div");
     popup.setAttribute('class', 'popup');
 
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+    overlay.style.height = document.body.offsetHeight + 'px';
+    overlay.style.width = document.body.offsetWidth + 'px';
+
+    const has_element_changed = build_fast_element_form(element, popup, graph);
+
     popup.close = () => {
+        if (has_element_changed()) {
+            // Refresh window
+            window.location = window.location;
+        }
         document.body.removeChild(overlay);
     }
 
@@ -345,12 +388,6 @@ function build_popup(element, graph){
         ev.stopPropagation();
     }
 
-    overlay.appendChild(popup);
-    document.body.appendChild(overlay);
-    overlay.style.height = document.body.offsetHeight + 'px';
-    overlay.style.width = document.body.offsetWidth + 'px';
-
-    build_fast_element_form(element, popup, graph);
 
     return popup;
 }
@@ -358,9 +395,10 @@ function build_popup(element, graph){
 function popup_element(element, graph) {
     const popup = build_popup(element, graph);
 
+    console.log(popup);
     window.scrollTo({
-        top: popup.top,
-        left: popup.left,
+        top: popup.offsetTop,
+        left: popup.offsetLeft,
         behavior: "smooth"
     });
 }
@@ -658,6 +696,7 @@ function get_project_graph(project_id, cb) {
     function process(project_id, stepsResult) {
         for (const step of stepsResult.steps){
             step.location = "/projects/" + project_id + "/steps/" + step.id;
+            step.project_id = project_id;
         }
     }
     

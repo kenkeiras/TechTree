@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    
+    <%= csrf_meta_tag %>
+
     <title>Technology tree</title>
     <link href="<%= static_path(@conn, "/favicon.ico") %>" rel="shortcut icon" type="image/x-icon" sizes="64x64" />
     <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
