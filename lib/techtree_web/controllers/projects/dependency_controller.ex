@@ -72,4 +72,29 @@ defmodule TechtreeWeb.Projects.DependencyController do
 
     render(conn, "dependency_graph.json", graph: dependency_graph)
   end
+
+  def get_step_dependencies(conn, %{"step_id" => step_id, "project_id" => project_id}) do
+    step = Projects.get_step_with_dependencies!(step_id)
+    available_steps = get_available_dependencies_for_step(conn, step)
+
+    render(conn, "steps.json", %{steps: available_steps})
+  end
+
+  def add_dependency(conn, %{
+                              "step_id" => step_id,
+                              "project_id" => project_id,
+                              "depended_id" => depended_id
+                            }) do
+    step = Projects.get_step_with_dependencies!(step_id)
+    depended = Projects.get_step!(depended_id)
+
+    case Projects.create_dependency(depended, step) do
+      %Step{} ->
+        render(conn, "result.json", %{result: %{ success: true }})
+      {:error, %Ecto.Changeset{} = changeset} ->
+        conn
+        |> put_status(:bad_request)
+        |> render("result.json", %{result: %{ success: false}})
+      end
+  end
 end

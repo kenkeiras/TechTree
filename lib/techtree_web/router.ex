@@ -42,6 +42,8 @@ defmodule TechtreeWeb.Router do
 
     get "/:project_id/dependencies", DependencyController, :dependency_graph
     patch "/:project_id/steps/:step_id", StepController, :api_patch
+    get "/:project_id/steps/:step_id/dependencies", DependencyController, :get_step_dependencies
+    put "/:project_id/steps/:step_id/dependencies/:depended_id", DependencyController, :add_dependency
   end
 
   defp authenticate_user(conn, _) do

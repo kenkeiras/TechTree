@@ -241,6 +241,38 @@ function add_node(canvas, element, left, top, graph) {
     }
 }
 
+function createDependencyAdder(project_id, step_id, section, on_updated) {
+    Api.get_available_dependencies_for_step(project_id, step_id, (success, result) => {
+        console.log("Success", success);
+        console.log("Result", result);
+
+        const selector = document.createElement('select');
+        
+        for(const step of result.steps) {
+            const option = document.createElement('option');
+            option.value = step.id;
+            option.innerText = step.name;
+
+            selector.appendChild(option);
+        }
+
+        section.appendChild(selector);
+
+        const submitButton = document.createElement('button');
+        submitButton.innerText = 'Add';
+        submitButton.onclick = () => {
+            Api.add_dependency(project_id, step_id, selector.value, () => {
+                section.removeChild(selector);
+                section.removeChild(submitButton);
+                on_updated();
+            });
+        }
+
+        section.appendChild(submitButton);
+    });
+}
+
+
 function build_fast_element_form(element, base, graph) {
     const titleBar = document.createElement('h1');
     const title = document.createElement('span');
@@ -349,9 +381,20 @@ function build_fast_element_form(element, base, graph) {
         body.appendChild(dependenciesSection);
     }
 
+    const addDependencySection = document.createElement('div');
+    addDependencySection.setAttribute('class', 'adder-section');
+
+    body.appendChild(addDependencySection);
+
     const addDependencyButton = document.createElement('button');
     addDependencyButton.setAttribute('class', 'action-button');
     addDependencyButton.innerText = 'Add dependency';
+    addDependencyButton.onclick = () => {
+        createDependencyAdder(element.project_id, 
+                              element.id,
+                              addDependencySection,
+                              () => { has_changed = true; });
+    };
     body.appendChild(addDependencyButton);
 
     const removeStepButton = document.createElement('button');

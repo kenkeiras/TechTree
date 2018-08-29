@@ -98,7 +98,6 @@ defmodule TechtreeWeb.Projects.StepController do
   def api_patch(conn, %{ "step_id" => step_id, "state" => new_state }) do
     step = Projects.get_step!(step_id)
     patch = Projects.gen_step_patch(new_state)
-    IO.inspect(patch)
     Projects.update_step(step, patch)
 
     render(conn, "operation_result.json", result: %{success: true})
