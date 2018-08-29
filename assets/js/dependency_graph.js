@@ -445,7 +445,7 @@ function build_fast_element_form(element, base, graph) {
     const removeStepButton = document.createElement('button');
     removeStepButton.setAttribute('class', 'action-button dangerous');
     removeStepButton.innerText = 'Remove step';
-    body.appendChild(removeStepButton);
+    // body.appendChild(removeStepButton); @TODO temporarily disabled
 
     return () => { return has_changed };
 }
