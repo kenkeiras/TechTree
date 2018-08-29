@@ -122,10 +122,11 @@ svg#techtree-graph a {
 
 .popup h1 a {
     cursor: pointer;
+    text-decoration: underline;
 }
 
-.popup h1 span {
-    text-decoration: underline;
+.popup h1 a:not(.navigation) {
+    color: inherit;
 }
 
 .action-button {

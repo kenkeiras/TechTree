@@ -304,11 +304,13 @@ function add_cross(element, size) {
 
 function build_fast_element_form(element, base, graph) {
     const titleBar = document.createElement('h1');
-    const title = document.createElement('span');
+    const title = document.createElement('a');
     title.innerText = element.title;
+    title.href = element.location;
     let has_changed = false;
 
     const backButton = document.createElement('a');
+    backButton.setAttribute('class', 'navigation');
     backButton.innerText = '←';
     backButton.onclick = () => {
         base.close();
