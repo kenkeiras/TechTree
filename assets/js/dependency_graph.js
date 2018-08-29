@@ -272,6 +272,35 @@ function createDependencyAdder(project_id, step_id, section, on_updated) {
     });
 }
 
+function add_cross(element, size) {
+    if (size === undefined){
+        size = 15;
+    }
+    const style = "stroke:rgb(255,255,255);stroke-width:2";
+
+    const canvas = document.createElementNS(SvgNS, "svg");
+    
+    const leftTop = document.createElementNS(SvgNS, 'line');
+    const leftBottom = document.createElementNS(SvgNS, 'line');
+
+    leftTop.setAttributeNS(null, 'x1', 0);
+    leftTop.setAttributeNS(null, 'y1', 0);
+    leftTop.setAttributeNS(null, 'x2', size);
+    leftTop.setAttributeNS(null, 'y2', size);
+    leftTop.setAttributeNS(null, 'style', style);
+
+    leftBottom.setAttributeNS(null, 'x1', 0);
+    leftBottom.setAttributeNS(null, 'y1', size);
+    leftBottom.setAttributeNS(null, 'x2', size);
+    leftBottom.setAttributeNS(null, 'y2', 0);
+    leftBottom.setAttributeNS(null, 'style', style);
+
+    canvas.appendChild(leftTop);
+    canvas.appendChild(leftBottom);
+
+    element.appendChild(canvas);
+}
+
 
 function build_fast_element_form(element, base, graph) {
     const titleBar = document.createElement('h1');
@@ -372,9 +401,23 @@ function build_fast_element_form(element, base, graph) {
         const dependencies = document.createElement('ul');
         for(const dep of element.dependencies) {
             const dependency = document.createElement('li');
-            dependency.innerText = graph[dep].title;
-
             dependencies.appendChild(dependency);
+
+            const removeDependencyButton = document.createElement('button');
+            removeDependencyButton.setAttribute('class', 'list-index dangerous');
+            add_cross(removeDependencyButton);
+            dependency.appendChild(removeDependencyButton);
+            removeDependencyButton.onclick = () => {
+                Api.remove_dependency(element.project_id, element.id, dep, () => {
+                    dependencies.removeChild(dependency);
+                    has_changed = true;
+                });
+            };
+
+            const dependencyName = document.createElement('span');
+            dependencyName.innerText = graph[dep].title;
+            dependency.appendChild(dependencyName);
+
         }
 
         dependenciesSection.appendChild(dependencies);

@@ -97,4 +97,17 @@ defmodule TechtreeWeb.Projects.DependencyController do
         |> render("result.json", %{result: %{ success: false}})
       end
   end
+
+
+  def remove_dependency(conn, %{
+                              "step_id" => step_id,
+                              "project_id" => project_id,
+                              "depended_id" => dependency_id
+                            }) do
+    {depender_id, ""} = Integer.parse(step_id)
+    {depended_id, ""} = Integer.parse(dependency_id)
+    {:ok, %Postgrex.Result{ num_rows: 1 }} = Projects.delete_dependency(depender_id, depended_id)
+
+    render(conn, "result.json", %{result: %{ success: true }})
+  end
 end
