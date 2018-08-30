@@ -361,13 +361,18 @@ function build_fast_element_form(element, base, graph) {
             completedClass = 'completed';
             toggleButton.innerText = 'Mark To-Do';
             toggleButton.onclick = () => {
+                toggleButton.setAttribute('class', 'action-button loading');
                 has_changed = true;
                 Api.mark_step_todo(element.project_id,
                                 element.id,
                                 (success) => {
                                     if (success) {
+                                        toggleButton.setAttribute('class', 'action-button loaded');
                                         element.completed = false;
                                         set_completion(element);
+                                    }
+                                    else {
+                                        toggleButton.setAttribute('class', 'action-button failed');
                                     }
                                 });
             }        
@@ -377,14 +382,19 @@ function build_fast_element_form(element, base, graph) {
             toggleButton.innerText = 'Mark Completed';
 
             toggleButton.onclick = () => {
+                toggleButton.setAttribute('class', 'action-button loading');
                 has_changed = true;
                 Api.mark_step_done(element.project_id, 
                                    element.id,
                                    (success) => {
-                                       if (success) {
+                                    if (success) {
+                                          toggleButton.setAttribute('class', 'action-button loaded');
                                           element.completed = true;
                                           set_completion(element);
-                                       }
+                                    }
+                                    else {
+                                        toggleButton.setAttribute('class', 'action-button failed');
+                                    }
                                    });
             }
         }
