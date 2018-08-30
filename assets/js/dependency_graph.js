@@ -469,8 +469,16 @@ function build_popup(element, graph){
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
 
-    const fullHeight = Math.max(screen.height, document.body.parentElement.offsetHeight);
-    const fullWidth = Math.max(screen.width, document.body.parentElement.offsetWidth);
+    const graphTree = document.getElementById('techtree-graph');
+    const fullHeight = Math.max(screen.height,
+                                document.body.parentElement.offsetHeight);
+
+    const fullWidth = Math.max(screen.width,
+                               document.body.parentElement.offsetWidth,
+                               (parseInt(graphTree.style.width) +
+                                parseInt(graphTree.style.left))
+                               );
+
     overlay.style.height = fullHeight + 'px';
     overlay.style.width = fullWidth + 'px';
 
