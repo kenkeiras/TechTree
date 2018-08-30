@@ -468,8 +468,11 @@ function build_popup(element, graph){
 
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
-    overlay.style.height = document.body.offsetHeight + 'px';
-    overlay.style.width = document.body.offsetWidth + 'px';
+
+    const fullHeight = Math.max(screen.height, document.body.parentElement.offsetHeight);
+    const fullWidth = Math.max(screen.width, document.body.parentElement.offsetWidth);
+    overlay.style.height = fullHeight + 'px';
+    overlay.style.width = fullWidth + 'px';
 
     const has_element_changed = build_fast_element_form(element, popup, graph);
 
