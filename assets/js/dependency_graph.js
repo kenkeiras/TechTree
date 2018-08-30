@@ -25,14 +25,14 @@ class DependencyGraph {
         this.div.style.height = prepared_draw.height + 'px';
 
         const center_canvas = () => {
-            this.canvas.style.left = Math.max(
+            this.canvas.style.left = (Math.max(
                 0,
-                (window.outerWidth - prepared_draw.width) / 2) + 'px';
+                (window.innerWidth - prepared_draw.width) / 2)
+            + 'px');
         }
 
-        window.on_resize = center_canvas();
+        window.onresize = center_canvas;
         center_canvas();
-
 
         prepared_draw.draw();
     }
