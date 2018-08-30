@@ -493,10 +493,9 @@ function build_popup(element, graph){
 function popup_element(element, graph) {
     const popup = build_popup(element, graph);
 
-    console.log(popup);
     window.scrollTo({
-        top: popup.offsetTop,
-        left: popup.offsetLeft,
+        top: 0,
+        left: 0,
         behavior: "smooth"
     });
 }
