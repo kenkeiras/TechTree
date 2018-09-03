@@ -9,6 +9,25 @@ defmodule Techtree.Projects do
   alias Techtree.Accounts
   alias Techtree.Projects.{Contributor, Project}
 
+  def is_project_completed(%Project{} = project) do
+    (
+      length(project.steps) > 0
+      and
+      Enum.all?(project.steps, fn x -> x.completed end)
+    )
+  end
+
+  def check_completed_project(%Project{} = project) do
+    %{
+      project |
+      completed: is_project_completed(project)
+    }
+  end
+
+  def check_completed_projects(projects) do
+    for project <- projects, do: check_completed_project(project)
+  end
+
   @doc """
   Returns the list of projects.
 
@@ -19,10 +38,12 @@ defmodule Techtree.Projects do
 
   """
   def list_projects(contributor=%Contributor{}) do
-    Project
+    result = Project
     |> Ecto.Query.where(contributor_id: ^contributor.id)
     |> Repo.all()
-    |> Repo.preload(contributor: [user: :email])
+    |> Repo.preload(contributor: [user: :email], steps: [])
+
+    check_completed_projects(result)
   end
 
   @doc """
@@ -60,9 +81,10 @@ defmodule Techtree.Projects do
 
   """
   def get_project_with_steps!(id) do
-    Project
+    project = Project
     |> Repo.get!(id)
     |> Repo.preload(contributor: [user: :email], steps: [])
+    check_completed_project(project)
   end
 
   @doc """
@@ -105,7 +127,7 @@ defmodule Techtree.Projects do
   end
 
   def ensure_contributor_exists(%Accounts.User{} = user) do
-    %Contributor{user_id: user.id} 
+    %Contributor{user_id: user.id}
     |> Ecto.Changeset.change()
     |> Ecto.Changeset.unique_constraint(:user_id)
     |> Repo.insert()
@@ -385,7 +407,7 @@ defmodule Techtree.Projects do
     |> Step.changeset(attrs)
     |> Repo.update()
   end
-  
+
   @doc """
   Adds changes to a step.
 
@@ -526,7 +548,7 @@ defmodule Techtree.Projects do
   """
   def delete_dependency(depender_id, depended_id) when is_number(depender_id) and is_number(depended_id) do
     # This is built as a custom query to avoid having to resolve
-    # depender_id and depended_id 
+    # depender_id and depended_id
     query = """
     DELETE
     FROM dependencies
@@ -569,7 +591,7 @@ defmodule Techtree.Projects do
 
   def import_project(conn, %{ "name" => name, "steps" => steps }) do
     {:ok, project} = create_project(conn.assigns.current_contributor, %{ "name" => name })
-    
+
     mapzip = for step <- steps, do: import_step(conn, project, step)
     map = Enum.reduce(mapzip, %{}, fn {import_id, new_id}, acc ->
       Map.put(acc, import_id, new_id)
@@ -595,7 +617,7 @@ defmodule Techtree.Projects do
     "dependencies" => _import_dependencies,
     "completed" => completed
   })do
-    {:ok, new_step } = create_step(conn.assigns.current_contributor, project, 
+    {:ok, new_step } = create_step(conn.assigns.current_contributor, project,
                                     %{
                                       "title" => title,
                                       "description" => description,

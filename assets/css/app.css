@@ -217,3 +217,17 @@ button.error:hover {
     background: #ff0000;
     color: white;
 }
+
+.completion-marker {
+    width: 0;
+    font-style: italic;
+    color: #548A00;
+}
+
+.title.completed::after {
+    content: "Complete!";
+    font-style: italic;
+    color: #548A00;
+    font-size: medium;
+    margin-left: 2ex;
+}
