@@ -751,6 +751,7 @@ function sort_by_dependency_columns(steps) {
         const last_row = rows[rows.length - 1];
         let depended_by_last = [];
         for(const element of last_row) {
+            depended[element].row = rows.length;
             depended_by_last = depended_by_last.concat(depended[element].dependencies);
         }
 
@@ -761,8 +762,8 @@ function sort_by_dependency_columns(steps) {
     }
 
     // Then try to show items as soon as possible by prunning them
-    const found = {};
     rows = rows.reverse();
+    const found = {};
     for (const row_num of rows) {
         for (let i = 0; i < row_num.length; i++) {
             let step_id = row_num[i];
@@ -774,6 +775,41 @@ function sort_by_dependency_columns(steps) {
             }
         }
     }
+
+    // Reconsider last line, move it to the earlier possible line
+    let moves = [];
+    let index = 0;
+    const last_row = rows[rows.length - 1];
+    for (const step_id of last_row) {
+
+        // Keep in mind that the rows are for the forwards
+        // column ordering (now going backwards)
+        let latestDepenedency = undefined;
+        for (const dep_id of depended[step_id].dependencies){
+            const row_pos = rows.length - depended[dep_id].row;
+            if (latestDepenedency === undefined || latestDepenedency < row_pos) {
+                latestDepenedency = row_pos;
+            }
+        }
+
+        if ((latestDepenedency !== undefined)  
+            && ((latestDepenedency + 1) < (rows.length - 1))){
+            
+            moves.push({from: index, to: latestDepenedency + 1});
+        } 
+        index++;
+    }
+
+    // Do the movements backwards not alter the to-be-moved parts
+    moves = moves.reverse();
+    for(const move of moves) {
+        const element = last_row[move.from];
+        delete last_row[move.from];
+        rows[move.to].push(element);
+    }
+
+    // Remove deleted entries
+    rows[rows.length - 1] = last_row.filter((v,i,a) => { return v !== undefined; });
 
     return resolve(rows, steps, depended);
 }
