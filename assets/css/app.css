@@ -129,6 +129,10 @@ svg#techtree-graph a {
     color: inherit;
 }
 
+.secondary {
+    font-size: small;
+}
+
 .action-button {
     border: 1px solid #888;
     margin: 1ex;

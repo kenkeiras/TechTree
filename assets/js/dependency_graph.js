@@ -100,7 +100,6 @@ class RowAllocationSlots {
 
         // Get any available position
         for (let i = 0; i < this.positions.length; i++) {
-            console.log(i, this.positions[i]);
             if (this.positions[i] === undefined) { // Empty position
                 this.positions[i] = element;
                 return i;
@@ -302,6 +301,44 @@ function add_cross(element, size) {
 }
 
 
+function search_to_dict(search) {
+    if (search == undefined) {
+        return {};
+    }
+
+    if (search.startsWith('?')) {
+        search = search.substring(1);
+    }
+
+    const chunks = search.split('&');
+    const dict = {};
+    for(const chunk of chunks) {
+        const parts = chunk.split('=');
+        const key = parts.shift();
+        const value = parts.join('=');
+
+        if (key.length > 0) {
+            dict[key] = value;
+        }
+    }
+
+    return dict;
+}
+
+function dict_to_search(dict) {
+    return '?' + Object.keys(dict).map((k) => {
+        return k + '=' + dict[k];
+    }).join('&');
+}
+
+function set_param(search, key, value) {
+    const search_dict = search_to_dict(search);
+    search_dict[key] = value;
+
+    return dict_to_search(search_dict);
+}
+
+
 function build_fast_element_form(element, base, graph) {
     const titleBar = document.createElement('h1');
     const title = document.createElement('a');
@@ -316,8 +353,17 @@ function build_fast_element_form(element, base, graph) {
         base.close();
     };
 
+    const focusButton = document.createElement('a');
+    focusButton.setAttribute('class', 'navigation secondary');
+    focusButton.innerText = '[focus]';
+
+    const new_search = set_param(document.location.search, 'from', element.id);
+    const focus_location = document.location.origin + document.location.pathname + new_search;
+    focusButton.href = focus_location;
+
     titleBar.appendChild(backButton);
     titleBar.appendChild(title);
+    titleBar.appendChild(focusButton);
 
     base.appendChild(titleBar);
 
@@ -545,6 +591,10 @@ function draw_column_from(base_x_off, base_y_off,
     let line_count = 0;
 
     for (const element of column) {
+        if (element === undefined) {
+            continue;
+        }
+
         for (const dependency of element.dependencies) {
             if (dependency_positions[dependency] === undefined) {
                 dependency_positions[dependency] = dependency_count++;
@@ -562,6 +612,10 @@ function draw_column_from(base_x_off, base_y_off,
     const y_off = base_y_off;
 
     for (const element of column) {
+        if (element === undefined) {
+            continue;
+        }
+
         const row_num = slots.get_position_for_element(element);
 
         const row_height = (y_off 
@@ -595,8 +649,11 @@ function draw_column_from(base_x_off, base_y_off,
         };
 
         for (const dependency of element.dependencies) {
-            // Connect two points
+            if (nodes_map[dependency] === undefined) {
+                continue;
+            }
 
+            // Connect two points
             const dependency_index = dependency_positions[dependency];
             const end_runway = base_end_runway + dependency_line_offset
                                                - (dependency_index * ((dependency_line_padding * 2)
@@ -661,6 +718,9 @@ function loops_back(graph, element_id, first_step, selector) {
 
     while (to_check.length != 0) {
         const step_id = to_check.shift();
+        if (graph[step_id] === undefined) {
+            continue;
+        }
 
         if (seen[step_id] === true) {
             continue;
@@ -727,7 +787,9 @@ function sort_by_dependency_columns(steps) {
         
     for (const step of steps){
         for (const dependency of step.dependencies) {
-            depended[dependency].depended_by.push(step.id);
+            if (depended[dependency] !== undefined) {
+                depended[dependency].depended_by.push(step.id);
+            }
         }
     }
 
@@ -751,6 +813,10 @@ function sort_by_dependency_columns(steps) {
         const last_row = rows[rows.length - 1];
         let depended_by_last = [];
         for(const element of last_row) {
+            if (depended[element] === undefined) {
+                continue;
+            }
+
             depended[element].row = rows.length;
             depended_by_last = depended_by_last.concat(depended[element].dependencies);
         }
@@ -864,6 +930,63 @@ function get_project_graph(project_id, cb) {
 
 var Graph = undefined;
 
+function is_depended_by(depended, depender, graph) {
+    if (depender.id === depended.id) {
+        return true;
+    }
+
+    if (depender.dependencies.indexOf(depended.id) >= 0) {
+        return true;
+    }
+
+    const explored = {};
+    const to_explore = Array.from(depender.dependencies);
+    while (to_explore.length > 0) {
+        const elem = to_explore.shift();
+
+        for (const dependency of graph[elem].dependencies) {
+            if (dependency == depended.id) {
+                return true;
+            }
+
+            if (explored[dependency] === undefined) {
+                explored[dependency] = true;
+                to_explore.push(dependency);
+            }
+        }
+    }
+
+    return false;
+}
+
+function remove_steps_not_depended_by(steps, step_id) {
+    const graph = {};
+
+    for (const step of steps) {
+        graph[step.id] = step;
+    }
+
+    for (let i = 0; i < steps.length; i++) {
+        const step = steps[i];
+
+        if (!is_depended_by(step, graph[step_id], graph)) {
+            delete steps[i];
+        }
+    }
+
+    return steps.filter((v) => v !== undefined);
+}
+
+function focus_data(data) {
+    const search_dict = search_to_dict(document.location.search);
+    if (search_dict['from'] === undefined) {
+        return;
+    }
+
+    const steps = remove_steps_not_depended_by(data.steps, search_dict['from']);
+    data.steps = steps;
+}
+
 var DependencyGraphRenderer = { 
     run: function() {
         Graph = new DependencyGraph(document.getElementById("dependency_graph"));
@@ -871,6 +994,7 @@ var DependencyGraphRenderer = {
         const project_id = document.location.pathname.split("/")[2];
 
         get_project_graph(project_id, data => {
+            focus_data(data);
             Graph.render(data);
         });
     }
