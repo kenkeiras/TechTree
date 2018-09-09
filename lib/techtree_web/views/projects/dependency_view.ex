@@ -20,4 +20,15 @@ defmodule TechtreeWeb.Projects.DependencyView do
        completed: dep.completed
     }
   end
+
+
+  def render("steps.json", %{steps: steps}) do
+    parsed = for {name, id} <- steps, do: %{ name: name, id: id}
+    %{steps: parsed }
+  end
+
+  def render("result.json", %{result: result}) do
+    result
+  end
+
 end

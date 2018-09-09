@@ -94,4 +94,12 @@ defmodule TechtreeWeb.Projects.StepController do
     |> put_flash(:info, "Step deleted successfully.")
     |> redirect(to: project_project_path(conn, :show, conn.assigns.project.id))
   end
+
+  def api_patch(conn, %{ "step_id" => step_id, "state" => new_state }) do
+    step = Projects.get_step!(step_id)
+    patch = Projects.gen_step_patch(new_state)
+    Projects.update_step(step, patch)
+
+    render(conn, "operation_result.json", result: %{success: true})
+  end 
 end

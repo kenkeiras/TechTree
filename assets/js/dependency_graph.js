@@ -1,3 +1,5 @@
+import * as Api from './api';
+
 const COMPLETED_STROKE_STYLE = '#548A00';
 const UNDEPENDED = 'UNDEPENDED';
 const SvgNS = "http://www.w3.org/2000/svg";
@@ -16,24 +18,33 @@ class DependencyGraph {
         
         this.div.appendChild(this.canvas);
 
-        const prepared_draw = prepare_draw_columns_in_canvas(columns, this.canvas);
+        const prepared_draw = prepare_draw_columns_in_canvas(columns, this.canvas, to_graph(data.steps));
         this.canvas.style.width = prepared_draw.width + 'px';
         this.canvas.style.height = prepared_draw.height + 'px';
         this.div.style.width = prepared_draw.width + 'px';
         this.div.style.height = prepared_draw.height + 'px';
 
         const center_canvas = () => {
-            this.canvas.style.left = Math.max(
+            this.canvas.style.left = (Math.max(
                 0,
-                (window.outerWidth - prepared_draw.width) / 2) + 'px';
+                (window.innerWidth - prepared_draw.width) / 2)
+            + 'px');
         }
 
-        window.on_resize = center_canvas();
+        window.onresize = center_canvas;
         center_canvas();
-
 
         prepared_draw.draw();
     }
+}
+
+function to_graph(base) {
+    const result = {};
+    for (const step of base) {
+        result[step.id] = step;
+    }
+
+    return result;
 }
 
 class RowAllocationSlots {
@@ -111,7 +122,7 @@ class RowAllocationSlots {
     }
 }
 
-function prepare_draw_columns_in_canvas(columns, canvas) {
+function prepare_draw_columns_in_canvas(columns, canvas, graph) {
     const left_margin = 10; // px
     const top_margin = 10; // px
     const inter_column_separation = 20; // px
@@ -128,7 +139,7 @@ function prepare_draw_columns_in_canvas(columns, canvas) {
 
         column_num++;
 
-        const result = draw_column_from(x_off, y_off, column, canvas, slots, nodes_map, column_num);
+        const result = draw_column_from(x_off, y_off, column, canvas, slots, nodes_map, column_num, graph);
         draw_actions = draw_actions.concat(result.draw_actions);
         slots.finish_column();
 
@@ -151,25 +162,33 @@ function prepare_draw_columns_in_canvas(columns, canvas) {
 
 let textCorrection = undefined;
 
-function add_node(canvas, element, left, top, completed) {
+function add_node(canvas, element, left, top, graph) {
     const x_padding = 2; // px
     const y_padding = 2; // px
 
     let strike_color = 'black';
-    if (completed) {
+    if (element.completed) {
         strike_color = COMPLETED_STROKE_STYLE;
     }
 
-    var rect = document.createElementNS(SvgNS, 'rect');
-    var textBox = document.createElementNS(SvgNS, 'text');
-    canvas.appendChild(rect);
+    const node = document.createElementNS(SvgNS, 'a');
+    const rect = document.createElementNS(SvgNS, 'rect');
+    const textBox = document.createElementNS(SvgNS, 'text');
 
-    canvas.appendChild(textBox);
+    // node.setAttributeNS(null, 'href', element.location);
+
+    canvas.appendChild(node);
+
+    node.appendChild(rect);
+
+    node.appendChild(textBox);
 
     textBox.setAttribute('class', 'actionable');
-    textBox.setAttributeNS(null,'stroke-width',"1");
+    textBox.setAttributeNS(null,'stroke',"none");
     textBox.textContent = element.title;
     textBox.setAttributeNS(null,'textlength', '100%');
+    textBox.style.fontWeight = "bold";
+    textBox.setAttributeNS(null, 'fill', 'black');
 
     // First time we draw this we have to calculate the correction
     // to apply over the text position. This translates from whatever
@@ -182,8 +201,8 @@ function add_node(canvas, element, left, top, completed) {
         textBox.setAttributeNS(null,'y', 0);
 
         textCorrection = { 
-            X: -(textBox.getClientRects()[0].left - textBox.parentElement.getClientRects()[0].left),
-            Y: -(textBox.getClientRects()[0].top - textBox.parentElement.getClientRects()[0].top)
+            X: -(textBox.getClientRects()[0].left - canvas.getClientRects()[0].left),
+            Y: -(textBox.getClientRects()[0].top - canvas.getClientRects()[0].top)
         }
     }
 
@@ -197,7 +216,6 @@ function add_node(canvas, element, left, top, completed) {
     rect.setAttributeNS(null,'height', textBox.getClientRects()[0].height + y_padding * 2);
 
     const onHover = () => {
-        textBox.setAttributeNS(null, 'stroke', 'white');
         textBox.setAttributeNS(null, 'fill', 'white');
         rect.setAttributeNS(null, 'fill', strike_color);
     };
@@ -205,28 +223,297 @@ function add_node(canvas, element, left, top, completed) {
     const onRestore = () => {
         rect.setAttributeNS(null,'stroke',strike_color);
         rect.setAttributeNS(null, 'fill', 'none');
-        textBox.setAttributeNS(null, 'stroke', strike_color);
         textBox.setAttributeNS(null, 'fill', strike_color);
     };
 
     onRestore();
 
-    textBox.onmouseenter = onHover;
-    textBox.onmouseleave = onRestore;
-    textBox.onclick = () => {
-        document.location = element.location;
+    node.onmouseenter = onHover;
+    node.onmouseleave = onRestore;
+    node.onclick = () => {
+        popup_element(element, graph);
     };
 
     return {
         width: rect.getClientRects()[0].width,
         height: rect.getClientRects()[0].height,
-        node_list: [textBox, rect]
+        node_list: [node]
     }
+}
+
+function createDependencyAdder(project_id, step_id, section, on_updated) {
+    Api.get_available_dependencies_for_step(project_id, step_id, (success, result) => {
+        console.log("Success", success);
+        console.log("Result", result);
+
+        const selector = document.createElement('select');
+        
+        for(const step of result.steps) {
+            const option = document.createElement('option');
+            option.value = step.id;
+            option.innerText = step.name;
+
+            selector.appendChild(option);
+        }
+
+        section.appendChild(selector);
+
+        const submitButton = document.createElement('button');
+        submitButton.innerText = 'Add';
+        submitButton.onclick = () => {
+            Api.add_dependency(project_id, step_id, selector.value, () => {
+                section.removeChild(selector);
+                section.removeChild(submitButton);
+                on_updated();
+            });
+        }
+
+        section.appendChild(submitButton);
+    });
+}
+
+function add_cross(element, size) {
+    if (size === undefined){
+        size = 15;
+    }
+    const style = "stroke:rgb(255,255,255);stroke-width:2";
+
+    const canvas = document.createElementNS(SvgNS, "svg");
+    
+    const leftTop = document.createElementNS(SvgNS, 'line');
+    const leftBottom = document.createElementNS(SvgNS, 'line');
+
+    leftTop.setAttributeNS(null, 'x1', 0);
+    leftTop.setAttributeNS(null, 'y1', 0);
+    leftTop.setAttributeNS(null, 'x2', size);
+    leftTop.setAttributeNS(null, 'y2', size);
+    leftTop.setAttributeNS(null, 'style', style);
+
+    leftBottom.setAttributeNS(null, 'x1', 0);
+    leftBottom.setAttributeNS(null, 'y1', size);
+    leftBottom.setAttributeNS(null, 'x2', size);
+    leftBottom.setAttributeNS(null, 'y2', 0);
+    leftBottom.setAttributeNS(null, 'style', style);
+
+    canvas.appendChild(leftTop);
+    canvas.appendChild(leftBottom);
+
+    element.appendChild(canvas);
+}
+
+
+function build_fast_element_form(element, base, graph) {
+    const titleBar = document.createElement('h1');
+    const title = document.createElement('a');
+    title.innerText = element.title;
+    title.href = element.location;
+    let has_changed = false;
+
+    const backButton = document.createElement('a');
+    backButton.setAttribute('class', 'navigation');
+    backButton.innerText = '←';
+    backButton.onclick = () => {
+        base.close();
+    };
+
+    titleBar.appendChild(backButton);
+    titleBar.appendChild(title);
+
+    base.appendChild(titleBar);
+
+    const body = document.createElement('div');
+    body.setAttribute('class', 'body');
+    base.appendChild(body);
+
+    if (element.description !== null) {
+        const description = document.createElement('span');
+        description.setAttribute('class', 'description')
+        description.innerText = element.description;
+        body.appendChild(description);
+    }
+    else {
+        const addDescriptionButton = document.createElement('span');
+        addDescriptionButton.setAttribute('class', 'description actionable-suggestion');
+        addDescriptionButton.innerText = 'Add a description...';
+        body.appendChild(addDescriptionButton);
+    }
+
+    const completedRow = document.createElement('div');
+    const completedLabel = document.createElement('label');
+    const state = document.createElement('span');
+    const toggleButton = document.createElement('button');
+
+    completedLabel.innerText = 'State:';
+    completedRow.appendChild(completedLabel);
+    completedRow.appendChild(state);
+    completedRow.appendChild(toggleButton);
+
+    body.appendChild(completedRow);
+
+    state.setAttribute('class', 'value');
+    toggleButton.setAttribute('class', 'action-button');
+
+    let completedClass = '';
+
+    const set_completion = () => {
+        if (element.completed) {
+            state.innerText = 'COMPLETE';
+            completedClass = 'completed';
+            toggleButton.innerText = 'Mark To-Do';
+            toggleButton.onclick = () => {
+                toggleButton.setAttribute('class', 'action-button loading');
+                has_changed = true;
+                Api.mark_step_todo(element.project_id,
+                                element.id,
+                                (success) => {
+                                    if (success) {
+                                        toggleButton.setAttribute('class', 'action-button loaded');
+                                        element.completed = false;
+                                        set_completion(element);
+                                    }
+                                    else {
+                                        toggleButton.setAttribute('class', 'action-button failed');
+                                    }
+                                });
+            }        
+        }
+        else {
+            state.innerHTML = 'TO-DO';
+            toggleButton.innerText = 'Mark Completed';
+
+            toggleButton.onclick = () => {
+                toggleButton.setAttribute('class', 'action-button loading');
+                has_changed = true;
+                Api.mark_step_done(element.project_id, 
+                                   element.id,
+                                   (success) => {
+                                    if (success) {
+                                          toggleButton.setAttribute('class', 'action-button loaded');
+                                          element.completed = true;
+                                          set_completion(element);
+                                    }
+                                    else {
+                                        toggleButton.setAttribute('class', 'action-button failed');
+                                    }
+                                   });
+            }
+        }
+
+        completedRow.setAttribute('class', 'completion ' + completedClass);
+    };
+
+    set_completion();
+
+    if (element.dependencies.length > 0) {
+        const dependenciesSection = document.createElement('div');
+        const dependenciesLabel = document.createElement('h2');
+        dependenciesLabel.innerText = 'Dependencies';
+        dependenciesSection.appendChild(dependenciesLabel);
+
+        const dependencies = document.createElement('ul');
+        for(const dep of element.dependencies) {
+            const dependency = document.createElement('li');
+            dependencies.appendChild(dependency);
+
+            const removeDependencyButton = document.createElement('button');
+            removeDependencyButton.setAttribute('class', 'list-index dangerous');
+            add_cross(removeDependencyButton);
+            dependency.appendChild(removeDependencyButton);
+            removeDependencyButton.onclick = () => {
+                Api.remove_dependency(element.project_id, element.id, dep, () => {
+                    dependencies.removeChild(dependency);
+                    has_changed = true;
+                });
+            };
+
+            const dependencyName = document.createElement('span');
+            dependencyName.innerText = graph[dep].title;
+            dependency.appendChild(dependencyName);
+
+        }
+
+        dependenciesSection.appendChild(dependencies);
+        body.appendChild(dependenciesSection);
+    }
+
+    const addDependencySection = document.createElement('div');
+    addDependencySection.setAttribute('class', 'adder-section');
+
+    body.appendChild(addDependencySection);
+
+    const addDependencyButton = document.createElement('button');
+    addDependencyButton.setAttribute('class', 'action-button');
+    addDependencyButton.innerText = 'Add dependency';
+    addDependencyButton.onclick = () => {
+        createDependencyAdder(element.project_id, 
+                              element.id,
+                              addDependencySection,
+                              () => { has_changed = true; });
+    };
+    body.appendChild(addDependencyButton);
+
+    const removeStepButton = document.createElement('button');
+    removeStepButton.setAttribute('class', 'action-button dangerous');
+    removeStepButton.innerText = 'Remove step';
+    // body.appendChild(removeStepButton); @TODO temporarily disabled
+
+    return () => { return has_changed };
+}
+
+function build_popup(element, graph){ 
+    const overlay = document.createElement("div");
+    overlay.setAttribute('class', 'overlay');    
+    const popup = document.createElement("div");
+    popup.setAttribute('class', 'popup');
+
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+
+    const graphTree = document.getElementById('techtree-graph');
+    const fullHeight = Math.max(screen.height,
+                                document.body.parentElement.offsetHeight);
+
+    const fullWidth = Math.max(screen.width,
+                               document.body.parentElement.offsetWidth,
+                               (parseInt(graphTree.style.width) +
+                                parseInt(graphTree.style.left))
+                               );
+
+    overlay.style.height = fullHeight + 'px';
+    overlay.style.width = fullWidth + 'px';
+
+    const has_element_changed = build_fast_element_form(element, popup, graph);
+
+    popup.close = () => {
+        if (has_element_changed()) {
+            // Refresh window
+            window.location = window.location;
+        }
+        document.body.removeChild(overlay);
+    }
+
+    overlay.onclick = popup.close;
+    popup.onclick = (ev) => {
+        ev.stopPropagation();
+    }
+
+
+    return popup;
+}
+
+function popup_element(element, graph) {
+    const popup = build_popup(element, graph);
+
+    window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "smooth"
+    });
 }
 
 function calculate_per_row_height(svg) {
     if (svg.per_row_height === undefined) {
-        const test = add_node(svg, {title: "test"}, 0, 0, false);
+        const test = add_node(svg, {title: "test", completed: false}, 0, 0, {});
         for (const node of test.node_list){
             svg.removeChild(node);
         }
@@ -237,7 +524,10 @@ function calculate_per_row_height(svg) {
     return svg.per_row_height;
 }
 
-function draw_column_from(base_x_off, base_y_off, column, svg, slots, nodes_map, column_num){
+function draw_column_from(base_x_off, base_y_off,
+                          column, svg,
+                          slots, nodes_map,
+                          column_num, graph){
     const box_padding = 3; // px
     const inter_row_separation = 5; // px
     const draw_actions = [];
@@ -278,7 +568,7 @@ function draw_column_from(base_x_off, base_y_off, column, svg, slots, nodes_map,
                             + row_num * per_row_height
                             + (row_num - 1) * inter_row_separation);
 
-        const measure = add_node(svg, element, x_off, row_height, element.completed);
+        const measure = add_node(svg, element, x_off, row_height, graph);
 
         const per_row_width = measure.width;
 
@@ -461,6 +751,7 @@ function sort_by_dependency_columns(steps) {
         const last_row = rows[rows.length - 1];
         let depended_by_last = [];
         for(const element of last_row) {
+            depended[element].row = rows.length;
             depended_by_last = depended_by_last.concat(depended[element].dependencies);
         }
 
@@ -471,8 +762,8 @@ function sort_by_dependency_columns(steps) {
     }
 
     // Then try to show items as soon as possible by prunning them
-    const found = {};
     rows = rows.reverse();
+    const found = {};
     for (const row_num of rows) {
         for (let i = 0; i < row_num.length; i++) {
             let step_id = row_num[i];
@@ -484,6 +775,41 @@ function sort_by_dependency_columns(steps) {
             }
         }
     }
+
+    // Reconsider last line, move it to the earlier possible line
+    let moves = [];
+    let index = 0;
+    const last_row = rows[rows.length - 1];
+    for (const step_id of last_row) {
+
+        // Keep in mind that the rows are for the forwards
+        // column ordering (now going backwards)
+        let latestDepenedency = undefined;
+        for (const dep_id of depended[step_id].dependencies){
+            const row_pos = rows.length - depended[dep_id].row;
+            if (latestDepenedency === undefined || latestDepenedency < row_pos) {
+                latestDepenedency = row_pos;
+            }
+        }
+
+        if ((latestDepenedency !== undefined)  
+            && ((latestDepenedency + 1) < (rows.length - 1))){
+            
+            moves.push({from: index, to: latestDepenedency + 1});
+        } 
+        index++;
+    }
+
+    // Do the movements backwards not alter the to-be-moved parts
+    moves = moves.reverse();
+    for(const move of moves) {
+        const element = last_row[move.from];
+        delete last_row[move.from];
+        rows[move.to].push(element);
+    }
+
+    // Remove deleted entries
+    rows[rows.length - 1] = last_row.filter((v,i,a) => { return v !== undefined; });
 
     return resolve(rows, steps, depended);
 }
@@ -514,6 +840,7 @@ function get_project_graph(project_id, cb) {
     function process(project_id, stepsResult) {
         for (const step of stepsResult.steps){
             step.location = "/projects/" + project_id + "/steps/" + step.id;
+            step.project_id = project_id;
         }
     }
     

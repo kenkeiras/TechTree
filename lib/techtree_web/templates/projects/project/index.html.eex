@@ -3,6 +3,7 @@
 <table class="table">
   <thead>
     <tr>
+      <th></th>
       <th>Name</th>
 
       <th></th>
@@ -12,8 +13,10 @@
 
 <%= if length(@projects) > 0 do %>
   <%= for project <- @projects do %>
+    <%= if not project.completed do %>
       <tr>
-        <td><%= project.name %></td>
+        <td></td>
+        <td class="project-name"><%= project.name %></td>
 
         <td class="text-right">
           <span><%= link "Show", to: project_project_path(@conn, :show, project), class: "btn btn-default btn-xs" %></span>
@@ -21,7 +24,23 @@
           <span><%= link "Delete", to: project_project_path(@conn, :delete, project), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
         </td>
       </tr>
+    <% end %>
   <% end %>
+  <%= for project <- @projects do %>
+    <%= if project.completed do %>
+      <tr class="completed-project">
+        <td class="completion-marker">Complete!</td>
+        <td class="project-name"><%= project.name %></td>
+
+        <td class="text-right">
+          <span><%= link "Show", to: project_project_path(@conn, :show, project), class: "btn btn-default btn-xs" %></span>
+          <span><%= link "Edit", to: project_project_path(@conn, :edit, project), class: "btn btn-default btn-xs" %></span>
+          <span><%= link "Delete", to: project_project_path(@conn, :delete, project), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
+        </td>
+      </tr>
+    <% end %>
+  <% end %>
+
 <% else %>
     <div class="call-to-action">
       <%= link "Create a new project", to: project_project_path(@conn, :new) %>
