@@ -271,7 +271,7 @@ function createDependencyAdder(project_id, step_id, section, on_updated) {
     });
 }
 
-function add_cross(element, size) {
+function add_cross(element, size?) {
     if (size === undefined){
         size = 15;
     }
@@ -401,7 +401,7 @@ function build_fast_element_form(element, base, graph) {
 
     let completedClass = '';
 
-    const set_completion = () => {
+    const set_completion = (element) => {
         if (element.completed) {
             state.innerText = 'COMPLETE';
             completedClass = 'completed';
@@ -448,7 +448,7 @@ function build_fast_element_form(element, base, graph) {
         completedRow.setAttribute('class', 'completion ' + completedClass);
     };
 
-    set_completion();
+    set_completion(element);
 
     if (element.dependencies.length > 0) {
         const dependenciesSection = document.createElement('div');
@@ -995,6 +995,7 @@ var DependencyGraphRenderer = {
 
         get_project_graph(project_id, data => {
             focus_data(data);
+            console.log("woot");
             Graph.render(data);
         });
     }
