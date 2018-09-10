@@ -1,5 +1,5 @@
 function get_csrf_token() {
-    return document.head.querySelector('[name="csrf-token"]').content;
+    return (document.head.querySelector('[name="csrf-token"]') as HTMLMetaElement).content;
 }
 
 function mark_step_done(project_id, step_id, cb) {
@@ -86,9 +86,7 @@ function remove_dependency(project_id, step_id, dependency_id, cb){
 
 }
                     
-
-
-module.exports = exports =  {
+export {
     mark_step_done,
     mark_step_todo,
     get_available_dependencies_for_step,

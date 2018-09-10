@@ -1001,7 +1001,7 @@ var DependencyGraphRenderer = {
     }
 };
 
-module.exports = {
+export {
     DependencyGraph,
     DependencyGraphRenderer,
     sort_by_dependency_columns,
