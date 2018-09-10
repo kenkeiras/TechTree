@@ -1,16 +1,18 @@
-function get_csrf_token() {
+function get_csrf_token(): string {
     return (document.head.querySelector('[name="csrf-token"]') as HTMLMetaElement).content;
 }
 
-function mark_step_done(project_id, step_id, cb) {
+type id = number | string;
+
+export function mark_step_done(project_id: id, step_id: id, cb: Function) {
     patch_step(project_id, step_id, {completed: true}, cb);
 }
 
-function mark_step_todo(project_id, step_id, cb) {
+export function mark_step_todo(project_id: id, step_id: id, cb: Function) {
     patch_step(project_id, step_id, {completed: false}, cb);
 }
 
-function patch_step(project_id, step_id, state, cb) {
+export function patch_step(project_id: id, step_id: id, state: any, cb: Function) {
     const xhttp = new XMLHttpRequest();
    
     xhttp.onreadystatechange = function() {
@@ -29,7 +31,7 @@ function patch_step(project_id, step_id, state, cb) {
     xhttp.send(JSON.stringify({"state": state}));
 }
 
-function get_available_dependencies_for_step(project_id, step_id, cb){
+export function get_available_dependencies_for_step(project_id: id, step_id: id, cb: Function){
     const xhttp = new XMLHttpRequest();
    
     xhttp.onreadystatechange = function() {
@@ -47,7 +49,7 @@ function get_available_dependencies_for_step(project_id, step_id, cb){
     xhttp.send();
 }
 
-function add_dependency(project_id, depender_id, dependency_id, cb) {
+export function add_dependency(project_id: id, depender_id: id, dependency_id: id, cb: Function) {
     const xhttp = new XMLHttpRequest();
    
     xhttp.onreadystatechange = function() {
@@ -66,7 +68,7 @@ function add_dependency(project_id, depender_id, dependency_id, cb) {
     xhttp.send();
 }
 
-function remove_dependency(project_id, step_id, dependency_id, cb){
+export function remove_dependency(project_id: id, step_id: id, dependency_id: id, cb: Function){
     const xhttp = new XMLHttpRequest();
    
     xhttp.onreadystatechange = function() {
@@ -85,11 +87,29 @@ function remove_dependency(project_id, step_id, dependency_id, cb){
     xhttp.send();
 
 }
-                    
-export {
-    mark_step_done,
-    mark_step_todo,
-    get_available_dependencies_for_step,
-    add_dependency,
-    remove_dependency,
+
+export function get_project_graph(project_id: id, cb: Function) {
+    function process(project_id, stepsResult) {
+        for (const step of stepsResult.steps){
+            step.location = "/projects/" + project_id + "/steps/" + step.id;
+            step.project_id = project_id;
+        }
+    }
+    
+    const xhr = new XMLHttpRequest(),
+          method = "GET",
+          url = "/api/projects/" + project_id + "/dependencies";
+
+    xhr.open(method, url, true);
+    xhr.onreadystatechange = function () {
+        if(xhr.readyState === 4 && xhr.status === 200) {
+            const result = JSON.parse(xhr.responseText);
+            process(project_id, result);
+            cb(result);
+        }
+        else if (xhr.readyState === 4) {
+            console.error("Request returned code", xhr.status, "text", xhr.responseText);
+        }        
+    };
+    xhr.send();
 }
