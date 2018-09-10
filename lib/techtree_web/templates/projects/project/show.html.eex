@@ -5,6 +5,9 @@
 <div id="dependency_graph">
 </div>
 
+<script src="<%= static_path(@conn, "/js/app.js") %>"></script>
+<script>require("js/dependency_graph.ts").DependencyGraphRenderer.run();</script>
+
 <table>
 <%= for step <- @project.steps do %>
     <tr>
