@@ -4,6 +4,7 @@ import { RowAllocationSlots } from './row_allocation_slots';
 
 const COMPLETED_STROKE_STYLE = '#548A00';
 const SvgNS = "http://www.w3.org/2000/svg";
+const TECHTREE_CANVAS_ID = "techtree-graph";
 
 export class DependencyGraph {
     div: HTMLDivElement;
@@ -18,7 +19,7 @@ export class DependencyGraph {
         const columns = sort_by_dependency_columns(data.steps);
         
         this.canvas = document.createElementNS(SvgNS, "svg");
-        this.canvas.setAttribute("id", "techtree-graph");
+        this.canvas.setAttribute("id", TECHTREE_CANVAS_ID);
         
         this.div.appendChild(this.canvas);
 
