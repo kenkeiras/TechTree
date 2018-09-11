@@ -1,6 +1,7 @@
 import * as Api from '../api';
 import * as params from '../params';
 import { RowAllocationSlots } from './row_allocation_slots';
+import { layout_steps, Layout, LayoutRow, LayoutEntry } from './layout';
 
 const COMPLETED_STROKE_STYLE = '#548A00';
 const SvgNS = "http://www.w3.org/2000/svg";
@@ -16,14 +17,14 @@ export class DependencyGraph {
     }
 
     render(data) {
-        const columns = sort_by_dependency_columns(data.steps);
+        const grid = layout_steps(data.steps);
         
         this.canvas = document.createElementNS(SvgNS, "svg");
         this.canvas.setAttribute("id", TECHTREE_CANVAS_ID);
         
         this.div.appendChild(this.canvas);
 
-        const prepared_draw = prepare_draw_columns_in_canvas(columns, this.canvas, to_graph(data.steps));
+        const prepared_draw = prepare_draw_grid_in_canvas(grid, this.canvas, to_graph(data.steps));
         this.canvas.style.width = prepared_draw.width + 'px';
         this.canvas.style.height = prepared_draw.height + 'px';
         this.div.style.width = prepared_draw.width + 'px';
@@ -53,7 +54,7 @@ function to_graph(base) {
 }
 
 
-function prepare_draw_columns_in_canvas(columns, canvas, graph) {
+function prepare_draw_grid_in_canvas(grid: Layout, canvas, graph) {
     const left_margin = 10; // px
     const top_margin = 10; // px
     const inter_column_separation = 20; // px
@@ -66,11 +67,11 @@ function prepare_draw_columns_in_canvas(columns, canvas, graph) {
     let height = 0;
     let column_num = 0;
 
-    for (const column of columns) {
+    for (const column of grid) {
 
         column_num++;
 
-        const result = draw_column_from(x_off, y_off, column, canvas, slots, nodes_map, column_num, graph);
+        const result = draw_column_from(x_off, y_off, column, canvas, nodes_map, column_num, graph);
         draw_actions = draw_actions.concat(result.draw_actions);
         slots.finish_column();
 
@@ -465,8 +466,8 @@ function calculate_per_row_height(svg) {
 }
 
 function draw_column_from(base_x_off, base_y_off,
-                          column, svg,
-                          slots, nodes_map,
+                          column: LayoutRow, svg,
+                          nodes_map,
                           column_num, graph){
     const box_padding = 3; // px
     const inter_row_separation = 5; // px
@@ -484,7 +485,9 @@ function draw_column_from(base_x_off, base_y_off,
     let dependency_count = 0;
     let line_count = 0;
 
-    for (const element of column) {
+    // Find out necessary padding for dependency lines
+    for (const entry of column) {
+        const element = entry.element;
         if (element === undefined) {
             continue;
         }
@@ -505,12 +508,14 @@ function draw_column_from(base_x_off, base_y_off,
     const x_off = base_x_off + left_padding;
     const y_off = base_y_off;
 
-    for (const element of column) {
+    for (const entry of column) {
+        const element = entry.element;
+
         if (element === undefined) {
             continue;
         }
 
-        const row_num = slots.get_position_for_element(element);
+        const row_num = entry.row_index;
 
         const row_height = (y_off 
                             + row_num * per_row_height
@@ -604,194 +609,4 @@ function draw_column_from(base_x_off, base_y_off,
         height: height + per_row_height,
         draw_actions: draw_actions
     };
-}
-
-function loops_back(graph, element_id, first_step, selector) {
-    const seen = {};
-    let to_check = [first_step];
-
-    while (to_check.length != 0) {
-        const step_id = to_check.shift();
-        if (graph[step_id] === undefined) {
-            continue;
-        }
-
-        if (seen[step_id] === true) {
-            continue;
-        }
-        else {
-            seen[step_id] = true;
-        }
-
-        const next_step = selector(graph[step_id]);
-
-        if (next_step.indexOf(+element_id) !== -1) {
-            
-            return true;
-        }
-
-        to_check = to_check.concat(next_step);
-    }
-
-    return false;
-}
-
-function clear_loops(graph) {
-    const cleaned_graph = {};
-
-    for (const id of Object.keys(graph)) {
-        const e = cleaned_graph[id] = {
-            id: id,
-            depended_by: [],
-            dependencies: []
-        };
-
-        for (let i = 0; i < graph[id].dependencies.length; i++) {
-            const dep = graph[id].dependencies[i];
-
-            if (!loops_back(graph, id, dep, e => e.dependencies)) {
-                e.dependencies.push(dep);
-            }
-        }
-
-        for (let i = 0; i < graph[id].depended_by.length; i++) {
-            const dep = graph[id].depended_by[i];
-
-            if (!loops_back(graph, id, dep, e => e.depended_by)) {
-                e.depended_by.push(dep);
-            }
-        }
-    }
-
-    return cleaned_graph;
-}
-
-export function sort_by_dependency_columns(steps) {
-    // Check which steps are being depended by which
-    let depended = {};
-
-    for (const step of steps){
-        depended[step.id] = { 
-            id: step.id,
-            dependencies: step.dependencies,
-            depended_by: [],
-        };
-    }
-
-        
-    for (const step of steps){
-        for (const dependency of step.dependencies) {
-            if (depended[dependency] !== undefined) {
-                depended[dependency].depended_by.push(step.id);
-            }
-        }
-    }
-
-    const dependend_by = JSON.parse(JSON.stringify(depended));
-    depended = clear_loops(depended);
-
-    const undepended = [];
-    for (const depId of Object.keys(depended)) {
-        const dep = depended[depId];
-
-        if (dep.depended_by.length == 0) {
-            undepended.push(dep.id);
-        }
-    }
-
-    let rows = [undepended];
-
-    // Start building by the undepended, and backtrack until
-    // there are no more dependencies
-    while (true) {
-        const last_row = rows[rows.length - 1];
-        let depended_by_last = [];
-        for(const element of last_row) {
-            if (depended[element] === undefined) {
-                continue;
-            }
-
-            depended[element].row = rows.length;
-            depended_by_last = depended_by_last.concat(depended[element].dependencies);
-        }
-
-        if (depended_by_last.length == 0) {
-            break;
-        }
-        rows.push(depended_by_last);
-    }
-
-    // Then try to show items as soon as possible by prunning them
-    rows = rows.reverse();
-    const found = {};
-    for (const row_num of rows) {
-        for (let i = 0; i < row_num.length; i++) {
-            let step_id = row_num[i];
-            if (found[step_id] !== true) {
-                found[step_id] = true;
-            }
-            else {
-                delete row_num[i];
-            }
-        }
-    }
-
-    // Reconsider last line, move it to the earlier possible line
-    let moves = [];
-    let index = 0;
-    const last_row = rows[rows.length - 1];
-    for (const step_id of last_row) {
-
-        // Keep in mind that the rows are for the forwards
-        // column ordering (now going backwards)
-        let latestDepenedency = undefined;
-        for (const dep_id of depended[step_id].dependencies){
-            const row_pos = rows.length - depended[dep_id].row;
-            if (latestDepenedency === undefined || latestDepenedency < row_pos) {
-                latestDepenedency = row_pos;
-            }
-        }
-
-        if ((latestDepenedency !== undefined)  
-            && ((latestDepenedency + 1) < (rows.length - 1))){
-            
-            moves.push({from: index, to: latestDepenedency + 1});
-        } 
-        index++;
-    }
-
-    // Do the movements backwards not alter the to-be-moved parts
-    moves = moves.reverse();
-    for(const move of moves) {
-        const element = last_row[move.from];
-        delete last_row[move.from];
-        rows[move.to].push(element);
-    }
-
-    // Remove deleted entries
-    rows[rows.length - 1] = last_row.filter((v,i,a) => { return v !== undefined; });
-
-    return resolve(rows, steps, depended);
-}
-
-function resolve(rows, steps, depended) {
-    const steps_by_id = {};
-    for(const step of steps) {
-        steps_by_id[step.id] = step;
-        steps_by_id[step.id].depended_by = depended[step.id].depended_by;
-    }
-
-    const resolved = [];
-    for(const row_num of rows) {
-        const resolved_row = [];
-        for (const step_id of row_num) {
-            if (step_id !== undefined){
-                resolved_row.push(steps_by_id[step_id]);
-            }
-        }
-
-        resolved.push(resolved_row);
-    }
-
-    return resolved;
 }
