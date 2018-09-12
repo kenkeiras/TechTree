@@ -1,6 +1,5 @@
 import * as Api from '../api';
 import * as params from '../params';
-import { RowAllocationSlots } from './row_allocation_slots';
 import { layout_steps, Layout, LayoutRow, LayoutEntry } from './layout';
 
 const COMPLETED_STROKE_STYLE = '#548A00';
@@ -59,7 +58,6 @@ function prepare_draw_grid_in_canvas(grid: Layout, canvas, graph) {
     const top_margin = 10; // px
     const inter_column_separation = 20; // px
     let draw_actions = [];
-    const slots = new RowAllocationSlots();
     const nodes_map = {};
 
     let x_off = left_margin;
@@ -73,7 +71,6 @@ function prepare_draw_grid_in_canvas(grid: Layout, canvas, graph) {
 
         const result = draw_column_from(x_off, y_off, column, canvas, nodes_map, column_num, graph);
         draw_actions = draw_actions.concat(result.draw_actions);
-        slots.finish_column();
 
         if (result.height > height) {
             height = result.height;
