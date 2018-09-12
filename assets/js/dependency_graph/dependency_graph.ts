@@ -1,10 +1,15 @@
-import * as Api from './api';
+import * as Api from '../api';
+import * as params from '../params';
+import { RowAllocationSlots } from './row_allocation_slots';
 
 const COMPLETED_STROKE_STYLE = '#548A00';
-const UNDEPENDED = 'UNDEPENDED';
 const SvgNS = "http://www.w3.org/2000/svg";
+const TECHTREE_CANVAS_ID = "techtree-graph";
 
-class DependencyGraph {
+export class DependencyGraph {
+    div: HTMLDivElement;
+    canvas: SVGElement;
+
     constructor(div) {
         this.div = div;
         this.canvas = undefined;
@@ -14,7 +19,7 @@ class DependencyGraph {
         const columns = sort_by_dependency_columns(data.steps);
         
         this.canvas = document.createElementNS(SvgNS, "svg");
-        this.canvas.setAttribute("id", "techtree-graph");
+        this.canvas.setAttribute("id", TECHTREE_CANVAS_ID);
         
         this.div.appendChild(this.canvas);
 
@@ -47,79 +52,6 @@ function to_graph(base) {
     return result;
 }
 
-class RowAllocationSlots {
-
-    constructor() {
-        this.positions = [];
-    }
-
-    get_position_for_element(vanilla_element) {
-        // Prepare a copy of the element to insert
-        const element = {
-            id: vanilla_element.id,
-            depended_by: Array.from(vanilla_element.depended_by)
-        };
-
-        // Remove element from depended_by
-        const depending_on_this = [];
-        for (let i = 0; i < this.positions.length; i++) {
-            const slot = this.positions[i];
-
-            if ((slot === undefined) || (slot.depended_by === undefined)) {
-                continue;
-            }
-
-            if (slot.depended_by.indexOf(element.id) !== -1) {
-                depending_on_this.push(i);
-
-                // Rebuild the array to undefined's in between
-                slot.depended_by = slot.depended_by.filter((v, _i, _a) => {
-                    const keep = v !== element.id;
-                    return keep;
-                });
-            }
-        }
-
-        // Remove elements which was undepended the step before
-        for (const i of depending_on_this) {
-            const slot = this.positions[i];
-            if (slot.depended_by.length === 0) {
-                this.positions[i] = UNDEPENDED;
-            }
-        }
-
-        // Get any element which only remaining dependence was this
-        for (const i of depending_on_this) {
-            const slot = this.positions[i];
-
-            if ((slot === UNDEPENDED) || (slot.depended_by.length === 0)) {
-                this.positions[i] = element;
-                return i;
-            }
-        }
-
-        // Get any available position
-        for (let i = 0; i < this.positions.length; i++) {
-            if (this.positions[i] === undefined) { // Empty position
-                this.positions[i] = element;
-                return i;
-            }
-        }
-
-        // Return the last position
-        const position = this.positions.length;
-        this.positions.push(element);
-        return position;
-    }
-
-    finish_column() {
-        for(let i=0; i < this.positions.length; i++) {
-            if (this.positions[i] === UNDEPENDED) {
-                this.positions[i] = undefined;
-            }
-        }
-    }
-}
 
 function prepare_draw_columns_in_canvas(columns, canvas, graph) {
     const left_margin = 10; // px
@@ -196,8 +128,8 @@ function add_node(canvas, element, left, top, graph) {
     // Looks like text .X/.Y positions the baseline?
 
     if (textCorrection === undefined) {
-        textBox.setAttributeNS(null,'x', 0);
-        textBox.setAttributeNS(null,'y', 0);
+        textBox.setAttributeNS(null, 'x', "0");
+        textBox.setAttributeNS(null, 'y', "0");
 
         textCorrection = { 
             X: -(textBox.getClientRects()[0].left - canvas.getClientRects()[0].left),
@@ -211,8 +143,8 @@ function add_node(canvas, element, left, top, graph) {
     rect.setAttributeNS(null,'x', left);
     rect.setAttributeNS(null,'y', top);
     rect.setAttributeNS(null,'stroke-width','1');
-    rect.setAttributeNS(null,'width', textBox.getClientRects()[0].width + x_padding * 2);
-    rect.setAttributeNS(null,'height', textBox.getClientRects()[0].height + y_padding * 2);
+    rect.setAttributeNS(null,'width', (textBox.getClientRects()[0].width + x_padding * 2) + "");
+    rect.setAttributeNS(null,'height', (textBox.getClientRects()[0].height + y_padding * 2) + "");
 
     const onHover = () => {
         textBox.setAttributeNS(null, 'fill', 'white');
@@ -227,8 +159,8 @@ function add_node(canvas, element, left, top, graph) {
 
     onRestore();
 
-    node.onmouseenter = onHover;
-    node.onmouseleave = onRestore;
+    (node as any).onmouseenter = onHover;
+    (node as any).onmouseleave = onRestore;
     node.onclick = () => {
         popup_element(element, graph);
     };
@@ -271,7 +203,7 @@ function createDependencyAdder(project_id, step_id, section, on_updated) {
     });
 }
 
-function add_cross(element, size) {
+function add_cross(element, size?) {
     if (size === undefined){
         size = 15;
     }
@@ -282,60 +214,22 @@ function add_cross(element, size) {
     const leftTop = document.createElementNS(SvgNS, 'line');
     const leftBottom = document.createElementNS(SvgNS, 'line');
 
-    leftTop.setAttributeNS(null, 'x1', 0);
-    leftTop.setAttributeNS(null, 'y1', 0);
+    leftTop.setAttributeNS(null, 'x1', '0');
+    leftTop.setAttributeNS(null, 'y1', '0');
     leftTop.setAttributeNS(null, 'x2', size);
     leftTop.setAttributeNS(null, 'y2', size);
     leftTop.setAttributeNS(null, 'style', style);
 
-    leftBottom.setAttributeNS(null, 'x1', 0);
+    leftBottom.setAttributeNS(null, 'x1', '0');
     leftBottom.setAttributeNS(null, 'y1', size);
     leftBottom.setAttributeNS(null, 'x2', size);
-    leftBottom.setAttributeNS(null, 'y2', 0);
+    leftBottom.setAttributeNS(null, 'y2', '0');
     leftBottom.setAttributeNS(null, 'style', style);
 
     canvas.appendChild(leftTop);
     canvas.appendChild(leftBottom);
 
     element.appendChild(canvas);
-}
-
-
-function search_to_dict(search) {
-    if (search == undefined) {
-        return {};
-    }
-
-    if (search.startsWith('?')) {
-        search = search.substring(1);
-    }
-
-    const chunks = search.split('&');
-    const dict = {};
-    for(const chunk of chunks) {
-        const parts = chunk.split('=');
-        const key = parts.shift();
-        const value = parts.join('=');
-
-        if (key.length > 0) {
-            dict[key] = value;
-        }
-    }
-
-    return dict;
-}
-
-function dict_to_search(dict) {
-    return '?' + Object.keys(dict).map((k) => {
-        return k + '=' + dict[k];
-    }).join('&');
-}
-
-function set_param(search, key, value) {
-    const search_dict = search_to_dict(search);
-    search_dict[key] = value;
-
-    return dict_to_search(search_dict);
 }
 
 
@@ -357,7 +251,7 @@ function build_fast_element_form(element, base, graph) {
     focusButton.setAttribute('class', 'navigation secondary');
     focusButton.innerText = '[focus]';
 
-    const new_search = set_param(document.location.search, 'from', element.id);
+    const new_search = params.set_param(document.location.search, 'from', element.id);
     const focus_location = document.location.origin + document.location.pathname + new_search;
     focusButton.href = focus_location;
 
@@ -401,7 +295,7 @@ function build_fast_element_form(element, base, graph) {
 
     let completedClass = '';
 
-    const set_completion = () => {
+    const set_completion = (element) => {
         if (element.completed) {
             state.innerText = 'COMPLETE';
             completedClass = 'completed';
@@ -448,7 +342,7 @@ function build_fast_element_form(element, base, graph) {
         completedRow.setAttribute('class', 'completion ' + completedClass);
     };
 
-    set_completion();
+    set_completion(element);
 
     if (element.dependencies.length > 0) {
         const dependenciesSection = document.createElement('div');
@@ -530,7 +424,7 @@ function build_popup(element, graph){
 
     const has_element_changed = build_fast_element_form(element, popup, graph);
 
-    popup.close = () => {
+    (popup as any).close = () => {
         if (has_element_changed()) {
             // Refresh window
             window.location = window.location;
@@ -538,7 +432,7 @@ function build_popup(element, graph){
         document.body.removeChild(overlay);
     }
 
-    overlay.onclick = popup.close;
+    overlay.onclick = (popup as any).close;
     popup.onclick = (ev) => {
         ev.stopPropagation();
     }
@@ -772,7 +666,7 @@ function clear_loops(graph) {
     return cleaned_graph;
 }
 
-function sort_by_dependency_columns(steps) {
+export function sort_by_dependency_columns(steps) {
     // Check which steps are being depended by which
     let depended = {};
 
@@ -901,107 +795,3 @@ function resolve(rows, steps, depended) {
 
     return resolved;
 }
-
-function get_project_graph(project_id, cb) {
-    function process(project_id, stepsResult) {
-        for (const step of stepsResult.steps){
-            step.location = "/projects/" + project_id + "/steps/" + step.id;
-            step.project_id = project_id;
-        }
-    }
-    
-    const xhr = new XMLHttpRequest(),
-          method = "GET",
-          url = "/api/projects/" + project_id + "/dependencies";
-
-    xhr.open(method, url, true);
-    xhr.onreadystatechange = function () {
-        if(xhr.readyState === 4 && xhr.status === 200) {
-            const result = JSON.parse(xhr.responseText);
-            process(project_id, result);
-            cb(result);
-        }
-        else if (xhr.readyState === 4) {
-            console.error("Request returned code", xhr.status, "text", xhr.responseText);
-        }        
-    };
-    xhr.send();
-}
-
-var Graph = undefined;
-
-function is_depended_by(depended, depender, graph) {
-    if (depender.id === depended.id) {
-        return true;
-    }
-
-    if (depender.dependencies.indexOf(depended.id) >= 0) {
-        return true;
-    }
-
-    const explored = {};
-    const to_explore = Array.from(depender.dependencies);
-    while (to_explore.length > 0) {
-        const elem = to_explore.shift();
-
-        for (const dependency of graph[elem].dependencies) {
-            if (dependency == depended.id) {
-                return true;
-            }
-
-            if (explored[dependency] === undefined) {
-                explored[dependency] = true;
-                to_explore.push(dependency);
-            }
-        }
-    }
-
-    return false;
-}
-
-function remove_steps_not_depended_by(steps, step_id) {
-    const graph = {};
-
-    for (const step of steps) {
-        graph[step.id] = step;
-    }
-
-    for (let i = 0; i < steps.length; i++) {
-        const step = steps[i];
-
-        if (!is_depended_by(step, graph[step_id], graph)) {
-            delete steps[i];
-        }
-    }
-
-    return steps.filter((v) => v !== undefined);
-}
-
-function focus_data(data) {
-    const search_dict = search_to_dict(document.location.search);
-    if (search_dict['from'] === undefined) {
-        return;
-    }
-
-    const steps = remove_steps_not_depended_by(data.steps, search_dict['from']);
-    data.steps = steps;
-}
-
-var DependencyGraphRenderer = { 
-    run: function() {
-        Graph = new DependencyGraph(document.getElementById("dependency_graph"));
-
-        const project_id = document.location.pathname.split("/")[2];
-
-        get_project_graph(project_id, data => {
-            focus_data(data);
-            Graph.render(data);
-        });
-    }
-};
-
-module.exports = {
-    DependencyGraph,
-    DependencyGraphRenderer,
-    sort_by_dependency_columns,
-};
