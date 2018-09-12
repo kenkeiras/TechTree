@@ -362,7 +362,7 @@ function arrange_in_trees(rows, depended): StepTree{
         top_level_trees.push(build_tree(element, backwards, depended));
     }
 
-    top_level_trees = sort_trees_by_leader_length(top_level_trees, depended);
+    top_level_trees = sort_tree_elements(top_level_trees, depended);
     remove_duplicates_across_trees(top_level_trees);
 
     return top_level_trees;
@@ -418,13 +418,20 @@ function build_tree_dependencies(element: id, next_rows, depended): StepTree {
         }
     }
 
-    dependency_tree = sort_trees_by_leader_length(dependency_tree, depended);
+    dependency_tree = sort_tree_elements(dependency_tree, depended);
     return dependency_tree;
 }
 
-function sort_trees_by_leader_length(trees: StepTree, steps): StepTree {
+function sort_tree_elements(trees: StepTree, steps): StepTree {
     return trees.sort((a: StepTreeEntry, b: StepTreeEntry) => {
-        return steps[a.step_id].title.length - steps[b.step_id].title.length; 
+        const step_a = steps[a.step_id];
+        const step_b = steps[b.step_id]
+        let count_dependers = step_a.depended_by.length - step_b.depended_by.length;
+        if (count_dependers !== 0) {
+            return count_dependers;
+        }
+
+        return step_a.title.length - step_b.title.length;
     });
 }
 
