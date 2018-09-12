@@ -27,6 +27,7 @@ export function layout_steps(steps): Layout {
             id: step.id,
             dependencies: step.dependencies,
             depended_by: [],
+            title: step.title,
         };
     }
 
@@ -208,7 +209,7 @@ function arrange_in_trees(rows, steps, depended): StepTree{
 
     // First we'll just build the trees with duplicated entries
     // and later remove the unnecessary values.
-    const top_level_trees: StepTree = [];
+    let top_level_trees: StepTree = [];
     const backwards: any[] = Array.from(rows).reverse();
 
     const top_row = backwards.shift();
@@ -217,6 +218,7 @@ function arrange_in_trees(rows, steps, depended): StepTree{
         top_level_trees.push(build_tree(element, backwards, depended));
     }
 
+    top_level_trees = sort_trees_by_leader_length(top_level_trees, depended);
     remove_duplicates_across_trees(top_level_trees);
 
     return top_level_trees;
@@ -262,7 +264,7 @@ function build_tree_dependencies(element: id, next_rows, depended): StepTree {
     }
 
     const dependencies: number[] = depended[element].dependencies;
-    const dependency_tree: StepTree = [];
+    let dependency_tree: StepTree = [];
     const next_row = next_rows[0];
     const following_rows = next_rows.slice(1);
     
@@ -272,7 +274,15 @@ function build_tree_dependencies(element: id, next_rows, depended): StepTree {
         }
     }
 
+    dependency_tree = sort_trees_by_leader_length(dependency_tree, depended);
     return dependency_tree;
+}
+
+function sort_trees_by_leader_length(trees: StepTree, steps): StepTree {
+    console.log(steps);
+    return trees.sort((a: StepTreeEntry, b: StepTreeEntry) => {
+        return steps[a.step_id].title.length - steps[b.step_id].title.length; 
+    });
 }
 
 
@@ -283,7 +293,8 @@ function clear_loops(graph) {
         const e = cleaned_graph[id] = {
             id: id,
             depended_by: [],
-            dependencies: []
+            dependencies: [],
+            title: graph[id].title,
         };
 
         for (let i = 0; i < graph[id].dependencies.length; i++) {
