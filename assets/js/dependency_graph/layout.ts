@@ -91,6 +91,7 @@ export function layout_steps(steps): Layout {
     const trees = arrange_in_trees(rows, depended);
     const grid = arrange_trees_in_grid(trees);
 
+    grid.pushback(depended);
     grid.minimize_distances(depended);
 
     return resolve(grid.dump_inverted_transposed(), steps, depended);
@@ -121,6 +122,35 @@ class GridController {
     constructor() {
         this.rows = [];
         this.reverse_index = {};
+    }
+
+    // Push the steps back as much as possible.
+    // 
+    // At this point this is only useful for
+    // top level elements.
+    public pushback(depended: {[key: string]: any}) {
+        for (let y = 0; y < this.height; y++) {
+            const entry = this.get_entry(0, y);
+            if (entry === undefined) {
+                continue;
+            }
+
+            const dependencies = depended[entry].dependencies;
+            this.push_entry_back(entry, dependencies);
+        }
+    }
+
+    private push_entry_back(entry: id, dependencies: id[]) {
+        const furthest_possible = Math.min.apply(null,
+            dependencies.map((v) => this.reverse_index[v][0] - 1)
+            .concat(this.width - 1)
+        );
+
+        const entry_x = this.reverse_index[entry][0];
+
+        if (furthest_possible > entry_x) {
+            this.move_entry_to_closest_y_in_x(entry, furthest_possible);
+        }
     }
 
     // Greedily minimize vertical distances between dependencies
@@ -176,6 +206,24 @@ class GridController {
         }
     }
 
+    private move_entry_to_closest_y_in_x(entry: id, x: number) {
+        const entry_pos = this.reverse_index[entry];
+        const orig_x = entry_pos[0];
+        const orig_y = entry_pos[1];
+
+        for (let diff = 0; diff < orig_y + 1; diff++) {
+            if (this.is_free(x, orig_y + diff)) {
+                this.move_entry({x: orig_x, y: orig_y}, {x, y: orig_y + diff});
+                return;
+            }
+
+            if (this.is_free(x, orig_y - diff)) {
+                this.move_entry({x: orig_x, y: orig_y}, {x, y: orig_y - diff});
+                return;
+            }
+        }
+    }
+
     public dump_inverted_transposed(): id[][] {
         const result: id[][] = [];
 
@@ -194,6 +242,10 @@ class GridController {
     }
 
     public is_free(x: number, y: number) {
+        if ((x < 0) || (y < 0)) {
+            return false;
+        }
+
         return this.get_entry(x, y) === undefined;
     }
 
@@ -213,6 +265,10 @@ class GridController {
         }
 
         const orig_row = this.rows[y];
+        if (orig_row === undefined) {
+            return undefined;
+        }
+
         if (x < orig_row.length) {
             return orig_row[x];
         }
@@ -252,6 +308,10 @@ class GridController {
     }
 
     add_element(value: id, x: number, y: number) {
+        if ((x < 0) || (y < 0)) {
+            throw new Error("Negative positions are not allowed");
+        }
+
         while (y > (this.height - 1)) {
             this.add_row();
         }
