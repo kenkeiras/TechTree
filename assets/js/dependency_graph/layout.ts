@@ -121,20 +121,26 @@ class GridController {
             const row = [];
 
             for (let y = 0; y < this.height; y++) {
-                const orig_row = this.rows[y];
-                if (x < orig_row.length) {
-                    row.push(orig_row[x]);
-                }
-                else {
-                    row.push(undefined);
-                }
+                row.push(this.get_entry(x, y));
             }
 
             result.push(row);
         }
 
-        console.log(result);
         return result;
+    }
+
+    public get_entry(x: number, y: number) {
+        if (!((x < this.width) && (y < this.height))) {
+            return undefined;
+        }
+
+        const orig_row = this.rows[y];
+        if (x < orig_row.length) {
+            return orig_row[x];
+        }
+
+        return undefined;
     }
 
     public add_tree(tree: StepTreeEntry) {
