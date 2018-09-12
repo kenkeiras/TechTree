@@ -88,8 +88,10 @@ export function layout_steps(steps): Layout {
         }
     }
 
-    const trees = arrange_in_trees(rows, steps, depended);
+    const trees = arrange_in_trees(rows, depended);
     const grid = arrange_trees_in_grid(trees);
+
+    grid.minimize_distances(depended);
 
     return resolve(grid.dump_inverted_transposed(), steps, depended);
 }
@@ -103,14 +105,75 @@ function arrange_trees_in_grid(trees: StepTree): GridController {
     return grid;
 }
 
+interface Position {
+    x: number,
+    y: number,
+};
 
 class GridController {
     rows: id[][];
     width = 0;
     height = 0;
 
+    // Maps an element ID to it's X/Y position
+    reverse_index: {[key: string]: [number, number]};
+
     constructor() {
         this.rows = [];
+        this.reverse_index = {};
+    }
+
+    // Greedily minimize vertical distances between dependencies
+    public minimize_distances(depended: {[key: string]: any}) {
+        // Minimize distances from less-dependent to more
+        // so, we don't have to keep re-adjusting
+        for (let x = this.width - 1; x >= 0; x--) {
+            for (let y = 0; y < this.height; y++) {
+                const entry = this.get_entry(x, y);
+                if (entry === undefined) {
+                    continue;
+                }
+
+                const dependencies = depended[entry].dependencies;
+                this.move_to_minimize_distance(entry, dependencies);
+            }
+        }
+    }
+
+    private move_to_minimize_distance(entry: id, dependencies: id[]) {
+        if (dependencies.length === 0) {
+            return;
+        }
+
+        const positions = [];
+
+        for (const dep of dependencies) {
+            const dep_position = this.reverse_index[dep][1];
+            positions.push(dep_position);
+        }
+
+        const sum = positions.reduce((prev, curr) => prev + curr);
+        const avg = Math.floor(sum / positions.length);
+
+        this.move_entry_to_closest_y(entry, avg);
+    }
+
+    private move_entry_to_closest_y(entry: id, new_y: number) {
+        const entry_pos = this.reverse_index[entry];
+        const x = entry_pos[0];
+        const orig_y = entry_pos[1];
+
+        for (let diff = 0; diff < Math.abs(new_y - orig_y); diff++) {
+            if (this.is_free(x, new_y + diff)) {
+                this.move_entry({x, y: orig_y}, {x, y: new_y + diff});
+                return;
+            }
+            
+            if (this.is_free(x, new_y - diff)) {
+                this.move_entry({x, y: orig_y}, {x, y: new_y - diff});
+                return;
+            }
+        }
     }
 
     public dump_inverted_transposed(): id[][] {
@@ -128,6 +191,20 @@ class GridController {
         }
 
         return result;
+    }
+
+    public is_free(x: number, y: number) {
+        return this.get_entry(x, y) === undefined;
+    }
+
+    public move_entry(orig: Position, new_pos: Position) {
+        const value = this.get_entry(orig.x, orig.y);
+        this.add_element(value, new_pos.x, new_pos.y);
+        this.remove_element(orig.x, orig.y);
+    }
+
+    public remove_element(x: number, y: number) {
+        this.rows[y][x] = undefined;
     }
 
     public get_entry(x: number, y: number) {
@@ -194,6 +271,7 @@ class GridController {
         }
 
         row[x] = value;
+        this.reverse_index[value] = [x, y];
     }
 
     private add_row() {
@@ -203,7 +281,7 @@ class GridController {
 }
 
 
-function arrange_in_trees(rows, steps, depended): StepTree{
+function arrange_in_trees(rows, depended): StepTree{
     // Start from the last row and backtrack entries
     // found on several trees are just kept on the first one
     // @TODO Better manage entries found on several trees
@@ -285,7 +363,6 @@ function build_tree_dependencies(element: id, next_rows, depended): StepTree {
 }
 
 function sort_trees_by_leader_length(trees: StepTree, steps): StepTree {
-    console.log(steps);
     return trees.sort((a: StepTreeEntry, b: StepTreeEntry) => {
         return steps[a.step_id].title.length - steps[b.step_id].title.length; 
     });
