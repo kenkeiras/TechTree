@@ -141,9 +141,13 @@ class GridController {
     }
 
     private push_entry_back(entry: id, dependencies: id[]) {
+        // Don't move elements with no dependencies.
+        if (dependencies.length === 0) {
+            return;
+        }
+
         const furthest_possible = Math.min.apply(null,
             dependencies.map((v) => this.reverse_index[v][0] - 1)
-            .concat(this.width - 1)
         );
 
         const entry_x = this.reverse_index[entry][0];
