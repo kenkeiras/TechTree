@@ -29,6 +29,7 @@
           <% end %>
         </ul>
       </nav>
+      <a href="/"><img src="<%= static_path(@conn, "/images/logo28-green.png") %>" width="36px" height="36px" /></a>
       <h1 class="title <%= render_existing @view_module, "section_title_completion.css", assigns %>">
         <%= render_existing @view_module, "section_subtitle_header.html", assigns %>
       </h1>

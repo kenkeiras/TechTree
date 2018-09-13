@@ -10,7 +10,11 @@ nav ul {
     white-space: nowrap;
     display: inline;
     font-weight: bold;
-    padding-left: 1ex;
+}
+
+.header > a > img {
+    margin-left: 1ex;
+    vertical-align: bottom;
 }
 
 .message > div, .message > span {
