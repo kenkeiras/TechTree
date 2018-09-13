@@ -10,6 +10,16 @@ nav ul {
     margin: 0px;
 }
 
+.navigation h1 {
+    white-space: nowrap;
+    display: inline;
+}
+
+div.container {
+    max-width: none;
+    width: 100%;
+}
+
 .nav-button:hover {
     text-decoration: none;
     background-color: #eee;

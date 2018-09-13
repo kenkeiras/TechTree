@@ -53,8 +53,10 @@ defmodule TechtreeWeb do
         "TechTree"
       end
 
-      def render("section_subtitle_header.html", %{ project: project }) do
-        "#{project.name}"
+      def render("section_subtitle_header.html", %{ project: project, conn: conn }) do
+        url = project_project_path(conn, :show, project)
+        name = Phoenix.HTML.safe_to_string(Phoenix.HTML.html_escape(project.name))
+        {:safe, "<a class=\"subtitle\" href=\"#{url}\">#{name}</a>"}
       end
 
       def render("section_subtitle_header.html", _) do
