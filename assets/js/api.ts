@@ -88,6 +88,25 @@ export function remove_dependency(project_id: id, step_id: id, dependency_id: id
 
 }
 
+export function remove_step(project_id: id, step_id: id, cb: Function){
+    const xhttp = new XMLHttpRequest();
+   
+    xhttp.onreadystatechange = function() {
+        if (this.readyState != 4) {
+            return;
+        }
+
+        const success = this.status == 200;
+        cb(success, success ? JSON.parse(this.responseText) : null);
+    };
+    
+    xhttp.open("DELETE", "/api/projects/" + project_id +  "/steps/" + step_id, true);
+    xhttp.setRequestHeader("x-csrf-token", get_csrf_token());
+    xhttp.setRequestHeader("Content-Type", "application/json");
+    
+    xhttp.send();
+}
+
 export function get_project_graph(project_id: id, cb: Function) {
     function process(project_id, stepsResult) {
         for (const step of stepsResult.steps){

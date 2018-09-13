@@ -12,6 +12,10 @@ nav ul {
     font-weight: bold;
 }
 
+.message > div, .message > span {
+    margin: 1ex;
+}
+
 .editable:hover::after {
     content: "✎";
 }
@@ -167,6 +171,11 @@ svg#techtree-graph a {
 .action-button:hover {
     background: rgba(0,0,0,0.8);
     color: #eee;
+}
+
+.action-button:disabled, .action-button:disabled {
+    background: inherit;
+    color: inherit;
 }
 
 .value {

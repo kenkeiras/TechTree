@@ -43,6 +43,7 @@ defmodule TechtreeWeb.Router do
     patch "/:project_id", ProjectController, :api_patch
 
     patch "/:project_id/steps/:step_id", StepController, :api_patch
+    delete "/:project_id/steps/:step_id", StepController, :api_remove
 
     get "/:project_id/dependencies", DependencyController, :dependency_graph
     get "/:project_id/steps/:step_id/dependencies", DependencyController, :get_step_dependencies
