@@ -9,6 +9,11 @@ nav ul {
 .header h1 {
     white-space: nowrap;
     display: inline;
+    font-weight: bold;
+}
+
+.editable:hover::after {
+    content: "✎";
 }
 
 div.container {

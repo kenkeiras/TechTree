@@ -69,6 +69,24 @@ class DependencyGraphRendererDriver {
             focus_data(data);
             graph.render(data);
         });
+
+        this.configure_title();
+    }
+
+    private configure_title() {
+        const title = document.querySelector(".header > h1.title");
+
+        const editableTitle = title.querySelector(".editable");
+        const search_dict = params.search_to_dict(document.location.search);
+        const focused = search_dict['from'] !== undefined;
+
+        if (focused) {
+            const unfocus_link = document.createElement("a");
+            unfocus_link.innerText = "←";
+            unfocus_link.href = document.location.pathname; // No search part
+
+            title.insertBefore(unfocus_link, editableTitle);
+        }
     }
 };
 
