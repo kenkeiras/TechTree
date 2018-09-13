@@ -108,7 +108,11 @@ function make_editable(editableTitle: HTMLSpanElement, project_id: string) {
     };
 
     editableTitle.onblur = (ev: FocusEvent) => {
-        const new_value = editableTitle.innerText;
+        const new_value = editableTitle.innerText.trim();
+        if (new_value === real_value) {
+            return;
+        }
+
         Api.set_project_name(project_id, new_value, (success) => {
             if (success) {
                 real_value = new_value;
