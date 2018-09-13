@@ -94,6 +94,7 @@ class DependencyGraphRendererDriver {
 
 function make_editable(editableTitle: HTMLSpanElement, project_id: string) {
     editableTitle.setAttribute('contentEditable', 'true');
+    editableTitle.setAttribute('spellcheck', 'false');
 
     let real_value = editableTitle.innerText;
 
