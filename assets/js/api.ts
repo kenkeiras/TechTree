@@ -113,3 +113,27 @@ export function get_project_graph(project_id: id, cb: Function) {
     };
     xhr.send();
 }
+
+export function set_project_name(project_id: string, name: string, cb: Function) {
+    if (name.length < 1) {
+        cb(false);
+        return;
+    }
+
+    const xhttp = new XMLHttpRequest();
+
+    xhttp.onreadystatechange = function() {
+        if (this.readyState != 4) {
+            return;
+        }
+
+        const success = this.status == 200;
+        cb(success);
+    };
+
+    xhttp.open("PATCH", "/api/projects/" + project_id, true);
+    xhttp.setRequestHeader("x-csrf-token", get_csrf_token());
+    xhttp.setRequestHeader("Content-Type", "application/json");
+
+    xhttp.send(JSON.stringify({"name": name}));
+}

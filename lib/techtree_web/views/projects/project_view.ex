@@ -15,6 +15,10 @@ defmodule TechtreeWeb.Projects.ProjectView do
     end
   end
 
+  def render("result.json", %{result: result}) do
+    result
+  end
+
   def render("export-project.json", %{project: project}) do
     %{
       steps: render_many(project.steps,
