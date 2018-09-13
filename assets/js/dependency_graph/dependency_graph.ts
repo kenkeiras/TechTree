@@ -557,7 +557,7 @@ function draw_column_from(base_x_off, base_y_off,
     const box_padding = 3; // px
     const inter_row_separation = 5; // px
     const draw_actions = [];
-    const base_end_runway = 5; // px
+    const base_end_runway = 20; // px
 
     let height = 0;
     let width = 0;
@@ -633,27 +633,26 @@ function draw_column_from(base_x_off, base_y_off,
         };
 
         for (const dependency of element.dependencies) {
-            if (nodes_map[dependency] === undefined) {
-                continue;
-            }
-
-            // Connect two points
-            const dependency_index = dependency_positions[dependency];
-            const end_runway = base_end_runway + dependency_line_offset
-                                               - (dependency_index * ((dependency_line_padding * 2)
-                                                                      + 1)); // px
-
-            const init_column = nodes_map[dependency].column_num;
-            const end_column = nodes_map[element.id].column_num;
-
             draw_actions.push(() => {
+                if (nodes_map[dependency] === undefined) {
+                    return;
+                }
+
+                // Connect two points
+                const dependency_index = dependency_positions[dependency];
+                const end_runway = base_end_runway + dependency_line_offset
+                                                   - (dependency_index * ((dependency_line_padding * 2)
+                                                                          + 1)); // px
+
+                const init_column = nodes_map[dependency].column_num;
+                const end_column = nodes_map[element.id].column_num;
+
                 const path_element = document.createElementNS(SvgNS, 'path');
                 let curve;
 
                 if (init_column !== end_column) {
                     const init = nodes_map[dependency].right_middle;
                     const end = nodes_map[element.id].left_middle;
-
 
                     curve = [
                         "M", init.left, ",", init.top,
@@ -664,12 +663,14 @@ function draw_column_from(base_x_off, base_y_off,
 
                 }
                 else {
-                    const init = nodes_map[dependency].bottom_middle;
-                    const end = nodes_map[element.id].top_middle;
+                    const init = nodes_map[dependency].right_middle;
+                    const end = nodes_map[element.id].left_middle;
 
                     curve = [
                         "M", init.left, ",", init.top,
-                        " C", end.left, ",", end.top
+                        " C", init.left + end_runway, ",", init.top,
+                        " ", end.left - end_runway, ",", end.top,
+                        " ", end.left, ",", end.top
                     ].join("");
                 }
 
