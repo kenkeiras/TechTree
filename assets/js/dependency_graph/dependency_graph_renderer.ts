@@ -116,6 +116,7 @@ function make_editable(editableTitle: HTMLSpanElement, project_id: string) {
         Api.set_project_name(project_id, new_value, (success) => {
             if (success) {
                 real_value = new_value;
+                document.title = new_value + ' @ TechTree';
             }
             else {
                 editableTitle.innerText = real_value;
