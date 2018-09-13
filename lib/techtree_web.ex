@@ -44,6 +44,25 @@ defmodule TechtreeWeb do
       def is_logged(conn) do
         Plug.Conn.get_session(conn, :user_id) != nil
       end
+
+      def render("section_title_header.html", %{ project: project }) do
+        "#{project.name} @ TechTree"
+      end
+
+      def render("section_title_header.html", _) do
+        "TechTree"
+      end
+
+      def render("section_subtitle_header.html", %{ project: project, conn: conn }) do
+        url = project_project_path(conn, :show, project)
+        name = Phoenix.HTML.safe_to_string(Phoenix.HTML.html_escape(project.name))
+        {:safe, "<span class=\"subtitle editable\" href=\"#{url}\">#{name}</span>"}
+      end
+
+      def render("section_subtitle_header.html", _) do
+        "TechTree"
+      end
+
     end
   end
 

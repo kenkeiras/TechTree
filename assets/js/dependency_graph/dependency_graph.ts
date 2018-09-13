@@ -393,9 +393,97 @@ function build_fast_element_form(element, base, graph) {
     const removeStepButton = document.createElement('button');
     removeStepButton.setAttribute('class', 'action-button dangerous');
     removeStepButton.innerText = 'Remove step';
-    // body.appendChild(removeStepButton); @TODO temporarily disabled
+
+    removeStepButton.onclick = () => {
+        confirm_dangerous_action("Remove step “" + element.title + "”",
+                                 element.title, () => {
+            Api.remove_step(element.project_id, element.id, (success) => {
+                has_changed = true;
+                base.close();
+            });
+        });
+    }
+    body.appendChild(removeStepButton);
 
     return () => { return has_changed };
+}
+
+function confirm_dangerous_action(action_description, type_information, callback) {
+    const overlay = document.createElement("div");
+    overlay.setAttribute('class', 'overlay');    
+    const popup = document.createElement("div");
+    popup.setAttribute('class', 'popup small');
+
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+    overlay.style.height = document.body.offsetHeight + 'px';
+    overlay.style.width = document.body.offsetWidth + 'px';
+
+    const messageBox = document.createElement('div');
+    messageBox.setAttribute('class', 'message');
+
+    const messageStart = document.createElement('div');
+    messageStart.innerText = "The following action is about to be performed:";
+    messageBox.appendChild(messageStart);
+
+    const actionDescriptionMessage = document.createElement('div');
+    actionDescriptionMessage.setAttribute('class', 'action-description dangerous');
+    actionDescriptionMessage.innerText = action_description;
+    messageBox.appendChild(actionDescriptionMessage);
+
+    const warningMessage = document.createElement('div');
+    warningMessage.innerText = 'This cannot be undone!';
+    messageBox.appendChild(warningMessage);
+
+    const callToAction = document.createElement('div');
+    const instructionsStart = document.createElement('span');
+    instructionsStart.innerText = 'Type “';
+    callToAction.appendChild(instructionsStart);
+
+    const instructionsRequirement = document.createElement('span');
+    instructionsRequirement.innerText = type_information;
+    callToAction.appendChild(instructionsRequirement);
+
+    const instructionsEnd = document.createElement('span');
+    instructionsEnd.innerText = '” to confirm';
+    callToAction.appendChild(instructionsEnd);
+    messageBox.appendChild(callToAction);
+    popup.appendChild(messageBox);
+
+    const inputBox = document.createElement('input');
+    inputBox.type = 'text';
+    inputBox.setAttribute('class', 'user-confirmation');
+    popup.appendChild(inputBox);
+
+    const confirmButton = document.createElement('button');
+    confirmButton.setAttribute('class', 'action-button dangerous');
+    confirmButton.innerText = 'Confirm';
+    confirmButton.disabled = true;
+    confirmButton.onclick = () => {
+        (popup as any).close();
+        callback();
+    }
+    popup.appendChild(confirmButton);
+
+    inputBox.onkeyup = () => {
+        const confirmed = inputBox.value === type_information;
+        confirmButton.disabled = !confirmed;
+    };
+
+    (popup as any).close = () => {
+        document.body.removeChild(overlay);
+    }
+
+    const cancelButton = document.createElement('button');
+    cancelButton.setAttribute('class', 'action-button');
+    cancelButton.innerText = 'Cancel';
+    cancelButton.onclick = (popup as any).close;
+    popup.appendChild(cancelButton);
+
+    overlay.onclick = (popup as any).close;
+    popup.onclick = (ev) => {
+        ev.stopPropagation();
+    }
 }
 
 function build_popup(element, graph){ 
@@ -469,7 +557,7 @@ function draw_column_from(base_x_off, base_y_off,
     const box_padding = 3; // px
     const inter_row_separation = 5; // px
     const draw_actions = [];
-    const base_end_runway = 5; // px
+    const base_end_runway = 20; // px
 
     let height = 0;
     let width = 0;
@@ -545,27 +633,26 @@ function draw_column_from(base_x_off, base_y_off,
         };
 
         for (const dependency of element.dependencies) {
-            if (nodes_map[dependency] === undefined) {
-                continue;
-            }
-
-            // Connect two points
-            const dependency_index = dependency_positions[dependency];
-            const end_runway = base_end_runway + dependency_line_offset
-                                               - (dependency_index * ((dependency_line_padding * 2)
-                                                                      + 1)); // px
-
-            const init_column = nodes_map[dependency].column_num;
-            const end_column = nodes_map[element.id].column_num;
-
             draw_actions.push(() => {
+                if (nodes_map[dependency] === undefined) {
+                    return;
+                }
+
+                // Connect two points
+                const dependency_index = dependency_positions[dependency];
+                const end_runway = base_end_runway + dependency_line_offset
+                                                   - (dependency_index * ((dependency_line_padding * 2)
+                                                                          + 1)); // px
+
+                const init_column = nodes_map[dependency].column_num;
+                const end_column = nodes_map[element.id].column_num;
+
                 const path_element = document.createElementNS(SvgNS, 'path');
                 let curve;
 
                 if (init_column !== end_column) {
                     const init = nodes_map[dependency].right_middle;
                     const end = nodes_map[element.id].left_middle;
-
 
                     curve = [
                         "M", init.left, ",", init.top,
@@ -576,12 +663,14 @@ function draw_column_from(base_x_off, base_y_off,
 
                 }
                 else {
-                    const init = nodes_map[dependency].bottom_middle;
-                    const end = nodes_map[element.id].top_middle;
+                    const init = nodes_map[dependency].right_middle;
+                    const end = nodes_map[element.id].left_middle;
 
                     curve = [
                         "M", init.left, ",", init.top,
-                        " C", end.left, ",", end.top
+                        " C", init.left + end_runway, ",", init.top,
+                        " ", end.left - end_runway, ",", end.top,
+                        " ", end.left, ",", end.top
                     ].join("");
                 }
 

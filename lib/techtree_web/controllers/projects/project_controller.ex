@@ -4,7 +4,7 @@ defmodule TechtreeWeb.Projects.ProjectController do
   alias Techtree.Projects
 
   plug :require_existing_contributor
-  plug :authorize_page when action in [:show, :edit, :update, :delete]
+  plug :authorize_page when action in [:show, :edit, :update, :delete, :api_patch]
 
   def require_existing_contributor(conn, _) do
     contributor = Projects.ensure_contributor_exists(conn.assigns.current_user)
@@ -75,6 +75,30 @@ defmodule TechtreeWeb.Projects.ProjectController do
   def edit(conn, _) do
     changeset = Projects.change_project(conn.assigns.project)
     render(conn, "edit.html", changeset: changeset)
+  end
+
+  def api_patch(conn, %{ "name" => nil }) do
+    conn
+    |> put_status(:precondition_failed)
+    |> render("result.json", %{result: %{ success: false}})
+  end
+
+  def api_patch(conn, %{ "name" => "" }) do
+    conn
+    |> put_status(:precondition_failed)
+    |> render("result.json", %{result: %{ success: false}})
+  end
+
+  def api_patch(conn, %{ "name" => name }) do
+    case Projects.update_project(conn.assigns.project, %{ "name" => name }) do
+      {:ok, project} ->
+        conn
+        |> render("result.json", %{result: %{ success: true}})
+      {:error, %Ecto.Changeset{} = changeset} ->
+        conn
+        |> put_status(:internal_server_error)
+        |> render("result.json", %{result: %{ success: true}})
+    end
   end
 
   def update(conn, %{ "project" => project_params}) do

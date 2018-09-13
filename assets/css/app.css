@@ -1,3 +1,30 @@
+html body {
+    margin: 0px;
+}
+
+nav ul {
+    margin: 0px;
+}
+
+.header h1 {
+    white-space: nowrap;
+    display: inline;
+    font-weight: bold;
+}
+
+.message > div, .message > span {
+    margin: 1ex;
+}
+
+.editable:hover::after {
+    content: "✎";
+}
+
+div.container {
+    max-width: none;
+    width: 100%;
+}
+
 .nav-button:hover {
     text-decoration: none;
     background-color: #eee;
@@ -146,6 +173,11 @@ svg#techtree-graph a {
     color: #eee;
 }
 
+.action-button:disabled, .action-button:disabled {
+    background: inherit;
+    color: inherit;
+}
+
 .value {
     font-weight: bold;
     text-decoration: underline;
@@ -228,7 +260,7 @@ button.error:hover {
     color: #548A00;
 }
 
-.title.completed::after {
+.title.completed::before {
     content: "Complete!";
     font-style: italic;
     color: #548A00;

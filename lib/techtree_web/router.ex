@@ -40,8 +40,12 @@ defmodule TechtreeWeb.Router do
   scope "/api/projects/", TechtreeWeb.Projects, as: :project do
     pipe_through [:browser, :api, :authenticate_user]
 
-    get "/:project_id/dependencies", DependencyController, :dependency_graph
+    patch "/:project_id", ProjectController, :api_patch
+
     patch "/:project_id/steps/:step_id", StepController, :api_patch
+    delete "/:project_id/steps/:step_id", StepController, :api_remove
+
+    get "/:project_id/dependencies", DependencyController, :dependency_graph
     get "/:project_id/steps/:step_id/dependencies", DependencyController, :get_step_dependencies
     put "/:project_id/steps/:step_id/dependencies/:depended_id", DependencyController, :add_dependency
     delete "/:project_id/steps/:step_id/dependencies/:depended_id", DependencyController, :remove_dependency
@@ -58,7 +62,7 @@ defmodule TechtreeWeb.Router do
         assign(conn, :current_user, Techtree.Accounts.get_user!(user_id))
     end
   end
-  
+
   # Other scopes may use custom stacks.
   # scope "/api", TechtreeWeb do
   #   pipe_through :api
