@@ -156,6 +156,18 @@ svg#techtree-graph a {
     color: inherit;
 }
 
+.popup h1 a {
+    text-decoration: none;
+}
+
+span.ready {
+    border-bottom: 2px solid #222;
+}
+
+span.loading {
+    border-bottom: 2px dashed #222;
+}
+
 .secondary {
     font-size: small;
 }

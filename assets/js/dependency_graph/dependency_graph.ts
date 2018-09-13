@@ -104,8 +104,6 @@ function add_node(canvas, element, left, top, graph) {
     const rect = document.createElementNS(SvgNS, 'rect');
     const textBox = document.createElementNS(SvgNS, 'text');
 
-    // node.setAttributeNS(null, 'href', element.location);
-
     canvas.appendChild(node);
 
     node.appendChild(rect);
@@ -231,12 +229,50 @@ function add_cross(element, size?) {
 }
 
 
+function make_editable_title(title: HTMLElement, element, on_change: Function) {
+    title.setAttribute('contentEditable', 'true');
+    title.setAttribute('spellcheck', 'false');
+
+    let real_value = title.innerText;
+    title.setAttribute("class", "ready");
+
+    // Block line jumps on project names
+    title.onkeypress = (ev: KeyboardEvent) => {
+        const key = ev.key;
+        if (key == 'Enter') {
+            ev.preventDefault();
+            title.blur();
+        }
+    };
+
+    title.onblur = (ev: FocusEvent) => {
+        const new_value = title.innerText.trim();
+        if (new_value === real_value) {
+            return;
+        }
+
+        title.setAttribute("class", "loading");
+        Api.set_element_name(element.project_id, element.id, new_value, (success) => {
+            title.setAttribute("class", "ready");
+            if (success) {
+                real_value = new_value;
+                on_change();
+            }
+            else {
+                title.innerText = real_value;
+            }
+        });
+    }
+}
+
+
 function build_fast_element_form(element, base, graph) {
     const titleBar = document.createElement('h1');
-    const title = document.createElement('a');
+    const title = document.createElement('span');
     title.innerText = element.title;
-    title.href = element.location;
     let has_changed = false;
+
+    make_editable_title(title, element, () => { has_changed = true });
 
     const backButton = document.createElement('a');
     backButton.setAttribute('class', 'navigation');

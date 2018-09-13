@@ -422,11 +422,24 @@ defmodule Techtree.Projects do
   """
   def gen_step_patch(patch) do
     %{}
-    |> patch_step_completion patch
+    |> patch_step_completion(patch)
+    |> patch_step_title(patch)
   end
 
   def patch_step_completion(patch, %{ "completed" => completion }) do
     Map.put(patch, "completed", completion)
+  end
+
+  def patch_step_completion(patch, x) do
+    patch
+  end
+
+  def patch_step_title(patch, %{ "title" => title }) do
+    Map.put(patch, "title", title)
+  end
+
+  def patch_step_title(patch, x) do
+    patch
   end
 
   @doc """
