@@ -69,8 +69,55 @@ class DependencyGraphRendererDriver {
             focus_data(data);
             graph.render(data);
         });
+
+        this.configure_title(project_id);
+    }
+
+    private configure_title(project_id: string) {
+        const title = document.querySelector(".header > h1.title");
+
+        const editableTitle: HTMLSpanElement = title.querySelector("span.editable");
+        const search_dict = params.search_to_dict(document.location.search);
+        const focused = search_dict['from'] !== undefined;
+
+        if (focused) {
+            const unfocus_link = document.createElement("a");
+            unfocus_link.innerText = "←";
+            unfocus_link.href = document.location.pathname; // No search part
+
+            title.insertBefore(unfocus_link, editableTitle);
+        }
+
+        make_editable(editableTitle, project_id);
     }
 };
+
+function make_editable(editableTitle: HTMLSpanElement, project_id: string) {
+    editableTitle.setAttribute('contentEditable', 'true');
+
+    let real_value = editableTitle.innerText;
+
+    // Block line jumps on project names
+    editableTitle.onkeypress = (ev: KeyboardEvent) => {
+        const key = ev.key;
+        if (key == 'Enter') {
+            ev.preventDefault();
+            editableTitle.blur();
+        }
+    };
+
+    editableTitle.onblur = (ev: FocusEvent) => {
+        const new_value = editableTitle.innerHTML;
+        Api.set_project_name(project_id, new_value, (success) => {
+            if (success) {
+                real_value = new_value;
+            }
+            else {
+                editableTitle.innerHTML = real_value;
+            }
+        });
+    }
+}
 
 const DependencyGraphRenderer = new DependencyGraphRendererDriver();
 
