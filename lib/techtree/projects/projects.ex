@@ -589,7 +589,7 @@ defmodule Techtree.Projects do
     |> Repo.preload([:dependencies])
   end
 
-  def import_project(conn, %{ "name" => name, "steps" => steps }) do
+  def import_project(conn, %{ "steps" => steps }, name) do
     {:ok, project} = create_project(conn.assigns.current_contributor, %{ "name" => name })
 
     mapzip = for step <- steps, do: import_step(conn, project, step)
@@ -626,9 +626,9 @@ defmodule Techtree.Projects do
     { import_id, new_step.id }
   end
 
-  def import_project_from_file(conn, path) do
+  def import_project_from_file(conn, name, path) do
     content = File.read!(path)
     decoded = Poison.decode!(content)
-    import_project(conn, decoded)
+    import_project(conn, decoded, name)
   end
 end

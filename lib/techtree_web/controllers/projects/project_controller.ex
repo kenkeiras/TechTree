@@ -38,8 +38,20 @@ defmodule TechtreeWeb.Projects.ProjectController do
     render(conn, "import.html")
   end
 
-  def new_import(conn, %{ "file" => %Plug.Upload{ path: path } }) do
-    case Projects.import_project_from_file(conn, path) do
+  def new_import(conn, %{ "name" => "" }) do
+    conn
+    |> put_flash(:error, "Empty project name.")
+    |> redirect(to: project_project_path(conn, :import))
+  end
+
+  def new_import(conn, %{ "name" => "" }) do
+    conn
+    |> put_flash(:error, "Empty project name.")
+    |> redirect(to: project_project_path(conn, :import))
+  end
+
+  def new_import(conn, %{ "file" => %Plug.Upload{ path: path }, "name" => name }) do
+    case Projects.import_project_from_file(conn, name, path) do
       {:ok, project} ->
         conn
         |> put_flash(:info, "Project imported successfully.")
@@ -47,6 +59,12 @@ defmodule TechtreeWeb.Projects.ProjectController do
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
     end
+  end
+
+  def new_import(conn, _) do
+    conn
+    |> put_flash(:error, "No project data.")
+    |> redirect(to: project_project_path(conn, :import))
   end
 
   def create(conn, %{ "project" => project_params }) do

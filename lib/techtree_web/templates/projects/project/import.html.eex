@@ -1,9 +1,18 @@
 <h2>Import</h2>
 
 <%= form_for @conn, project_project_path(@conn, :new_import), [multipart: true], fn f -> %>
-  <%= label f, :file, class: "control-label" %>
-  <%= file_input f, :file, class: "form-control" %>
-  <%= error_tag f, :file %>
+
+  <div class="form-group">
+    <%= label f, :name, class: "control-label" %>
+    <%= text_input f, :name, class: "form-control" %>
+    <%= error_tag f, :name %>
+  </div>
+
+  <div class="form-group">
+    <%= label f, :file, class: "control-label" %>
+    <%= file_input f, :file, class: "form-control" %>
+    <%= error_tag f, :file %>
+  </div>
 
   <div class="form-group">
     <%= submit "Submit", class: "btn btn-primary" %>
