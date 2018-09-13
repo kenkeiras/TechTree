@@ -1,3 +1,21 @@
+html body {
+    margin: 0px;
+}
+
+nav ul {
+    margin: 0px;
+}
+
+.header h1 {
+    white-space: nowrap;
+    display: inline;
+}
+
+div.container {
+    max-width: none;
+    width: 100%;
+}
+
 .nav-button:hover {
     text-decoration: none;
     background-color: #eee;
@@ -228,7 +246,7 @@ button.error:hover {
     color: #548A00;
 }
 
-.title.completed::after {
+.title.completed::before {
     content: "Complete!";
     font-style: italic;
     color: #548A00;

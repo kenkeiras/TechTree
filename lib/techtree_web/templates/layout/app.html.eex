@@ -8,7 +8,7 @@
     <meta name="author" content="">
     <%= csrf_meta_tag %>
 
-    <title>Technology tree</title>
+    <title><%= render @view_module, "section_title_header.html", assigns %></title>
     <link href="<%= static_path(@conn, "/favicon.ico") %>" rel="shortcut icon" type="image/x-icon" sizes="64x64" />
     <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
   </head>
@@ -29,7 +29,9 @@
             <% end %>
           </ul>
         </nav>
-        <span class="logo"></span>
+        <h1 class="title <%= render_existing @view_module, "section_title_completion.css", assigns %>">
+          <%= render_existing @view_module, "section_subtitle_header.html", assigns %>
+        </h1>
       </header>
 
       <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>

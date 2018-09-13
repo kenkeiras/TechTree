@@ -1,7 +1,3 @@
-<h2 class="title <%= if @project.completed do %>completed<% end %>">
-  <%= link @project.name, to: project_project_path(@conn, :show, @project.id) %>
-</h2>
-
 <div id="dependency_graph">
 </div>
 

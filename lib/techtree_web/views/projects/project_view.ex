@@ -7,6 +7,14 @@ defmodule TechtreeWeb.Projects.ProjectView do
     contributor.user.name
   end
 
+  def render("section_title_completion.css", %{ project: project }) do
+    if project.completed do
+      "completed"
+    else
+      ""
+    end
+  end
+
   def render("export-project.json", %{project: project}) do
     %{
       steps: render_many(project.steps,
