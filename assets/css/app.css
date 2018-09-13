@@ -10,6 +10,7 @@ nav ul {
     white-space: nowrap;
     display: inline;
     font-weight: bold;
+    padding-left: 1ex;
 }
 
 .message > div, .message > span {
@@ -18,11 +19,6 @@ nav ul {
 
 .editable:hover::after {
     content: "✎";
-}
-
-div.container {
-    max-width: none;
-    width: 100%;
 }
 
 .nav-button:hover {

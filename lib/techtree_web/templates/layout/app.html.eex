@@ -14,29 +14,29 @@
   </head>
 
   <body>
-    <div class="container">
-      <header class="header">
-        <nav role="navigation">
-          <ul class="nav nav-pills pull-right">
-            <%= if is_logged(@conn) do %>
-            <li>
-              <%= form_for @conn, session_path(@conn, :delete), [method: :delete, as: :user, class: ["bare"]],  fn _ -> %>
-                  <%= submit "Logout", class: ["nav-button"] %>
-              <% end %>
-            </li>
-            <% else %>
-            <li><%= link "Login", to: session_path(@conn, :new) %></li>
+    <header class="header">
+      <nav role="navigation">
+        <ul class="nav nav-pills pull-right">
+          <%= if is_logged(@conn) do %>
+          <li>
+            <%= form_for @conn, session_path(@conn, :delete), [method: :delete, as: :user, class: ["bare"]],  fn _ -> %>
+                <%= submit "Logout", class: ["nav-button"] %>
             <% end %>
-          </ul>
-        </nav>
-        <h1 class="title <%= render_existing @view_module, "section_title_completion.css", assigns %>">
-          <%= render_existing @view_module, "section_subtitle_header.html", assigns %>
-        </h1>
-      </header>
+          </li>
+          <% else %>
+          <li><%= link "Login", to: session_path(@conn, :new) %></li>
+          <% end %>
+        </ul>
+      </nav>
+      <h1 class="title <%= render_existing @view_module, "section_title_completion.css", assigns %>">
+        <%= render_existing @view_module, "section_subtitle_header.html", assigns %>
+      </h1>
+    </header>
 
-      <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
-      <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
+    <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
+    <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
 
+    <div class="container">
       <main role="main">
         <%= render @view_module, @view_template, assigns %>
       </main>
