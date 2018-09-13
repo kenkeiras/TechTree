@@ -44,6 +44,23 @@ defmodule TechtreeWeb do
       def is_logged(conn) do
         Plug.Conn.get_session(conn, :user_id) != nil
       end
+
+      def render("section_title_header.html", %{ project: project }) do
+        "#{project.name} @ TechTree"
+      end
+
+      def render("section_title_header.html", _) do
+        "TechTree"
+      end
+
+      def render("section_subtitle_header.html", %{ project: project }) do
+        "#{project.name}"
+      end
+
+      def render("section_subtitle_header.html", _) do
+        "TechTree"
+      end
+
     end
   end
 

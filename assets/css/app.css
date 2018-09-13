@@ -1,3 +1,15 @@
+.header .title {
+    font-family: monospace;
+}
+
+html body {
+    margin: 0px;
+}
+
+nav ul {
+    margin: 0px;
+}
+
 .nav-button:hover {
     text-decoration: none;
     background-color: #eee;
@@ -228,7 +240,7 @@ button.error:hover {
     color: #548A00;
 }
 
-.title.completed::after {
+.title.completed::before {
     content: "Complete!";
     font-style: italic;
     color: #548A00;
