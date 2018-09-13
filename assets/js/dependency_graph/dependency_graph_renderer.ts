@@ -108,13 +108,13 @@ function make_editable(editableTitle: HTMLSpanElement, project_id: string) {
     };
 
     editableTitle.onblur = (ev: FocusEvent) => {
-        const new_value = editableTitle.innerHTML;
+        const new_value = editableTitle.innerText;
         Api.set_project_name(project_id, new_value, (success) => {
             if (success) {
                 real_value = new_value;
             }
             else {
-                editableTitle.innerHTML = real_value;
+                editableTitle.innerText = real_value;
             }
         });
     }
