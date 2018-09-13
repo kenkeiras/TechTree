@@ -4,20 +4,6 @@
 <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
 <script>require("js/dependency_graph/dependency_graph_renderer.ts").DependencyGraphRenderer.run();</script>
 
-<table>
-<%= for step <- @project.steps do %>
-    <tr>
-      <td><%= step.title %></td>
-
-      <td class="text-right">
-        <span><%= link "Show", to: project_step_path(@conn, :show, @project.id, step), class: "btn btn-default btn-xs" %></span>
-        <span><%= link "Delete", to: project_step_path(@conn, :delete, @project.id, step), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %></span>
-      </td>
-    </tr>
-<% end %>
-</table>
-
 <span><%= link "Add step", to: project_step_path(@conn, :new, @project) %></span>
-<span><%= link "Edit", to: project_project_path(@conn, :edit, @project) %></span>
 <span><%= link "Back", to: project_project_path(@conn, :index)  %></span>
 <span><%= link "Export", to: project_project_path(@conn, :export, @project) %></span>
