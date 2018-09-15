@@ -2,6 +2,7 @@ import { DependencyGraph } from './dependency_graph';
 import * as params from '../params';
 import * as Api from '../api';
 import * as Prompts from './prompts';
+import * as Hotkeys from '../hotkeys';
 
 function is_depended_by(depended, depender, graph) {
     if (depender.id === depended.id) {
@@ -81,10 +82,15 @@ class DependencyGraphRendererDriver {
 
     private configure_add_step_buttons(project_id: string) {
         const buttons = document.getElementsByClassName("add-step-button");
+        const trigger_add_step = () => Prompts.show_add_step_prompt(project_id);
 
+        // Set buttons
         for (const button of buttons) {
-            (button as HTMLButtonElement).onclick = () => Prompts.show_add_step_prompt(project_id);
+            (button as HTMLButtonElement).onclick = trigger_add_step;
         }
+
+        // Set hotkeys
+        Hotkeys.set_key('a', trigger_add_step);
     }
 
     private configure_title(project_id: string) {

@@ -20,7 +20,7 @@ defmodule TechtreeWeb.Projects.ProjectView do
 
     ~E{
       <div class="nav-buttons">
-        <button class="nav-button add-step-button">Add step</button>
+        <button class="nav-button add-step-button">Add step [⌨ a]</button>
         <a target="_blank" href="<%= export_url %>" class="nav-button export-project-button">
           Export project
         </a>

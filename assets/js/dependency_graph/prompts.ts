@@ -1,4 +1,5 @@
 import * as Api from '../api';
+import * as Hotkeys from '../hotkeys';
 
 export function show_add_step_prompt(project_id: string) {
     build_popup((popup) => add_step_prompt(popup, project_id));
@@ -150,12 +151,16 @@ function build_popup(setup_prompt: Function){
     const has_element_changed = setup_prompt(popup);
 
     (popup as any).close = () => {
+        Hotkeys.pop_key('Escape', (popup as any).close);
+
         if (has_element_changed()) {
             // Refresh window
             window.location = window.location;
         }
         document.body.removeChild(overlay);
     }
+
+    Hotkeys.set_key('Escape', (popup as any).close);
 
     overlay.onclick = (popup as any).close;
     popup.onclick = (ev) => {
