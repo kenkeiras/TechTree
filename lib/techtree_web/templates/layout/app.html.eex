@@ -17,6 +17,12 @@
   <body>
     <header class="header">
       <nav role="navigation">
+        <a href="/"><img src="<%= static_path(@conn, "/images/logo28-green.png") %>" width="36px" height="36px" /></a>
+        <h1 class="title <%= render_existing @view_module, "section_title_completion.css", assigns %>">
+          <%= render_existing @view_module, "section_subtitle_header.html", assigns %>
+        </h1>
+
+        <%= render_existing @view_module, "navbar_buttons.html", assigns %>
         <ul class="nav nav-pills pull-right">
           <%= if is_logged(@conn) do %>
           <li>
@@ -29,10 +35,6 @@
           <% end %>
         </ul>
       </nav>
-      <a href="/"><img src="<%= static_path(@conn, "/images/logo28-green.png") %>" width="36px" height="36px" /></a>
-      <h1 class="title <%= render_existing @view_module, "section_title_completion.css", assigns %>">
-        <%= render_existing @view_module, "section_subtitle_header.html", assigns %>
-      </h1>
     </header>
 
     <div class="container">

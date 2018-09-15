@@ -109,4 +109,18 @@ defmodule TechtreeWeb.Projects.StepController do
 
     render(conn, "operation_result.json", result: %{success: true})
   end
+
+  def api_create(conn, %{"step" => step_params}) do
+    case Projects.create_step(conn.assigns.current_contributor, conn.assigns.project, step_params) do
+      {:ok, step} ->
+        render(conn, "operation_result.json", result: %{success: true})
+      {:error, %Ecto.Changeset{} = changeset} ->
+        IO.puts("----  ERROR ----")
+        IO.inspect(changeset)
+        IO.puts("---- /ERROR ----")
+        conn
+        |> put_status(:bad_request)
+        |> render("operation_result.json", result: %{success: false})
+    end
+  end
 end

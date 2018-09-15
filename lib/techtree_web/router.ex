@@ -42,6 +42,7 @@ defmodule TechtreeWeb.Router do
 
     patch "/:project_id", ProjectController, :api_patch
 
+    post "/:project_id/steps/", StepController, :api_create
     patch "/:project_id/steps/:step_id", StepController, :api_patch
     delete "/:project_id/steps/:step_id", StepController, :api_remove
 

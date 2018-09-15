@@ -160,3 +160,22 @@ export function set_project_name(project_id: string, name: string, cb: Function)
 
     xhttp.send(JSON.stringify({"name": name}));
 }
+
+export function create_step(project_id: string, properties: any, cb: Function){
+    const xhttp = new XMLHttpRequest();
+
+    xhttp.onreadystatechange = function() {
+        if (this.readyState != 4) {
+            return;
+        }
+
+        const success = this.status == 200;
+        cb(success);
+    };
+
+    xhttp.open("POST", "/api/projects/" + project_id + "/steps", true);
+    xhttp.setRequestHeader("x-csrf-token", get_csrf_token());
+    xhttp.setRequestHeader("Content-Type", "application/json");
+
+    xhttp.send(JSON.stringify({step: properties}));
+}

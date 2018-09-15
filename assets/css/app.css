@@ -6,15 +6,23 @@ nav ul {
     margin: 0px;
 }
 
-.header h1 {
+.header > nav > h1 {
     white-space: nowrap;
     display: inline;
     font-weight: bold;
 }
 
-.header > a > img {
+.nav-buttons {
+    display: inline;
+}
+
+.nav-buttons > .nav-button {
+    display: inline;
+}
+
+.header > nav > a > img {
     margin-left: 1ex;
-    vertical-align: bottom;
+    vertical-align: text-bottom;
 }
 
 .message > div, .message > span {
@@ -55,6 +63,10 @@ nav ul {
     border: none;
     background: inherit;
     color: #337ab7;
+}
+
+.form-group > .nav-button {
+    display: inline;
 }
 
 form.bare {
@@ -128,6 +140,10 @@ svg#techtree-graph a {
     position: absolute;
 }
 
+input.invalid {
+    border-color: red;
+}
+
 .popup {
     background-color: white;
     margin: 2ex;
@@ -135,6 +151,12 @@ svg#techtree-graph a {
     padding: 2ex;
     box-shadow: 0px 0px 3px 3px rgba(0,0,0, 0.3);
     border: none;
+    width: 90vw;
+}
+
+.popup > form {
+    width: 70vw;
+    margin: auto;
 }
 
 .popup h1 {

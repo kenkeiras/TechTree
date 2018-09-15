@@ -1,6 +1,7 @@
 import { DependencyGraph } from './dependency_graph';
 import * as params from '../params';
 import * as Api from '../api';
+import * as Prompts from './prompts';
 
 function is_depended_by(depended, depender, graph) {
     if (depender.id === depended.id) {
@@ -71,10 +72,23 @@ class DependencyGraphRendererDriver {
         });
 
         this.configure_title(project_id);
+        this.configure_buttons(project_id);
+    }
+
+    private configure_buttons(project_id: string) {
+        this.configure_add_step_buttons(project_id);
+    }
+
+    private configure_add_step_buttons(project_id: string) {
+        const buttons = document.getElementsByClassName("add-step-button");
+
+        for (const button of buttons) {
+            (button as HTMLButtonElement).onclick = () => Prompts.show_add_step_prompt(project_id);
+        }
     }
 
     private configure_title(project_id: string) {
-        const title = document.querySelector(".header > h1.title");
+        const title = document.querySelector(".header > nav > h1.title");
 
         const editableTitle: HTMLSpanElement = title.querySelector("span.editable");
         const search_dict = params.search_to_dict(document.location.search);

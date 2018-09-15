@@ -3,6 +3,3 @@
 
 <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
 <script>require("js/dependency_graph/dependency_graph_renderer.ts").DependencyGraphRenderer.run();</script>
-
-<span><%= link "Add step", to: project_step_path(@conn, :new, @project) %></span>
-<span><%= link "Export", to: project_project_path(@conn, :export, @project) %></span>
