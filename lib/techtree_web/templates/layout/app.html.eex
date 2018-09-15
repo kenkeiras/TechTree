@@ -9,7 +9,7 @@
     <%= csrf_meta_tag %>
 
     <title><%= render @view_module, "section_title_header.html", assigns %></title>
-    <link href="<%= static_path(@conn, "/favicon.ico") %>" rel="shortcut icon" type="image/x-icon" sizes="64x64" />
+    <link rel="shortcut icon" href="<%= static_path(@conn, "/favicon.ico") %>" type="image/x-icon">
     <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
     <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
   </head>
