@@ -95,9 +95,11 @@ function add_node(canvas, element, left, top, graph) {
     const x_padding = 2; // px
     const y_padding = 2; // px
 
+    let completed_class = '';
     let strike_color = 'black';
     if (element.completed) {
         strike_color = COMPLETED_STROKE_STYLE;
+        completed_class = ' completed';
     }
 
     const node = document.createElementNS(SvgNS, 'a');
@@ -110,7 +112,7 @@ function add_node(canvas, element, left, top, graph) {
 
     node.appendChild(textBox);
 
-    textBox.setAttribute('class', 'actionable');
+    textBox.setAttribute('class', 'actionable' + completed_class);
     textBox.setAttributeNS(null,'stroke',"none");
     textBox.textContent = element.title;
     textBox.setAttributeNS(null,'textlength', '100%');
@@ -136,6 +138,7 @@ function add_node(canvas, element, left, top, graph) {
     textBox.setAttributeNS(null,'x', x_padding + left + textCorrection.X);
     textBox.setAttributeNS(null,'y', y_padding + top + textCorrection.Y);
 
+    rect.setAttribute('class', completed_class);
     rect.setAttributeNS(null,'x', left);
     rect.setAttributeNS(null,'y', top);
     rect.setAttributeNS(null,'stroke-width','1');

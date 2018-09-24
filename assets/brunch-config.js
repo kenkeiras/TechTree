@@ -20,7 +20,18 @@ exports.config = {
       // }
     },
     stylesheets: {
-      joinTo: "css/app.css"
+      joinTo: {
+        "css/app.css": [
+          "css/app.css",
+          "css/phoenix.css"
+        ],
+        "css/app_night.css": [
+          "css/app.css",
+          "css/app_night.css",
+          "css/phoenix.css"
+        ]
+      }
+
     },
     templates: {
       joinTo: "js/app.js"

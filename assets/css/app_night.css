@@ -1,0 +1,87 @@
+html body, .popup {
+    background-color: #222;
+    color: #eee;
+}
+
+button {
+    background-color: #222;
+    color: #eee;
+    border: 1px solid #444;
+    border-radius: 2px;
+    padding: 1ex;
+}
+
+button,
+a.nav-button:hover,
+button.nav-button:hover  {
+    color: #539ad7;
+    background-color: #444;
+}
+
+input[type=text],
+input[type=password],
+input[type=email] {
+    background-color: #444;
+    border: 1px solid #666;
+    border-radius: 2px;
+    padding: 1ex;
+    color: #eee;
+}
+
+body > .header {
+    border-bottom-color: #666;
+}
+
+nav > .nav > li > a:hover {
+    background-color: #444;
+}
+
+a:hover {
+    color: #539ad7 !important;
+}
+
+p.alert-info {
+    color: #31708f;
+    background-color: #012;
+    border-color: #234;
+}
+
+p.alert-danger {
+    color: #a94442;
+    background-color: #211;
+    border-color: #322;
+}
+
+a.btn-default {
+    color: #eee;
+    background-color: #444;
+    border-color: #555;
+}
+
+text.actionable:not(.completed) {
+    fill: #eee;
+}
+
+rect:not(.completed), path {
+    stroke: #666;
+}
+
+span.ready {
+    border-bottom: 2px solid #eee;
+}
+
+span.loading {
+    border-bottom: 2px dashed #eee;
+}
+
+select {
+    background-color: #272727;
+    border: none;
+    border-radius: 2px;
+    padding: 1ex;
+    display: inline-block;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-bottom: 2px solid #666;
+}
