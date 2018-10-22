@@ -8,15 +8,26 @@ defmodule TechtreeWeb.Projects.StepController do
   alias TechtreeWeb.Projects.Plugs
 
   plug :require_existing_contributor
-  plug :authorize_page
+
+  plug :authorize_page_visibility when action in [:show]
+  plug :authorize_page_edition when action in [
+    :new, :create,
+    :edit, :mark_completed, :mark_uncompleted,
+    :update, :delete,
+    :api_remove, :api_patch, :api_create
+  ]
 
   defp require_existing_contributor(conn, x) do
     # TODO move to it's own module
     ProjectController.require_existing_contributor(conn, x)
   end
 
-  defp authorize_page(conn, x) do
-    ProjectController.authorize_page(conn, x)
+  defp authorize_page_visibility(conn, x) do
+    ProjectController.authorize_page_visibility(conn, x)
+  end
+
+  defp authorize_page_edition(conn, x) do
+    ProjectController.authorize_page_edition(conn, x)
   end
 
   def new(conn, _params) do

@@ -4,14 +4,28 @@ defmodule TechtreeWeb.Projects.ProjectController do
   alias Techtree.Projects
 
   plug :require_existing_contributor
-  plug :authorize_page when action in [:show, :edit, :update, :delete, :api_patch]
+  plug :authorize_page_visibility when action in [:show]
+  plug :authorize_page_edition when action in [:edit, :update, :delete, :api_patch]
 
   def require_existing_contributor(conn, _) do
     contributor = Projects.ensure_contributor_exists(conn.assigns.current_user)
     assign(conn, :current_contributor, contributor)
   end
 
-  def authorize_page(conn, _) do
+  def authorize_page_visibility(conn, _) do
+    project = Projects.get_project!(conn.params["project_id"])
+
+    if conn.assigns.current_contributor.id == project.contributor_id or project.public_visible do
+      assign(conn, :project, project)
+    else
+      conn
+      |> put_flash(:error, "You can't use this project")
+      |> redirect(to: project_project_path(conn, :index))
+      |> halt()
+    end
+  end
+
+  def authorize_page_edition(conn, _) do
     project = Projects.get_project!(conn.params["project_id"])
 
     if conn.assigns.current_contributor.id == project.contributor_id do

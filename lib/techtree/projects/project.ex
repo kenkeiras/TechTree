@@ -9,6 +9,7 @@ defmodule Techtree.Projects.Project do
     belongs_to :contributor, Contributor
     has_many :steps, Step
     field :completed, :boolean, virtual: true
+    field :public_visible, :boolean
 
     timestamps()
   end
