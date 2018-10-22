@@ -276,7 +276,7 @@ function make_editable_description(description: HTMLTextAreaElement, element, on
     // Block line jumps on project names
     description.onkeypress = (ev: KeyboardEvent) => {
         const key = ev.key;
-        if (key == 'Enter') {
+        if (key == 'Enter' && ev.altKey) {
             ev.preventDefault();
             description.blur();
         }
