@@ -11,7 +11,21 @@ Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
 Ready to run in production? Please [check our deployment guides](http://www.phoenixframework.org/docs/deployment).
 
-## Learn more
+## Fast configuration & deploy
+
+To build a docker and deploy it there (with a corresponding one for the DB) 
+do the following
+
+```bash
+# Build docker image
+docker -t techtree .
+# Launch docker image and database
+sh launch-docker.sh
+```
+
+## References
+
+### More about phoenix framework
 
   * Official website: http://www.phoenixframework.org/
   * Guides: http://phoenixframework.org/docs/overview
