@@ -270,8 +270,24 @@ function make_editable_title(title: HTMLElement, element, on_change: Function) {
 
 
 function make_editable_description(description: HTMLTextAreaElement, element, on_change: Function) {
-    let real_value = description.innerText;
+    let real_value = description.value;
     description.classList.add("ready");
+
+    const update_row_count = (one_extra) => {
+        let rows_num = description.value.split("\n").length;
+
+        if (one_extra) {
+            rows_num += 1;
+        }
+
+        // We could avoid doing the comparation. It's just a feeling
+        // that writing to the DOM if not needed is not good.
+        if (rows_num != description.rows) {
+            description.rows = rows_num;
+        }
+    };
+
+    update_row_count(false);
 
     // Block line jumps on project names
     description.onkeypress = (ev: KeyboardEvent) => {
@@ -280,6 +296,10 @@ function make_editable_description(description: HTMLTextAreaElement, element, on
             ev.preventDefault();
             description.blur();
         }
+
+        // Consider one extra row when de user is pressing [Enter]
+        const one_extra = key == 'Enter';
+        update_row_count(one_extra);
     };
 
     description.onblur = (ev: FocusEvent) => {
