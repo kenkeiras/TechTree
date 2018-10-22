@@ -49,7 +49,6 @@ class HotkeyManager {
     }
 
     capture(ev: KeyboardEvent) {
-        console.log(document.activeElement);
         if ((document.activeElement !== document.body) && (OverridenKeys.indexOf(ev.key) === -1)) {
             return;
         }
