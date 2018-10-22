@@ -111,6 +111,10 @@ export function set_element_name(project_id: string, step_id: string, new_value:
     patch_step(project_id, step_id, { "title": new_value }, cb);
 }
 
+export function set_element_description(project_id: string, step_id: string, new_value: string, cb: Function) {
+    patch_step(project_id, step_id, { "description": new_value }, cb);
+}
+
 export function get_project_graph(project_id: id, cb: Function) {
     function process(project_id, stepsResult) {
         for (const step of stepsResult.steps){

@@ -223,8 +223,8 @@ span.loading {
 }
 
 .description {
-    font-style: italic;
-    text-decoration: underline;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
     cursor: pointer;
 }
 
@@ -300,4 +300,16 @@ button.error:hover {
     color: #548A00;
     font-size: medium;
     margin-left: 2ex;
+}
+
+textarea.description {
+    width: 100%;
+    border: none;
+    background-color: transparent;
+    resize: none;
+    outline: none;
+}
+
+textarea.loading {
+    border: 2px dashed #222;
 }

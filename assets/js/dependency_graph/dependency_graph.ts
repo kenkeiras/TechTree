@@ -269,6 +269,43 @@ function make_editable_title(title: HTMLElement, element, on_change: Function) {
 }
 
 
+function make_editable_description(description: HTMLTextAreaElement, element, on_change: Function) {
+    let real_value = description.innerText;
+    description.classList.add("ready");
+
+    // Block line jumps on project names
+    description.onkeypress = (ev: KeyboardEvent) => {
+        const key = ev.key;
+        if (key == 'Enter') {
+            ev.preventDefault();
+            description.blur();
+        }
+    };
+
+    description.onblur = (ev: FocusEvent) => {
+        const new_value = description.value.trim();
+        if (new_value === real_value) {
+            return;
+        }
+
+        description.classList.remove("ready");
+        description.classList.add("loading");
+        Api.set_element_description(element.project_id, element.id, new_value, (success) => {
+            description.classList.remove("loading");
+            description.classList.add("ready");
+
+            if (success) {
+                real_value = new_value;
+                on_change();
+            }
+            else {
+                description.value = real_value;
+            }
+        });
+    }
+}
+
+
 function build_fast_element_form(element, base, graph) {
     const titleBar = document.createElement('h1');
     const title = document.createElement('span');
@@ -302,18 +339,16 @@ function build_fast_element_form(element, base, graph) {
     body.setAttribute('class', 'body');
     base.appendChild(body);
 
+    const description = document.createElement('textarea');
+    description.setAttribute('class', 'description actionable');
+    description.placeholder = 'Add a description...';
+
     if (element.description !== null) {
-        const description = document.createElement('span');
-        description.setAttribute('class', 'description')
-        description.innerText = element.description;
-        body.appendChild(description);
+        description.value = element.description;
     }
-    else {
-        const addDescriptionButton = document.createElement('span');
-        addDescriptionButton.setAttribute('class', 'description actionable-suggestion');
-        addDescriptionButton.innerText = 'Add a description...';
-        body.appendChild(addDescriptionButton);
-    }
+
+    make_editable_description(description, element, () => { has_changed = true });
+    body.appendChild(description);
 
     const completedRow = document.createElement('div');
     const completedLabel = document.createElement('label');
