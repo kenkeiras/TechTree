@@ -19,7 +19,7 @@ defmodule TechtreeWeb.Projects.ProjectController do
       assign(conn, :project, project)
     else
       conn
-      |> put_flash(:error, "You can't use this project")
+      |> put_flash(:error, "You can't view this project")
       |> redirect(to: project_project_path(conn, :index))
       |> halt()
     end
@@ -32,7 +32,7 @@ defmodule TechtreeWeb.Projects.ProjectController do
       assign(conn, :project, project)
     else
       conn
-      |> put_flash(:error, "You can't use this project")
+      |> put_flash(:error, "You can't edit this project")
       |> redirect(to: project_project_path(conn, :index))
       |> halt()
     end
