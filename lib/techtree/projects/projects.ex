@@ -431,7 +431,7 @@ defmodule Techtree.Projects do
     Map.put(patch, "completed", completion)
   end
 
-  def patch_step_completion(patch, x) do
+  def patch_step_completion(patch, _) do
     patch
   end
 
@@ -439,7 +439,7 @@ defmodule Techtree.Projects do
     Map.put(patch, "title", title)
   end
 
-  def patch_step_title(patch, x) do
+  def patch_step_title(patch, _) do
     patch
   end
 
@@ -447,7 +447,7 @@ defmodule Techtree.Projects do
     Map.put(patch, "description", description)
   end
 
-  def patch_step_description(patch, x) do
+  def patch_step_description(patch, _) do
     patch
   end
 
@@ -624,7 +624,7 @@ defmodule Techtree.Projects do
     {:ok, project}
   end
 
-  def add_dependencies(conn, project, map, %{ "id" => import_id, "dependencies" => dependencies }) do
+  def add_dependencies(_conn, _project, map, %{ "id" => import_id, "dependencies" => dependencies }) do
     step = get_step_with_dependencies!(Map.get(map, import_id))
     Enum.each(dependencies, fn dep_import_id ->
       new_id = Map.get(map, dep_import_id)
