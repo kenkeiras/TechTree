@@ -310,6 +310,10 @@ textarea.description {
     outline: none;
 }
 
+textarea.description:focus {
+    border: 1px solid #bbb;
+}
+
 textarea.loading {
     border: 2px dashed #222;
 }
