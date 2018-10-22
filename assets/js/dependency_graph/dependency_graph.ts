@@ -270,23 +270,40 @@ function make_editable_title(title: HTMLElement, element, on_change: Function) {
 
 
 function make_editable_description(description: HTMLTextAreaElement, element, on_change: Function) {
-    let real_value = description.innerText;
+    let real_value = description.value;
     description.classList.add("ready");
+
+    const update_row_count = () => {
+        let rows_num = description.value.split("\n").length;
+        // We could avoid doing the comparation. It's just a feeling
+        // that writing to the DOM if not needed is not good.
+        if (rows_num != description.rows) {
+            description.rows = rows_num;
+        }
+    };
+
+    update_row_count();
 
     // Block line jumps on project names
     description.onkeypress = (ev: KeyboardEvent) => {
         const key = ev.key;
-        if (key == 'Enter') {
+        if (key == 'Enter' && ev.altKey) {
             ev.preventDefault();
             description.blur();
         }
     };
+
+    description.onchange = update_row_count;
+    description.onkeyup = update_row_count;
 
     description.onblur = (ev: FocusEvent) => {
         const new_value = description.value.trim();
         if (new_value === real_value) {
             return;
         }
+
+        description.value = new_value; // Set trimmed value
+        update_row_count();
 
         description.classList.remove("ready");
         description.classList.add("loading");

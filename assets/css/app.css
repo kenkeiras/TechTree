@@ -308,6 +308,11 @@ textarea.description {
     background-color: transparent;
     resize: none;
     outline: none;
+    overflow-y: hidden;
+}
+
+textarea.description:focus {
+    border: 1px solid #bbb;
 }
 
 textarea.loading {
