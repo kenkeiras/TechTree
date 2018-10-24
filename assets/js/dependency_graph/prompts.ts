@@ -1,8 +1,8 @@
 import * as Api from '../api';
 import * as Hotkeys from '../hotkeys';
 
-export function show_add_step_prompt(project_id: string) {
-    build_popup((popup) => add_step_prompt(popup, project_id));
+export function show_add_step_prompt(project_id: string, steps) {
+    build_popup((popup) => add_step_prompt(popup, project_id, steps));
 
     window.scrollTo({
         top: 0,
@@ -11,7 +11,17 @@ export function show_add_step_prompt(project_id: string) {
     });
 }
 
-function add_step_prompt(popup, project_id: string): (() => boolean) {
+function to_set(values: [string]): {[key: string] : boolean} {
+    const set = {};
+
+    for (const value of values) {
+        set[value] = true;
+    }
+
+    return set;
+}
+
+function add_step_prompt(popup, project_id: string, steps): (() => boolean) {
     let has_changed = false;
 
     const titleBar = document.createElement('h1');
@@ -25,7 +35,7 @@ function add_step_prompt(popup, project_id: string): (() => boolean) {
     form.onsubmit = () => false;
 
     const name_group = document.createElement('div');
-    name_group.setAttribute('class', 'form-group');
+    name_group.setAttribute('class', 'form-group add-step-name');
 
     const name_label = document.createElement('label');
     name_label.setAttribute('class', 'control-label');
@@ -43,8 +53,8 @@ function add_step_prompt(popup, project_id: string): (() => boolean) {
     name_help_block.setAttribute('class', 'help-block');
 
     name_group.appendChild(name_label);
-    name_group.appendChild(name_input);
     name_group.appendChild(name_help_block);
+    name_group.appendChild(name_input);
 
     form.appendChild(name_group);
 
@@ -101,6 +111,30 @@ function add_step_prompt(popup, project_id: string): (() => boolean) {
         }
     }
     button_group.appendChild(create_button);
+
+    // Check that the name is not repeated
+    const step_set = to_set(steps.map(step => step.title.trim().toUpperCase()));
+    const check_name_not_repeated = () => {
+        // On name input check if it's repeated, if it is
+        if (step_set[name_input.value.trim().toUpperCase()]) {
+            name_input.classList.add('warning');
+            create_button.classList.add('warning');
+            name_help_block.innerText = 'There is already a step with that name';
+        }
+        else {
+            if (name_input.classList.contains('warning')){
+                name_input.classList.remove('warning');
+                name_help_block.innerText = '';
+
+                if (create_button.classList.contains('warning')) {
+                    create_button.classList.remove('warning');
+                }
+            }
+        }
+    };
+    name_input.onchange = check_name_not_repeated;
+    name_input.onkeyup = check_name_not_repeated;
+
 
     const cancel_button = document.createElement('button');
     cancel_button.setAttribute('class', 'nav-button');

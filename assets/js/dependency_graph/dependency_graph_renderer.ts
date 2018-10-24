@@ -70,19 +70,20 @@ class DependencyGraphRendererDriver {
         Api.get_project_graph(project_id, data => {
             focus_data(data);
             graph.render(data);
+
+            this.configure_buttons(project_id, data.steps);
         });
 
         this.configure_title(project_id);
-        this.configure_buttons(project_id);
     }
 
-    private configure_buttons(project_id: string) {
-        this.configure_add_step_buttons(project_id);
+    private configure_buttons(project_id: string, steps) {
+        this.configure_add_step_buttons(project_id, steps);
     }
 
-    private configure_add_step_buttons(project_id: string) {
+    private configure_add_step_buttons(project_id: string, steps) {
         const buttons = document.getElementsByClassName("add-step-button");
-        const trigger_add_step = () => Prompts.show_add_step_prompt(project_id);
+        const trigger_add_step = () => Prompts.show_add_step_prompt(project_id, steps);
 
         // Set buttons
         for (const button of buttons) {
