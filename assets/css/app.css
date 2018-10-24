@@ -208,8 +208,8 @@ span.loading {
 }
 
 .action-button:disabled, .action-button:disabled {
-    background: inherit;
-    color: inherit;
+    background: repeating-linear-gradient(45deg,#AAA,#AAA 10px,#eee 10px,#eee 20px);
+    color: #222;
 }
 
 .value {

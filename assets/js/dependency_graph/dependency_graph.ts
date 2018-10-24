@@ -495,10 +495,14 @@ function build_fast_element_form(element, base, graph) {
     addDependencyButton.setAttribute('class', 'action-button');
     addDependencyButton.innerText = 'Add dependency';
     addDependencyButton.onclick = () => {
+        addDependencyButton.disabled = true;
         createDependencyAdder(element.project_id, 
                               element.id,
                               addDependencySection,
-                              () => { has_changed = true; });
+                              () => {
+                                  addDependencyButton.disabled = false;
+                                  has_changed = true;
+                              });
     };
     body.appendChild(addDependencyButton);
 
