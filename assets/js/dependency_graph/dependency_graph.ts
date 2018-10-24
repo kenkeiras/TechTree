@@ -91,6 +91,49 @@ function prepare_draw_grid_in_canvas(grid: Layout, canvas, graph) {
 
 let textCorrection = undefined;
 
+interface Point {
+    x: number,
+    y: number,
+};
+
+function draw_path(path: SVGPathElement, from: Point, to: Point, runway: number){
+    const curve = [
+        "M", from.x, ",", from.y,
+        " C", from.x + runway, ",", from.y,
+        " ", to.x - runway, ",", to.y,
+        " ", to.x, ",", to.y,
+    ].join("");
+
+    path.setAttributeNS(null, "d", curve);
+    path.setAttributeNS(null, 'fill', 'none');
+    path.setAttributeNS(null, 'stroke', 'black');
+    path.setAttributeNS(null, 'stroke-width', '1');
+}
+
+function follow_user(from: Point, canvas, runway: number=0) {
+    // Remove previous follower if it exists
+    const previous_follower = canvas.getElementById('user_follower_path');
+    if (previous_follower !== null){
+        previous_follower.parentElement.removeChild(previous_follower);
+    }
+
+    const follower_path = document.createElementNS(SvgNS, 'path');
+    follower_path.setAttribute('id', 'user_follower_path');
+
+    // Offset between the line following the user and the cursor
+    let personal_area = runway;
+    if (personal_area === 0){
+        personal_area = -10;
+    }
+
+    canvas.appendChild(follower_path);
+
+    window.onmousemove = (ev) => {
+        draw_path(follower_path, from, 
+            {x: ev.layerX - personal_area, y: ev.layerY}, runway)
+    };
+}
+
 function add_node(canvas, element, left, top, graph) {
     const x_padding = 2; // px
     const y_padding = 2; // px
@@ -186,10 +229,17 @@ function add_node(canvas, element, left, top, graph) {
 
 
     const ignore = () => undefined;
-    (add_dependency_circle_node as any).onclick = ignore;
+    (add_dependency_circle_node as any).onclick = () => follow_user(
+        {x: left, y: top + box_height / 2}, // from
+        canvas,
+        -box_height, // runway
+    );
 
-    (use_as_dependency_circle_node as any).onclick = ignore;
-
+    (use_as_dependency_circle_node as any).onclick = () => follow_user(
+        {x: left + box_width, y: top + box_height / 2}, // from
+        canvas,
+        +box_height, // runway
+    );
 
     return {
         width: rect.getClientRects()[0].width,
