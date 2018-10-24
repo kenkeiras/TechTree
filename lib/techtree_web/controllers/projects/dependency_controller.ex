@@ -8,15 +8,28 @@ defmodule TechtreeWeb.Projects.DependencyController do
   alias TechtreeWeb.Projects.Plugs
 
   plug :require_existing_contributor
-  plug :authorize_page
+  plug :authorize_page_visibility when action in [
+    :get_available_dependencies_for_step,
+    :dependency_graph,
+    :get_step_dependencies,
+  ]
+
+  plug :authorize_page_edition when action in [
+    :new, :create, :delete, :add_dependency, :remove_dependency
+  ]
+
 
   defp require_existing_contributor(conn, x) do
     # TODO move to it's own module
     ProjectController.require_existing_contributor(conn, x)
   end
 
-  defp authorize_page(conn, x) do
-    ProjectController.authorize_page(conn, x)
+  defp authorize_page_visibility(conn, x) do
+    ProjectController.authorize_page_visibility(conn, x)
+  end
+
+  defp authorize_page_edition(conn, x) do
+    ProjectController.authorize_page_edition(conn, x)
   end
 
   def get_available_dependencies_for_step(conn, step) do
@@ -52,7 +65,7 @@ defmodule TechtreeWeb.Projects.DependencyController do
 
         available_steps = get_available_dependencies_for_step(conn, step)
         render(conn, "new.html", step: step,
-                                 available_steps: available_steps, 
+                                 available_steps: available_steps,
                                  changeset: changeset)
     end
   end
