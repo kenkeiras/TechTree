@@ -2,6 +2,9 @@ import * as Api from '../api';
 import * as params from '../params';
 import { layout_steps, Layout, LayoutRow, LayoutEntry } from './layout';
 
+// Offset between the line following the user and the cursor
+const PERSONAL_AREA_SPACE = 3;
+
 const COMPLETED_STROKE_STYLE = '#548A00';
 const SvgNS = "http://www.w3.org/2000/svg";
 const TECHTREE_CANVAS_ID = "techtree-graph";
@@ -91,6 +94,92 @@ function prepare_draw_grid_in_canvas(grid: Layout, canvas, graph) {
 
 let textCorrection = undefined;
 
+interface Point {
+    x: number,
+    y: number,
+};
+
+function draw_path(path: SVGPathElement, from: Point, to: Point, runway: number){
+    const curve = [
+        "M", from.x, ",", from.y,
+        " C", from.x + runway, ",", from.y,
+        " ", to.x - runway, ",", to.y,
+        " ", to.x, ",", to.y,
+    ].join("");
+
+    path.setAttributeNS(null, "d", curve);
+    path.setAttributeNS(null, 'fill', 'none');
+    path.setAttributeNS(null, 'stroke', 'black');
+    path.setAttributeNS(null, 'stroke-width', '1');
+}
+
+function logged(f: Function) {
+    try {
+        return f();
+    }
+    catch(e) {
+        console.error(e);
+    }
+}
+
+function on_user_clicks_dependency_node(
+        origin: SVGCircleElement,
+        canvas,
+        cb: (element_id: number) => void,
+        runway: number=0) {
+
+    const origin_side = origin.getAttribute('connector_side');
+    const origin_element_id = origin.getAttribute('element_id');
+
+    let no_need_to_follow = false;
+
+    // If previous follower exists
+    const previous_follower = canvas.getElementById('user_follower_path');
+    if (previous_follower !== null){
+        // If the sides are different (so they can be connected)
+        const previous_side = previous_follower.getAttribute('connector_side');
+        const previous_element_id = previous_follower.getAttribute('element_id');
+        if ((previous_side !== null) && (previous_side !== origin_side)) {
+
+            // If the element id are not the same
+            if ((previous_element_id !== null) && (previous_element_id !== origin_element_id)) {
+                // Establish the connection
+                no_need_to_follow = true;
+                cb(previous_element_id);
+            }
+        }
+
+        previous_follower.parentElement.removeChild(previous_follower);
+    }
+
+    if (no_need_to_follow) {
+        return;
+    }
+
+    const from = {
+        x: parseInt(origin.getAttributeNS(null, 'cx') + ""),
+        y: parseInt(origin.getAttributeNS(null, 'cy') + ""),
+    };
+
+    const follower_path = document.createElementNS(SvgNS, 'path');
+    follower_path.setAttribute('id', 'user_follower_path');
+    follower_path.setAttribute('connector_side', origin_side);
+    follower_path.setAttribute('element_id', origin_element_id);
+    canvas.appendChild(follower_path);
+
+    let personal_area_sign = 1;
+    if (runway != 0){
+        personal_area_sign = runway / Math.abs(runway);
+    }
+
+    const personal_area = PERSONAL_AREA_SPACE * personal_area_sign;
+
+    window.onmousemove = (ev) => {
+        draw_path(follower_path, from, 
+            {x: ev.layerX - personal_area, y: ev.layerY}, runway)
+    };
+}
+
 function add_node(canvas, element, left, top, graph) {
     const x_padding = 2; // px
     const y_padding = 2; // px
@@ -105,12 +194,17 @@ function add_node(canvas, element, left, top, graph) {
     const node = document.createElementNS(SvgNS, 'a');
     const rect = document.createElementNS(SvgNS, 'rect');
     const textBox = document.createElementNS(SvgNS, 'text');
-
-    canvas.appendChild(node);
+    const use_as_dependency_circle_node = document.createElementNS(SvgNS, 'circle');
+    const add_dependency_circle_node = document.createElementNS(SvgNS, 'circle');
 
     node.appendChild(rect);
-
     node.appendChild(textBox);
+
+    // Use-as/add dependency nodes are outside the main node
+    //  so as the callbacks don't interfere
+    canvas.appendChild(use_as_dependency_circle_node);
+    canvas.appendChild(add_dependency_circle_node);
+    canvas.appendChild(node);
 
     textBox.setAttribute('class', 'actionable' + completed_class);
     textBox.setAttributeNS(null,'stroke',"none");
@@ -138,12 +232,31 @@ function add_node(canvas, element, left, top, graph) {
     textBox.setAttributeNS(null,'x', x_padding + left + textCorrection.X);
     textBox.setAttributeNS(null,'y', y_padding + top + textCorrection.Y);
 
+    const box_width = (textBox.getClientRects()[0].width + x_padding * 2);
+    const box_height = (textBox.getClientRects()[0].height + y_padding * 2);
+
     rect.setAttribute('class', completed_class);
     rect.setAttributeNS(null,'x', left);
     rect.setAttributeNS(null,'y', top);
     rect.setAttributeNS(null,'stroke-width','1');
-    rect.setAttributeNS(null,'width', (textBox.getClientRects()[0].width + x_padding * 2) + "");
-    rect.setAttributeNS(null,'height', (textBox.getClientRects()[0].height + y_padding * 2) + "");
+    rect.setAttributeNS(null,'width', box_width + "");
+    rect.setAttributeNS(null,'height', box_height + "");
+
+    use_as_dependency_circle_node.setAttribute('connector_side', 'right');
+    use_as_dependency_circle_node.setAttribute('element_id', element.id);
+    use_as_dependency_circle_node.setAttributeNS(null, 'cx', left + box_width);
+    use_as_dependency_circle_node.setAttributeNS(null, 'cy', top + box_height / 2);
+    use_as_dependency_circle_node.setAttributeNS(null, 'r', box_height / 2.5 + "");
+    use_as_dependency_circle_node.setAttributeNS(null, 'stroke', strike_color);
+    use_as_dependency_circle_node.setAttribute('class', 'use-as-dependency-node');
+
+    add_dependency_circle_node.setAttribute('connector_side', 'left');
+    add_dependency_circle_node.setAttribute('element_id', element.id);
+    add_dependency_circle_node.setAttributeNS(null, 'cx', left);
+    add_dependency_circle_node.setAttributeNS(null, 'cy', top + box_height / 2);
+    add_dependency_circle_node.setAttributeNS(null, 'r', box_height / 2.5 + "");
+    add_dependency_circle_node.setAttributeNS(null, 'stroke', strike_color);
+    add_dependency_circle_node.setAttribute('class', 'add-dependency-node');
 
     const onHover = () => {
         textBox.setAttributeNS(null, 'fill', 'white');
@@ -152,7 +265,7 @@ function add_node(canvas, element, left, top, graph) {
 
     const onRestore = () => {
         rect.setAttributeNS(null,'stroke',strike_color);
-        rect.setAttributeNS(null, 'fill', 'none');
+        rect.setAttributeNS(null, 'fill', 'white');
         textBox.setAttributeNS(null, 'fill', strike_color);
     };
 
@@ -164,10 +277,41 @@ function add_node(canvas, element, left, top, graph) {
         popup_element(element, graph);
     };
 
+    const on_dependencies_updated = () => {
+        // Refresh
+        document.location = document.location;
+    };
+
+    (add_dependency_circle_node as any).onclick = () => on_user_clicks_dependency_node(
+        add_dependency_circle_node, // from
+        canvas,
+        (previous_element_id) => {
+            Api.add_dependency(
+                element.project_id,
+                element.id,
+                previous_element_id,
+                on_dependencies_updated);
+        },
+        -box_height, // runway
+    );
+
+    (use_as_dependency_circle_node as any).onclick = () => on_user_clicks_dependency_node(
+        use_as_dependency_circle_node, // from
+        canvas,
+        (previous_element_id) => {
+            Api.add_dependency(
+                element.project_id,
+                previous_element_id,
+                element.id,
+                on_dependencies_updated);
+        },
+        +box_height, // runway
+    );
+
     return {
         width: rect.getClientRects()[0].width,
         height: rect.getClientRects()[0].height,
-        node_list: [node]
+        node_list: [node, use_as_dependency_circle_node, add_dependency_circle_node]
     }
 }
 
@@ -192,9 +336,6 @@ function sort_steps_by_name(steps) {
 
 function createDependencyAdder(project_id, step_id, section, on_updated) {
     Api.get_available_dependencies_for_step(project_id, step_id, (success, result) => {
-        console.log("Success", success);
-        console.log("Result", result);
-
         const selector = document.createElement('select');
 
         sort_steps_by_name(result.steps);
