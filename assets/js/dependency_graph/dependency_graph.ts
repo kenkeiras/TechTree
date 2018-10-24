@@ -161,8 +161,6 @@ function on_user_clicks_dependency_node(
         y: parseInt(origin.getAttributeNS(null, 'cy') + ""),
     };
 
-    console.log(origin, from);
-
     const follower_path = document.createElementNS(SvgNS, 'path');
     follower_path.setAttribute('id', 'user_follower_path');
     follower_path.setAttribute('connector_side', origin_side);
@@ -338,9 +336,6 @@ function sort_steps_by_name(steps) {
 
 function createDependencyAdder(project_id, step_id, section, on_updated) {
     Api.get_available_dependencies_for_step(project_id, step_id, (success, result) => {
-        console.log("Success", success);
-        console.log("Result", result);
-
         const selector = document.createElement('select');
 
         sort_steps_by_name(result.steps);
