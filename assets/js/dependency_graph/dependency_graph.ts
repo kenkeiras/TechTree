@@ -2,6 +2,9 @@ import * as Api from '../api';
 import * as params from '../params';
 import { layout_steps, Layout, LayoutRow, LayoutEntry } from './layout';
 
+// Offset between the line following the user and the cursor
+const PERSONAL_AREA_SPACE = 3;
+
 const COMPLETED_STROKE_STYLE = '#548A00';
 const SvgNS = "http://www.w3.org/2000/svg";
 const TECHTREE_CANVAS_ID = "techtree-graph";
@@ -166,11 +169,12 @@ function on_user_clicks_dependency_node(
     follower_path.setAttribute('element_id', origin_element_id);
     canvas.appendChild(follower_path);
 
-    // Offset between the line following the user and the cursor
-    let personal_area = runway;
-    if (personal_area === 0){
-        personal_area = -10;
+    let personal_area_sign = 1;
+    if (runway != 0){
+        personal_area_sign = runway / Math.abs(runway);
     }
+
+    const personal_area = PERSONAL_AREA_SPACE * personal_area_sign;
 
     window.onmousemove = (ev) => {
         draw_path(follower_path, from, 
