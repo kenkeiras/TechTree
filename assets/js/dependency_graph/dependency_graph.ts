@@ -110,23 +110,67 @@ function draw_path(path: SVGPathElement, from: Point, to: Point, runway: number)
     path.setAttributeNS(null, 'stroke-width', '1');
 }
 
-function follow_user(from: Point, canvas, runway: number=0) {
-    // Remove previous follower if it exists
+function logged(f: Function) {
+    try {
+        return f();
+    }
+    catch(e) {
+        console.error(e);
+    }
+}
+
+function on_user_clicks_dependency_node(
+        origin: SVGCircleElement,
+        canvas,
+        cb: (element_id: number) => void,
+        runway: number=0) {
+
+    const origin_side = origin.getAttribute('connector_side');
+    const origin_element_id = origin.getAttribute('element_id');
+
+    let no_need_to_follow = false;
+
+    // If previous follower exists
     const previous_follower = canvas.getElementById('user_follower_path');
     if (previous_follower !== null){
+        // If the sides are different (so they can be connected)
+        const previous_side = previous_follower.getAttribute('connector_side');
+        const previous_element_id = previous_follower.getAttribute('element_id');
+        if ((previous_side !== null) && (previous_side !== origin_side)) {
+
+            // If the element id are not the same
+            if ((previous_element_id !== null) && (previous_element_id !== origin_element_id)) {
+                // Establish the connection
+                no_need_to_follow = true;
+                cb(previous_element_id);
+            }
+        }
+
         previous_follower.parentElement.removeChild(previous_follower);
     }
 
+    if (no_need_to_follow) {
+        return;
+    }
+
+    const from = {
+        x: parseInt(origin.getAttributeNS(null, 'cx') + ""),
+        y: parseInt(origin.getAttributeNS(null, 'cy') + ""),
+    };
+
+    console.log(origin, from);
+
     const follower_path = document.createElementNS(SvgNS, 'path');
     follower_path.setAttribute('id', 'user_follower_path');
+    follower_path.setAttribute('connector_side', origin_side);
+    follower_path.setAttribute('element_id', origin_element_id);
+    canvas.appendChild(follower_path);
 
     // Offset between the line following the user and the cursor
     let personal_area = runway;
     if (personal_area === 0){
         personal_area = -10;
     }
-
-    canvas.appendChild(follower_path);
 
     window.onmousemove = (ev) => {
         draw_path(follower_path, from, 
@@ -196,12 +240,16 @@ function add_node(canvas, element, left, top, graph) {
     rect.setAttributeNS(null,'width', box_width + "");
     rect.setAttributeNS(null,'height', box_height + "");
 
+    use_as_dependency_circle_node.setAttribute('connector_side', 'right');
+    use_as_dependency_circle_node.setAttribute('element_id', element.id);
     use_as_dependency_circle_node.setAttributeNS(null, 'cx', left + box_width);
     use_as_dependency_circle_node.setAttributeNS(null, 'cy', top + box_height / 2);
     use_as_dependency_circle_node.setAttributeNS(null, 'r', box_height / 2.5 + "");
     use_as_dependency_circle_node.setAttributeNS(null, 'stroke', strike_color);
     use_as_dependency_circle_node.setAttribute('class', 'use-as-dependency-node');
 
+    add_dependency_circle_node.setAttribute('connector_side', 'left');
+    add_dependency_circle_node.setAttribute('element_id', element.id);
     add_dependency_circle_node.setAttributeNS(null, 'cx', left);
     add_dependency_circle_node.setAttributeNS(null, 'cy', top + box_height / 2);
     add_dependency_circle_node.setAttributeNS(null, 'r', box_height / 2.5 + "");
@@ -227,17 +275,34 @@ function add_node(canvas, element, left, top, graph) {
         popup_element(element, graph);
     };
 
+    const on_dependencies_updated = () => {
+        // Refresh
+        document.location = document.location;
+    };
 
-    const ignore = () => undefined;
-    (add_dependency_circle_node as any).onclick = () => follow_user(
-        {x: left, y: top + box_height / 2}, // from
+    (add_dependency_circle_node as any).onclick = () => on_user_clicks_dependency_node(
+        add_dependency_circle_node, // from
         canvas,
+        (previous_element_id) => {
+            Api.add_dependency(
+                element.project_id,
+                element.id,
+                previous_element_id,
+                on_dependencies_updated);
+        },
         -box_height, // runway
     );
 
-    (use_as_dependency_circle_node as any).onclick = () => follow_user(
-        {x: left + box_width, y: top + box_height / 2}, // from
+    (use_as_dependency_circle_node as any).onclick = () => on_user_clicks_dependency_node(
+        use_as_dependency_circle_node, // from
         canvas,
+        (previous_element_id) => {
+            Api.add_dependency(
+                element.project_id,
+                previous_element_id,
+                element.id,
+                on_dependencies_updated);
+        },
         +box_height, // runway
     );
 
