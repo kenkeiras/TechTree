@@ -105,12 +105,17 @@ function add_node(canvas, element, left, top, graph) {
     const node = document.createElementNS(SvgNS, 'a');
     const rect = document.createElementNS(SvgNS, 'rect');
     const textBox = document.createElementNS(SvgNS, 'text');
-
-    canvas.appendChild(node);
+    const use_as_dependency_circle_node = document.createElementNS(SvgNS, 'circle');
+    const add_dependency_circle_node = document.createElementNS(SvgNS, 'circle');
 
     node.appendChild(rect);
-
     node.appendChild(textBox);
+
+    // Use-as/add dependency nodes are outside the main node
+    //  so as the callbacks don't interfere
+    canvas.appendChild(use_as_dependency_circle_node);
+    canvas.appendChild(add_dependency_circle_node);
+    canvas.appendChild(node);
 
     textBox.setAttribute('class', 'actionable' + completed_class);
     textBox.setAttributeNS(null,'stroke',"none");
@@ -138,12 +143,27 @@ function add_node(canvas, element, left, top, graph) {
     textBox.setAttributeNS(null,'x', x_padding + left + textCorrection.X);
     textBox.setAttributeNS(null,'y', y_padding + top + textCorrection.Y);
 
+    const box_width = (textBox.getClientRects()[0].width + x_padding * 2);
+    const box_height = (textBox.getClientRects()[0].height + y_padding * 2);
+
     rect.setAttribute('class', completed_class);
     rect.setAttributeNS(null,'x', left);
     rect.setAttributeNS(null,'y', top);
     rect.setAttributeNS(null,'stroke-width','1');
-    rect.setAttributeNS(null,'width', (textBox.getClientRects()[0].width + x_padding * 2) + "");
-    rect.setAttributeNS(null,'height', (textBox.getClientRects()[0].height + y_padding * 2) + "");
+    rect.setAttributeNS(null,'width', box_width + "");
+    rect.setAttributeNS(null,'height', box_height + "");
+
+    use_as_dependency_circle_node.setAttributeNS(null, 'cx', left + box_width);
+    use_as_dependency_circle_node.setAttributeNS(null, 'cy', top + box_height / 2);
+    use_as_dependency_circle_node.setAttributeNS(null, 'r', box_height / 2.5 + "");
+    use_as_dependency_circle_node.setAttributeNS(null, 'stroke', strike_color);
+    use_as_dependency_circle_node.setAttribute('class', 'use-as-dependency-node');
+
+    add_dependency_circle_node.setAttributeNS(null, 'cx', left);
+    add_dependency_circle_node.setAttributeNS(null, 'cy', top + box_height / 2);
+    add_dependency_circle_node.setAttributeNS(null, 'r', box_height / 2.5 + "");
+    add_dependency_circle_node.setAttributeNS(null, 'stroke', strike_color);
+    add_dependency_circle_node.setAttribute('class', 'add-dependency-node');
 
     const onHover = () => {
         textBox.setAttributeNS(null, 'fill', 'white');
@@ -152,7 +172,7 @@ function add_node(canvas, element, left, top, graph) {
 
     const onRestore = () => {
         rect.setAttributeNS(null,'stroke',strike_color);
-        rect.setAttributeNS(null, 'fill', 'none');
+        rect.setAttributeNS(null, 'fill', 'white');
         textBox.setAttributeNS(null, 'fill', strike_color);
     };
 
@@ -164,10 +184,17 @@ function add_node(canvas, element, left, top, graph) {
         popup_element(element, graph);
     };
 
+
+    const ignore = () => undefined;
+    (add_dependency_circle_node as any).onclick = ignore;
+
+    (use_as_dependency_circle_node as any).onclick = ignore;
+
+
     return {
         width: rect.getClientRects()[0].width,
         height: rect.getClientRects()[0].height,
-        node_list: [node]
+        node_list: [node, use_as_dependency_circle_node, add_dependency_circle_node]
     }
 }
 

@@ -127,10 +127,6 @@ svg#techtree-graph {
     position: absolute;
 }
 
-svg#techtree-graph a {
-    text-decoration: none;
-}
-
 .overlay {
     background: rgba(0,0,0,0.5);
     left: 0;
@@ -333,3 +329,14 @@ textarea.description:focus {
 textarea.loading {
     border: 2px dashed #222;
 }
+
+/* Graph styles */
+.use-as-dependency-node, .add-dependency-node {
+    stroke-width: 2px;
+    fill: transparent; /* Transparent, not none, to allow easier selection */
+}
+
+svg#techtree-graph a {
+    text-decoration: none;
+}
+
