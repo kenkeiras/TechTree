@@ -171,12 +171,33 @@ function add_node(canvas, element, left, top, graph) {
     }
 }
 
+function sort_steps_by_name(steps) {
+    steps.sort((a, b) => {
+        const name_a = a.name.toUpperCase(); // ignore upper and lowercase
+        const name_b = b.name.toUpperCase(); // ignore upper and lowercase
+
+        if (name_a < name_b) {
+          return -1;
+        }
+
+        if (name_a > name_b) {
+          return 1;
+        }
+
+        // names must be equal
+        return 0;
+      }
+    );
+}
+
 function createDependencyAdder(project_id, step_id, section, on_updated) {
     Api.get_available_dependencies_for_step(project_id, step_id, (success, result) => {
         console.log("Success", success);
         console.log("Result", result);
 
         const selector = document.createElement('select');
+
+        sort_steps_by_name(result.steps);
         
         for(const step of result.steps) {
             const option = document.createElement('option');
