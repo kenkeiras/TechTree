@@ -191,7 +191,7 @@ function add_node(canvas, element, left, top, graph) {
     const x_padding = 2; // px
     const y_padding = 2; // px
 
-    let completed_class = '';
+    let node_class = '';
     let strike_color = 'black';
 
     let state: ElementState = element.state;
@@ -199,38 +199,38 @@ function add_node(canvas, element, left, top, graph) {
     switch (state) {
         case 'to_do':
             strike_color = TO_DO_STROKE_STYLE;
-            completed_class = 'status-to-do';
+            node_class = 'status-to-do';
             break;
         case 'completed':
             strike_color = COMPLETED_STROKE_STYLE;
-            completed_class = 'status-completed';
+            node_class = 'status-completed';
             break;
         case 'work_in_progress':
             strike_color = WORK_IN_PROGRESS_STROKE_STYLE;
-            completed_class = 'status-work-in-progress';
+            node_class = 'status-work-in-progress';
             break;
         case 'archived':
             strike_color = ARCHIVED_STROKE_STYLE;
-            completed_class = 'status-archived';
+            node_class = 'status-archived';
             break;
     }
 
     const node = document.createElementNS(SvgNS, 'a');
     const rect = document.createElementNS(SvgNS, 'rect');
     const textBox = document.createElementNS(SvgNS, 'text');
-    const use_as_dependency_circle_node = document.createElementNS(SvgNS, 'circle');
-    const add_dependency_circle_node = document.createElementNS(SvgNS, 'circle');
+    const use_as_dependency_node = document.createElementNS(SvgNS, 'circle');
+    const add_dependency_node = document.createElementNS(SvgNS, 'circle');
 
     node.appendChild(rect);
     node.appendChild(textBox);
 
     // Use-as/add dependency nodes are outside the main node
     //  so as the callbacks don't interfere
-    canvas.appendChild(use_as_dependency_circle_node);
-    canvas.appendChild(add_dependency_circle_node);
+    canvas.appendChild(use_as_dependency_node);
+    canvas.appendChild(add_dependency_node);
     canvas.appendChild(node);
 
-    textBox.setAttribute('class', 'actionable' + completed_class);
+    textBox.setAttribute('class', 'actionable' + node_class);
     textBox.setAttributeNS(null,'stroke',"none");
     textBox.textContent = element.title;
     textBox.setAttributeNS(null,'textlength', '100%');
@@ -259,28 +259,28 @@ function add_node(canvas, element, left, top, graph) {
     const box_width = (textBox.getClientRects()[0].width + x_padding * 2);
     const box_height = (textBox.getClientRects()[0].height + y_padding * 2);
 
-    rect.setAttribute('class', completed_class);
+    rect.setAttribute('class', node_class);
     rect.setAttributeNS(null,'x', left);
     rect.setAttributeNS(null,'y', top);
     rect.setAttributeNS(null,'stroke-width','1');
     rect.setAttributeNS(null,'width', box_width + "");
     rect.setAttributeNS(null,'height', box_height + "");
 
-    use_as_dependency_circle_node.setAttribute('connector_side', 'right');
-    use_as_dependency_circle_node.setAttribute('element_id', element.id);
-    use_as_dependency_circle_node.setAttributeNS(null, 'cx', left + box_width);
-    use_as_dependency_circle_node.setAttributeNS(null, 'cy', top + box_height / 2);
-    use_as_dependency_circle_node.setAttributeNS(null, 'r', box_height / 2.5 + "");
-    use_as_dependency_circle_node.setAttributeNS(null, 'stroke', strike_color);
-    use_as_dependency_circle_node.setAttribute('class', 'use-as-dependency-node');
+    use_as_dependency_node.setAttribute('connector_side', 'right');
+    use_as_dependency_node.setAttribute('element_id', element.id);
+    use_as_dependency_node.setAttributeNS(null, 'cx', left + box_width);
+    use_as_dependency_node.setAttributeNS(null, 'cy', top + box_height / 2);
+    use_as_dependency_node.setAttributeNS(null, 'r', box_height / 2.5 + "");
+    use_as_dependency_node.setAttributeNS(null, 'stroke', strike_color);
+    use_as_dependency_node.setAttribute('class', 'use-as-dependency-node');
 
-    add_dependency_circle_node.setAttribute('connector_side', 'left');
-    add_dependency_circle_node.setAttribute('element_id', element.id);
-    add_dependency_circle_node.setAttributeNS(null, 'cx', left);
-    add_dependency_circle_node.setAttributeNS(null, 'cy', top + box_height / 2);
-    add_dependency_circle_node.setAttributeNS(null, 'r', box_height / 2.5 + "");
-    add_dependency_circle_node.setAttributeNS(null, 'stroke', strike_color);
-    add_dependency_circle_node.setAttribute('class', 'add-dependency-node');
+    add_dependency_node.setAttribute('connector_side', 'left');
+    add_dependency_node.setAttribute('element_id', element.id);
+    add_dependency_node.setAttributeNS(null, 'cx', left);
+    add_dependency_node.setAttributeNS(null, 'cy', top + box_height / 2);
+    add_dependency_node.setAttributeNS(null, 'r', box_height / 2.5 + "");
+    add_dependency_node.setAttributeNS(null, 'stroke', strike_color);
+    add_dependency_node.setAttribute('class', 'add-dependency-node');
 
     const onHover = () => {
         textBox.setAttributeNS(null, 'fill', 'white');
@@ -306,8 +306,8 @@ function add_node(canvas, element, left, top, graph) {
         document.location = document.location;
     };
 
-    (add_dependency_circle_node as any).onclick = () => on_user_clicks_dependency_node(
-        add_dependency_circle_node, // from
+    (add_dependency_node as any).onclick = () => on_user_clicks_dependency_node(
+        add_dependency_node, // from
         canvas,
         (previous_element_id) => {
             Api.add_dependency(
@@ -319,8 +319,8 @@ function add_node(canvas, element, left, top, graph) {
         -box_height, // runway
     );
 
-    (use_as_dependency_circle_node as any).onclick = () => on_user_clicks_dependency_node(
-        use_as_dependency_circle_node, // from
+    (use_as_dependency_node as any).onclick = () => on_user_clicks_dependency_node(
+        use_as_dependency_node, // from
         canvas,
         (previous_element_id) => {
             Api.add_dependency(
@@ -335,7 +335,7 @@ function add_node(canvas, element, left, top, graph) {
     return {
         width: rect.getClientRects()[0].width,
         height: rect.getClientRects()[0].height,
-        node_list: [node, use_as_dependency_circle_node, add_dependency_circle_node]
+        node_list: [node, use_as_dependency_node, add_dependency_node]
     }
 }
 
