@@ -1,13 +1,20 @@
 import * as Api from '../api';
 import * as params from '../params';
+import {ElementState} from './element';
 import { layout_steps, Layout, LayoutRow, LayoutEntry } from './layout';
 
 // Offset between the line following the user and the cursor
 const PERSONAL_AREA_SPACE = 3;
 
-const COMPLETED_STROKE_STYLE = '#548A00';
 const SvgNS = "http://www.w3.org/2000/svg";
 const TECHTREE_CANVAS_ID = "techtree-graph";
+
+/* Colors for different status */
+const TO_DO_STROKE_STYLE = '#000000'; // White
+const COMPLETED_STROKE_STYLE = '#548A00'; // Green
+const WORK_IN_PROGRESS_STROKE_STYLE = '#048DFF'; // Blue
+const ARCHIVED_STROKE_STYLE = '#7A7B00'; // Yellow
+
 
 export class DependencyGraph {
     div: HTMLDivElement;
@@ -186,9 +193,26 @@ function add_node(canvas, element, left, top, graph) {
 
     let completed_class = '';
     let strike_color = 'black';
-    if (element.completed) {
-        strike_color = COMPLETED_STROKE_STYLE;
-        completed_class = ' completed';
+
+    let state: ElementState = element.state;
+
+    switch (state) {
+        case 'to_do':
+            strike_color = TO_DO_STROKE_STYLE;
+            completed_class = 'status-to-do';
+            break;
+        case 'completed':
+            strike_color = COMPLETED_STROKE_STYLE;
+            completed_class = 'status-completed';
+            break;
+        case 'work_in_progress':
+            strike_color = WORK_IN_PROGRESS_STROKE_STYLE;
+            completed_class = 'status-work-in-progress';
+            break;
+        case 'archived':
+            strike_color = ARCHIVED_STROKE_STYLE;
+            completed_class = 'status-archived';
+            break;
     }
 
     const node = document.createElementNS(SvgNS, 'a');

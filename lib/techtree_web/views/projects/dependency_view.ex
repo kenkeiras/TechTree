@@ -17,7 +17,7 @@ defmodule TechtreeWeb.Projects.DependencyView do
        title: dep.title,
        description: dep.description,
        dependencies: dependencies,
-       completed: dep.completed
+       state: dep.state
     }
   end
 

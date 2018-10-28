@@ -7,13 +7,13 @@ defmodule Techtree.Projects do
   alias Techtree.Repo
 
   alias Techtree.Accounts
-  alias Techtree.Projects.{Contributor, Project}
+  alias Techtree.Projects.{Contributor, Project, Step}
 
   def is_project_completed(%Project{} = project) do
     (
       length(project.steps) > 0
       and
-      Enum.all?(project.steps, fn x -> x.completed end)
+      Enum.all?(project.steps, fn x -> Step.finished?(x) end)
     )
   end
 
@@ -422,16 +422,16 @@ defmodule Techtree.Projects do
   """
   def gen_step_patch(patch) do
     %{}
-    |> patch_step_completion(patch)
+    |> patch_step_state(patch)
     |> patch_step_title(patch)
     |> patch_step_description(patch)
   end
 
-  def patch_step_completion(patch, %{ "completed" => completion }) do
-    Map.put(patch, "completed", completion)
+  def patch_step_state(patch, %{ "state" => state }) do
+    Map.put(patch, "state", state)
   end
 
-  def patch_step_completion(patch, _) do
+  def patch_step_state(patch, _) do
     patch
   end
 
@@ -637,13 +637,13 @@ defmodule Techtree.Projects do
     "id" => import_id,
     "description" => description,
     "dependencies" => _import_dependencies,
-    "completed" => completed
+    "state" => state
   })do
     {:ok, new_step } = create_step(conn.assigns.current_contributor, project,
                                     %{
                                       "title" => title,
                                       "description" => description,
-                                      "completed" => completed
+                                      "state" => state
                                     })
     { import_id, new_step.id }
   end

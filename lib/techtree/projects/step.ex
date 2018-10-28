@@ -7,7 +7,6 @@ defmodule Techtree.Projects.Step do
   schema "steps" do
     field :description, :string
     field :title, :string
-    field :completed, :boolean
     field :state, StepState
     belongs_to :project, Project
     many_to_many :dependencies, Step, join_through: "dependencies",
@@ -16,10 +15,19 @@ defmodule Techtree.Projects.Step do
     timestamps()
   end
 
+  def finished?(%Step{ state: state }) do
+    case state do
+      :to_do -> false
+      :work_in_progress -> false
+      :completed -> true
+      :archived -> true
+    end
+  end
+
   @doc false
   def changeset(step, attrs) do
     step
-    |> cast(attrs, [:title, :description, :completed, :state])
+    |> cast(attrs, [:title, :description, :state])
     |> validate_required([:title])
   end
 end
