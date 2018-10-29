@@ -368,17 +368,17 @@ svg#techtree-graph a {
 }
 
 .state-work-in-progress > rect {
-    stroke: #048DFF;
+    stroke: #337ab7;
 }
 .state-work-in-progress:hover > rect {
-    fill: #048DFF;
+    fill: #337ab7;
 }
 
 .state-archived > rect {
-    stroke:  #7A7B00;
+    stroke:  #a13900;
 }
 .state-archived:hover > rect {
-    fill:  #7A7B00;
+    fill:  #a13900;
 }
 
 /* Step nodes */
@@ -391,9 +391,9 @@ circle.state-completed {
 }
 
 circle.state-work-in-progress {
-    stroke: #048DFF;
+    stroke: #337ab7;
 }
 
 circle.state-archived {
-    stroke: #7A7B00;
+    stroke: #a13900;
 }
