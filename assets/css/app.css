@@ -351,6 +351,7 @@ svg#techtree-graph a {
 
 .step-node > rect {
     fill: white;
+    stroke-width: 1px;
 }
 
 .state-to-do > rect {

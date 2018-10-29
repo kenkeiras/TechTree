@@ -247,7 +247,6 @@ function add_node(canvas, element, left, top, graph) {
 
     rect.setAttributeNS(null,'x', left);
     rect.setAttributeNS(null,'y', top);
-    rect.setAttributeNS(null,'stroke-width','1');
     rect.setAttributeNS(null,'width', box_width + "");
     rect.setAttributeNS(null,'height', box_height + "");
 
