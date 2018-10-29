@@ -44,6 +44,7 @@ defmodule Techtree.Mixfile do
       {:comeonin, "~> 4.0"},
       {:argon2_elixir, "~> 1.2"},
       {:distillery, "~> 2.0-pre"},
+      {:ecto_enum, "~> 1.0"},
     ]
   end
 

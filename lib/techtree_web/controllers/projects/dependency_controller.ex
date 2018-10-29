@@ -40,44 +40,6 @@ defmodule TechtreeWeb.Projects.DependencyController do
     for other_step <- all_steps,
                       !(HashSet.member?(used, other_step.id)),
                       do: {other_step.title, other_step.id}
-
-  end
-
-  def new(conn, %{"step_id" => step_id}) do
-    step = Projects.get_step_with_dependencies!(step_id)
-    available_steps = get_available_dependencies_for_step(conn, step)
-
-    render(conn, "new.html", step: step, available_steps: available_steps)
-  end
-
-  def create(conn, %{"dependency" => depended_id, "step_id" => step_id}) do
-    step = Projects.get_step_with_dependencies!(step_id)
-    depended = Projects.get_step!(depended_id)
-
-    case Projects.create_dependency(depended, step) do
-      %Step{} ->
-        conn
-        |> put_flash(:info, "Dependency added successfully.")
-        |> redirect(to: project_step_path(conn, :show, conn.assigns.project.id, step_id))
-      {:error, %Ecto.Changeset{} = changeset} ->
-        IO.puts("ERROR:")
-        IO.inspect(changeset)
-
-        available_steps = get_available_dependencies_for_step(conn, step)
-        render(conn, "new.html", step: step,
-                                 available_steps: available_steps,
-                                 changeset: changeset)
-    end
-  end
-
-  def delete(conn, %{"step_id" => step_id, "dependency_id" => dependency_id}) do
-    {depender_id, ""} = Integer.parse(step_id)
-    {depended_id, ""} = Integer.parse(dependency_id)
-    {:ok, %Postgrex.Result{ num_rows: 1 }} = Projects.delete_dependency(depender_id, depended_id)
-
-    conn
-    |> put_flash(:info, "Dependency deleted successfully.")
-    |> redirect(to: project_project_path(conn, :show, conn.assigns.project.id))
   end
 
   def dependency_graph(conn, _params) do

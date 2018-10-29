@@ -29,12 +29,7 @@ defmodule TechtreeWeb.Router do
     resources "/", ProjectController, param: "project_id"
     get "/new/import", ProjectController, :import
     post "/new/import", ProjectController, :new_import
-    resources "/:project_id/steps", StepController, param: "step_id"
     get "/:project_id/export", ProjectController, :export
-    post "/:project_id/steps/:step_id/state/completed", StepController, :mark_completed
-    post "/:project_id/steps/:step_id/state/uncompleted", StepController, :mark_uncompleted
-
-    resources "/:project_id/steps/:step_id/dependencies", DependencyController, param: "dependency_id"
   end
 
   scope "/api/projects/", TechtreeWeb.Projects, as: :project do

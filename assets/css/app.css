@@ -340,3 +340,61 @@ svg#techtree-graph a {
     text-decoration: none;
 }
 
+/* States */
+.step-node > text {
+    fill: black;
+    stroke: none;
+}
+.step-node:hover > text {
+    fill: white;
+}
+
+.step-node > rect {
+    fill: white;
+    stroke-width: 1px;
+}
+
+.state-to-do > rect {
+    stroke: #000000;
+}
+.state-to-do:hover > rect {
+    fill: #000000;
+}
+
+.state-completed > rect {
+    stroke: #548A00;
+}
+.state-completed:hover > rect {
+    fill: #548A00;
+}
+
+.state-work-in-progress > rect {
+    stroke: #337ab7;
+}
+.state-work-in-progress:hover > rect {
+    fill: #337ab7;
+}
+
+.state-archived > rect {
+    stroke:  #a13900;
+}
+.state-archived:hover > rect {
+    fill:  #a13900;
+}
+
+/* Step nodes */
+circle.state-to-do {
+    stroke: #000000;
+}
+
+circle.state-completed {
+    stroke: #548A00;
+}
+
+circle.state-work-in-progress {
+    stroke: #337ab7;
+}
+
+circle.state-archived {
+    stroke: #a13900;
+}

@@ -1,11 +1,11 @@
 import * as Api from '../api';
 import * as params from '../params';
+import {ElementState} from './element';
 import { layout_steps, Layout, LayoutRow, LayoutEntry } from './layout';
 
 // Offset between the line following the user and the cursor
 const PERSONAL_AREA_SPACE = 3;
 
-const COMPLETED_STROKE_STYLE = '#548A00';
 const SvgNS = "http://www.w3.org/2000/svg";
 const TECHTREE_CANVAS_ID = "techtree-graph";
 
@@ -184,34 +184,44 @@ function add_node(canvas, element, left, top, graph) {
     const x_padding = 2; // px
     const y_padding = 2; // px
 
-    let completed_class = '';
-    let strike_color = 'black';
-    if (element.completed) {
-        strike_color = COMPLETED_STROKE_STYLE;
-        completed_class = ' completed';
+    let node_class = '';
+    let state: ElementState = element.state;
+
+    switch (state) {
+        case 'to_do':
+            node_class = 'state-to-do';
+            break;
+        case 'completed':
+            node_class = 'state-completed';
+            break;
+        case 'work_in_progress':
+            node_class = 'state-work-in-progress';
+            break;
+        case 'archived':
+            node_class = 'state-archived';
+            break;
     }
 
     const node = document.createElementNS(SvgNS, 'a');
     const rect = document.createElementNS(SvgNS, 'rect');
     const textBox = document.createElementNS(SvgNS, 'text');
-    const use_as_dependency_circle_node = document.createElementNS(SvgNS, 'circle');
-    const add_dependency_circle_node = document.createElementNS(SvgNS, 'circle');
+    const use_as_dependency_node = document.createElementNS(SvgNS, 'circle');
+    const add_dependency_node = document.createElementNS(SvgNS, 'circle');
+
+    node.setAttribute('class', 'step-node ' + node_class);
 
     node.appendChild(rect);
     node.appendChild(textBox);
 
     // Use-as/add dependency nodes are outside the main node
     //  so as the callbacks don't interfere
-    canvas.appendChild(use_as_dependency_circle_node);
-    canvas.appendChild(add_dependency_circle_node);
+    canvas.appendChild(use_as_dependency_node);
+    canvas.appendChild(add_dependency_node);
     canvas.appendChild(node);
 
-    textBox.setAttribute('class', 'actionable' + completed_class);
-    textBox.setAttributeNS(null,'stroke',"none");
+    textBox.setAttribute('class', 'actionable');
     textBox.textContent = element.title;
     textBox.setAttributeNS(null,'textlength', '100%');
-    textBox.style.fontWeight = "bold";
-    textBox.setAttributeNS(null, 'fill', 'black');
 
     // First time we draw this we have to calculate the correction
     // to apply over the text position. This translates from whatever
@@ -235,44 +245,26 @@ function add_node(canvas, element, left, top, graph) {
     const box_width = (textBox.getClientRects()[0].width + x_padding * 2);
     const box_height = (textBox.getClientRects()[0].height + y_padding * 2);
 
-    rect.setAttribute('class', completed_class);
     rect.setAttributeNS(null,'x', left);
     rect.setAttributeNS(null,'y', top);
-    rect.setAttributeNS(null,'stroke-width','1');
     rect.setAttributeNS(null,'width', box_width + "");
     rect.setAttributeNS(null,'height', box_height + "");
 
-    use_as_dependency_circle_node.setAttribute('connector_side', 'right');
-    use_as_dependency_circle_node.setAttribute('element_id', element.id);
-    use_as_dependency_circle_node.setAttributeNS(null, 'cx', left + box_width);
-    use_as_dependency_circle_node.setAttributeNS(null, 'cy', top + box_height / 2);
-    use_as_dependency_circle_node.setAttributeNS(null, 'r', box_height / 2.5 + "");
-    use_as_dependency_circle_node.setAttributeNS(null, 'stroke', strike_color);
-    use_as_dependency_circle_node.setAttribute('class', 'use-as-dependency-node');
+    use_as_dependency_node.setAttribute('connector_side', 'right');
+    use_as_dependency_node.setAttribute('element_id', element.id);
+    use_as_dependency_node.setAttributeNS(null, 'cx', left + box_width);
+    use_as_dependency_node.setAttributeNS(null, 'cy', top + box_height / 2);
+    use_as_dependency_node.setAttributeNS(null, 'r', box_height / 2.5 + "");
+    use_as_dependency_node.setAttribute('class', 'use-as-dependency-node ' + node_class);
 
-    add_dependency_circle_node.setAttribute('connector_side', 'left');
-    add_dependency_circle_node.setAttribute('element_id', element.id);
-    add_dependency_circle_node.setAttributeNS(null, 'cx', left);
-    add_dependency_circle_node.setAttributeNS(null, 'cy', top + box_height / 2);
-    add_dependency_circle_node.setAttributeNS(null, 'r', box_height / 2.5 + "");
-    add_dependency_circle_node.setAttributeNS(null, 'stroke', strike_color);
-    add_dependency_circle_node.setAttribute('class', 'add-dependency-node');
+    add_dependency_node.setAttribute('connector_side', 'left');
+    add_dependency_node.setAttribute('element_id', element.id);
+    add_dependency_node.setAttributeNS(null, 'cx', left);
+    add_dependency_node.setAttributeNS(null, 'cy', top + box_height / 2);
+    add_dependency_node.setAttributeNS(null, 'r', box_height / 2.5 + "");
+    add_dependency_node.setAttribute('class', 'add-dependency-node ' + node_class);
 
-    const onHover = () => {
-        textBox.setAttributeNS(null, 'fill', 'white');
-        rect.setAttributeNS(null, 'fill', strike_color);
-    };
 
-    const onRestore = () => {
-        rect.setAttributeNS(null,'stroke',strike_color);
-        rect.setAttributeNS(null, 'fill', 'white');
-        textBox.setAttributeNS(null, 'fill', strike_color);
-    };
-
-    onRestore();
-
-    (node as any).onmouseenter = onHover;
-    (node as any).onmouseleave = onRestore;
     node.onclick = () => {
         popup_element(element, graph);
     };
@@ -282,8 +274,8 @@ function add_node(canvas, element, left, top, graph) {
         document.location = document.location;
     };
 
-    (add_dependency_circle_node as any).onclick = () => on_user_clicks_dependency_node(
-        add_dependency_circle_node, // from
+    (add_dependency_node as any).onclick = () => on_user_clicks_dependency_node(
+        add_dependency_node, // from
         canvas,
         (previous_element_id) => {
             Api.add_dependency(
@@ -295,8 +287,8 @@ function add_node(canvas, element, left, top, graph) {
         -box_height, // runway
     );
 
-    (use_as_dependency_circle_node as any).onclick = () => on_user_clicks_dependency_node(
-        use_as_dependency_circle_node, // from
+    (use_as_dependency_node as any).onclick = () => on_user_clicks_dependency_node(
+        use_as_dependency_node, // from
         canvas,
         (previous_element_id) => {
             Api.add_dependency(
@@ -311,7 +303,7 @@ function add_node(canvas, element, left, top, graph) {
     return {
         width: rect.getClientRects()[0].width,
         height: rect.getClientRects()[0].height,
-        node_list: [node, use_as_dependency_circle_node, add_dependency_circle_node]
+        node_list: [node, use_as_dependency_node, add_dependency_node]
     }
 }
 
@@ -484,6 +476,47 @@ function make_editable_description(description: HTMLTextAreaElement, element, on
     }
 }
 
+function build_state_select(element) : HTMLSelectElement{
+    let state: ElementState = element.state;
+
+    const select = document.createElement('select');
+
+    // Build the different options
+    const todo_option = document.createElement('option');
+    todo_option.innerText = 'To do';
+    todo_option.value = 'to_do';
+
+    const wip_option = document.createElement('option');
+    wip_option.innerText = 'Work in progress';
+    wip_option.value = 'work_in_progress';
+
+    const completed_option = document.createElement('option');
+    completed_option.innerText = 'Completed';
+    completed_option.value = 'completed';
+
+    const archived_option = document.createElement('option');
+    archived_option.innerText = 'Archived';
+    archived_option.value = 'archived';
+    
+    // Add them in the appropriate order
+    select.appendChild(todo_option);
+    select.appendChild(wip_option);
+    select.appendChild(completed_option);
+    select.appendChild(archived_option);
+
+    // Set the current one
+    const selected = {
+        "to_do": todo_option,
+        "work_in_progress": wip_option,
+        "completed": completed_option,
+        "archived": archived_option,
+    }[state];
+
+    selected.setAttribute('selected', 'selected');
+
+    return select;
+}
+
 
 function build_fast_element_form(element, base, graph) {
     const titleBar = document.createElement('h1');
@@ -529,71 +562,38 @@ function build_fast_element_form(element, base, graph) {
     make_editable_description(description, element, () => { has_changed = true });
     body.appendChild(description);
 
-    const completedRow = document.createElement('div');
-    const completedLabel = document.createElement('label');
-    const state = document.createElement('span');
-    const toggleButton = document.createElement('button');
+    const stateRow = document.createElement('div');
+    const stateLabel = document.createElement('label');
+    const stateSelect = build_state_select(element);
 
-    completedLabel.innerText = 'State:';
-    completedRow.appendChild(completedLabel);
-    completedRow.appendChild(state);
-    completedRow.appendChild(toggleButton);
+    stateLabel.innerText = 'State:';
+    stateRow.appendChild(stateLabel);
+    stateRow.appendChild(stateSelect);
 
-    body.appendChild(completedRow);
-
-    state.setAttribute('class', 'value');
-    toggleButton.setAttribute('class', 'action-button');
+    body.appendChild(stateRow);
 
     let completedClass = '';
 
-    const set_completion = (element) => {
-        if (element.completed) {
-            state.innerText = 'COMPLETE';
-            completedClass = 'completed';
-            toggleButton.innerText = 'Mark To-Do';
-            toggleButton.onclick = () => {
-                toggleButton.setAttribute('class', 'action-button loading');
-                has_changed = true;
-                Api.mark_step_todo(element.project_id,
-                                element.id,
-                                (success) => {
-                                    if (success) {
-                                        toggleButton.setAttribute('class', 'action-button loaded');
-                                        element.completed = false;
-                                        set_completion(element);
-                                    }
-                                    else {
-                                        toggleButton.setAttribute('class', 'action-button failed');
-                                    }
-                                });
-            }        
-        }
-        else {
-            state.innerHTML = 'TO-DO';
-            toggleButton.innerText = 'Mark Completed';
-
-            toggleButton.onclick = () => {
-                toggleButton.setAttribute('class', 'action-button loading');
-                has_changed = true;
-                Api.mark_step_done(element.project_id, 
-                                   element.id,
-                                   (success) => {
-                                    if (success) {
-                                          toggleButton.setAttribute('class', 'action-button loaded');
-                                          element.completed = true;
-                                          set_completion(element);
-                                    }
-                                    else {
-                                        toggleButton.setAttribute('class', 'action-button failed');
-                                    }
-                                   });
-            }
-        }
-
-        completedRow.setAttribute('class', 'completion ' + completedClass);
-    };
-
-    set_completion(element);
+    stateSelect.onchange = () => {
+        stateSelect.classList.remove('loaded');
+        stateSelect.classList.remove('failed');
+        stateSelect.classList.add('loading');
+        has_changed = true;
+        Api.set_step_state(element.project_id,
+                           element.id,
+                           stateSelect.value,
+                           (success) => {
+                               if (success) {
+                                   stateSelect.classList.remove('loading');
+                                   stateSelect.classList.add('loaded');
+                               }
+                               else {
+                                   /// @TODO: Reset the original value
+                                   stateSelect.classList.remove('loading');
+                                   stateSelect.classList.add('failed');
+                                }
+                            });
+    }
 
     if (element.dependencies.length > 0) {
         const dependenciesSection = document.createElement('div');

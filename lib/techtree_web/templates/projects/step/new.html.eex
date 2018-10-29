@@ -1,5 +1,0 @@
-<h2>New Step</h2>
-
-<%= render "form.html", Map.put(assigns, :action, project_step_path(@conn, :create, @project.id)) %>
-
-<span><%= link "Back", to: project_project_path(@conn, :show, @project.id) %></span>
