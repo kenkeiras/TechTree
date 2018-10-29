@@ -9,13 +9,6 @@ const PERSONAL_AREA_SPACE = 3;
 const SvgNS = "http://www.w3.org/2000/svg";
 const TECHTREE_CANVAS_ID = "techtree-graph";
 
-// Colors for different states
-const TO_DO_STROKE_STYLE = '#000000'; // White
-const COMPLETED_STROKE_STYLE = '#548A00'; // Green
-const WORK_IN_PROGRESS_STROKE_STYLE = '#048DFF'; // Blue
-const ARCHIVED_STROKE_STYLE = '#7A7B00'; // Yellow
-
-
 export class DependencyGraph {
     div: HTMLDivElement;
     canvas: SVGElement;
@@ -192,25 +185,19 @@ function add_node(canvas, element, left, top, graph) {
     const y_padding = 2; // px
 
     let node_class = '';
-    let strike_color = 'black';
-
     let state: ElementState = element.state;
 
     switch (state) {
         case 'to_do':
-            strike_color = TO_DO_STROKE_STYLE;
             node_class = 'state-to-do';
             break;
         case 'completed':
-            strike_color = COMPLETED_STROKE_STYLE;
             node_class = 'state-completed';
             break;
         case 'work_in_progress':
-            strike_color = WORK_IN_PROGRESS_STROKE_STYLE;
             node_class = 'state-work-in-progress';
             break;
         case 'archived':
-            strike_color = ARCHIVED_STROKE_STYLE;
             node_class = 'state-archived';
             break;
     }
@@ -221,6 +208,8 @@ function add_node(canvas, element, left, top, graph) {
     const use_as_dependency_node = document.createElementNS(SvgNS, 'circle');
     const add_dependency_node = document.createElementNS(SvgNS, 'circle');
 
+    node.setAttribute('class', 'step-node ' + node_class);
+
     node.appendChild(rect);
     node.appendChild(textBox);
 
@@ -230,12 +219,9 @@ function add_node(canvas, element, left, top, graph) {
     canvas.appendChild(add_dependency_node);
     canvas.appendChild(node);
 
-    textBox.setAttribute('class', 'actionable' + node_class);
-    textBox.setAttributeNS(null,'stroke',"none");
+    textBox.setAttribute('class', 'actionable');
     textBox.textContent = element.title;
     textBox.setAttributeNS(null,'textlength', '100%');
-    textBox.style.fontWeight = "bold";
-    textBox.setAttributeNS(null, 'fill', 'black');
 
     // First time we draw this we have to calculate the correction
     // to apply over the text position. This translates from whatever
@@ -259,7 +245,6 @@ function add_node(canvas, element, left, top, graph) {
     const box_width = (textBox.getClientRects()[0].width + x_padding * 2);
     const box_height = (textBox.getClientRects()[0].height + y_padding * 2);
 
-    rect.setAttribute('class', node_class);
     rect.setAttributeNS(null,'x', left);
     rect.setAttributeNS(null,'y', top);
     rect.setAttributeNS(null,'stroke-width','1');
@@ -271,32 +256,16 @@ function add_node(canvas, element, left, top, graph) {
     use_as_dependency_node.setAttributeNS(null, 'cx', left + box_width);
     use_as_dependency_node.setAttributeNS(null, 'cy', top + box_height / 2);
     use_as_dependency_node.setAttributeNS(null, 'r', box_height / 2.5 + "");
-    use_as_dependency_node.setAttributeNS(null, 'stroke', strike_color);
-    use_as_dependency_node.setAttribute('class', 'use-as-dependency-node');
+    use_as_dependency_node.setAttribute('class', 'use-as-dependency-node ' + node_class);
 
     add_dependency_node.setAttribute('connector_side', 'left');
     add_dependency_node.setAttribute('element_id', element.id);
     add_dependency_node.setAttributeNS(null, 'cx', left);
     add_dependency_node.setAttributeNS(null, 'cy', top + box_height / 2);
     add_dependency_node.setAttributeNS(null, 'r', box_height / 2.5 + "");
-    add_dependency_node.setAttributeNS(null, 'stroke', strike_color);
-    add_dependency_node.setAttribute('class', 'add-dependency-node');
+    add_dependency_node.setAttribute('class', 'add-dependency-node ' + node_class);
 
-    const onHover = () => {
-        textBox.setAttributeNS(null, 'fill', 'white');
-        rect.setAttributeNS(null, 'fill', strike_color);
-    };
 
-    const onRestore = () => {
-        rect.setAttributeNS(null,'stroke',strike_color);
-        rect.setAttributeNS(null, 'fill', 'white');
-        textBox.setAttributeNS(null, 'fill', strike_color);
-    };
-
-    onRestore();
-
-    (node as any).onmouseenter = onHover;
-    (node as any).onmouseleave = onRestore;
     node.onclick = () => {
         popup_element(element, graph);
     };
