@@ -9,7 +9,7 @@ const PERSONAL_AREA_SPACE = 3;
 const SvgNS = "http://www.w3.org/2000/svg";
 const TECHTREE_CANVAS_ID = "techtree-graph";
 
-/* Colors for different status */
+// Colors for different states
 const TO_DO_STROKE_STYLE = '#000000'; // White
 const COMPLETED_STROKE_STYLE = '#548A00'; // Green
 const WORK_IN_PROGRESS_STROKE_STYLE = '#048DFF'; // Blue
@@ -199,19 +199,19 @@ function add_node(canvas, element, left, top, graph) {
     switch (state) {
         case 'to_do':
             strike_color = TO_DO_STROKE_STYLE;
-            node_class = 'status-to-do';
+            node_class = 'state-to-do';
             break;
         case 'completed':
             strike_color = COMPLETED_STROKE_STYLE;
-            node_class = 'status-completed';
+            node_class = 'state-completed';
             break;
         case 'work_in_progress':
             strike_color = WORK_IN_PROGRESS_STROKE_STYLE;
-            node_class = 'status-work-in-progress';
+            node_class = 'state-work-in-progress';
             break;
         case 'archived':
             strike_color = ARCHIVED_STROKE_STYLE;
-            node_class = 'status-archived';
+            node_class = 'state-archived';
             break;
     }
 
