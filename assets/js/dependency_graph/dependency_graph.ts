@@ -508,6 +508,47 @@ function make_editable_description(description: HTMLTextAreaElement, element, on
     }
 }
 
+function build_state_select(element) : HTMLSelectElement{
+    let state: ElementState = element.state;
+
+    const select = document.createElement('select');
+
+    // Build the different options
+    const todo_option = document.createElement('option');
+    todo_option.innerText = 'To do';
+    todo_option.value = 'to_do';
+
+    const wip_option = document.createElement('option');
+    wip_option.innerText = 'Work in progress';
+    wip_option.value = 'work_in_progress';
+
+    const completed_option = document.createElement('option');
+    completed_option.innerText = 'Completed';
+    completed_option.value = 'completed';
+
+    const archived_option = document.createElement('option');
+    archived_option.innerText = 'Archived';
+    archived_option.value = 'archived';
+    
+    // Add them in the appropriate order
+    select.appendChild(todo_option);
+    select.appendChild(wip_option);
+    select.appendChild(completed_option);
+    select.appendChild(archived_option);
+
+    // Set the current one
+    const selected = {
+        "to_do": todo_option,
+        "work_in_progress": wip_option,
+        "completed": completed_option,
+        "archived": archived_option,
+    }[state];
+
+    selected.setAttribute('selected', 'selected');
+
+    return select;
+}
+
 
 function build_fast_element_form(element, base, graph) {
     const titleBar = document.createElement('h1');
@@ -553,71 +594,38 @@ function build_fast_element_form(element, base, graph) {
     make_editable_description(description, element, () => { has_changed = true });
     body.appendChild(description);
 
-    const completedRow = document.createElement('div');
-    const completedLabel = document.createElement('label');
-    const state = document.createElement('span');
-    const toggleButton = document.createElement('button');
+    const stateRow = document.createElement('div');
+    const stateLabel = document.createElement('label');
+    const stateSelect = build_state_select(element);
 
-    completedLabel.innerText = 'State:';
-    completedRow.appendChild(completedLabel);
-    completedRow.appendChild(state);
-    completedRow.appendChild(toggleButton);
+    stateLabel.innerText = 'State:';
+    stateRow.appendChild(stateLabel);
+    stateRow.appendChild(stateSelect);
 
-    body.appendChild(completedRow);
-
-    state.setAttribute('class', 'value');
-    toggleButton.setAttribute('class', 'action-button');
+    body.appendChild(stateRow);
 
     let completedClass = '';
 
-    const set_completion = (element) => {
-        if (element.completed) {
-            state.innerText = 'COMPLETE';
-            completedClass = 'completed';
-            toggleButton.innerText = 'Mark To-Do';
-            toggleButton.onclick = () => {
-                toggleButton.setAttribute('class', 'action-button loading');
-                has_changed = true;
-                Api.mark_step_todo(element.project_id,
-                                element.id,
-                                (success) => {
-                                    if (success) {
-                                        toggleButton.setAttribute('class', 'action-button loaded');
-                                        element.completed = false;
-                                        set_completion(element);
-                                    }
-                                    else {
-                                        toggleButton.setAttribute('class', 'action-button failed');
-                                    }
-                                });
-            }        
-        }
-        else {
-            state.innerHTML = 'TO-DO';
-            toggleButton.innerText = 'Mark Completed';
-
-            toggleButton.onclick = () => {
-                toggleButton.setAttribute('class', 'action-button loading');
-                has_changed = true;
-                Api.mark_step_done(element.project_id, 
-                                   element.id,
-                                   (success) => {
-                                    if (success) {
-                                          toggleButton.setAttribute('class', 'action-button loaded');
-                                          element.completed = true;
-                                          set_completion(element);
-                                    }
-                                    else {
-                                        toggleButton.setAttribute('class', 'action-button failed');
-                                    }
-                                   });
-            }
-        }
-
-        completedRow.setAttribute('class', 'completion ' + completedClass);
-    };
-
-    set_completion(element);
+    stateSelect.onchange = () => {
+        stateSelect.classList.remove('loaded');
+        stateSelect.classList.remove('failed');
+        stateSelect.classList.add('loading');
+        has_changed = true;
+        Api.set_step_state(element.project_id,
+                           element.id,
+                           stateSelect.value,
+                           (success) => {
+                               if (success) {
+                                   stateSelect.classList.remove('loading');
+                                   stateSelect.classList.add('loaded');
+                               }
+                               else {
+                                   /// @TODO: Reset the original value
+                                   stateSelect.classList.remove('loading');
+                                   stateSelect.classList.add('failed');
+                                }
+                            });
+    }
 
     if (element.dependencies.length > 0) {
         const dependenciesSection = document.createElement('div');

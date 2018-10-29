@@ -4,12 +4,8 @@ function get_csrf_token(): string {
 
 type id = number | string;
 
-export function mark_step_done(project_id: id, step_id: id, cb: Function) {
-    patch_step(project_id, step_id, {completed: true}, cb);
-}
-
-export function mark_step_todo(project_id: id, step_id: id, cb: Function) {
-    patch_step(project_id, step_id, {completed: false}, cb);
+export function set_step_state(project_id: id, step_id: id, state: string, cb: Function) {
+    patch_step(project_id, step_id, {state: state}, cb);
 }
 
 export function patch_step(project_id: id, step_id: id, state: any, cb: Function) {
