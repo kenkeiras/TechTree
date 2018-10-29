@@ -34,33 +34,6 @@ defmodule TechtreeWeb.Projects.StepController do
     end
   end
 
-  ## TODO : Refactor marking as completed/uncomplete
-  def mark_completed(conn, %{"step_id" => id}) do
-    step = Projects.get_step!(id)
-    case Projects.update_step(step, %{ "completed" => true }) do
-      {:ok, step} ->
-        conn
-        |> put_flash(:info, "Step updated successfully.")
-        |> redirect(to: project_step_path(conn, :show, conn.assigns.project.id, step))
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-          render(conn, "edit.html", step: step, changeset: changeset)
-    end
-  end
-
-  def mark_uncompleted(conn, %{"step_id" => id}) do
-    step = Projects.get_step!(id)
-    case Projects.update_step(step, %{ "completed" => false }) do
-      {:ok, step} ->
-        conn
-        |> put_flash(:info, "Step updated successfully.")
-        |> redirect(to: project_step_path(conn, :show, conn.assigns.project.id, step))
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-          render(conn, "edit.html", step: step, changeset: changeset)
-    end
-  end
-
   def api_remove(conn, %{"step_id" => id}) do
     step = Projects.get_step!(id)
     {:ok, _step} = Projects.delete_step(step)
