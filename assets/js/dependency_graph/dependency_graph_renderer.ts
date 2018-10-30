@@ -62,7 +62,7 @@ function focus_data(data) {
 }
 
 class DependencyGraphRendererDriver {
-    public run() {
+    public run(user_can_edit: boolean) {
         const graph = new DependencyGraph(document.getElementById("dependency_graph"));
 
         const project_id = document.location.pathname.split("/")[2];
@@ -71,27 +71,35 @@ class DependencyGraphRendererDriver {
             focus_data(data);
             graph.render(data);
 
-            this.configure_buttons(project_id, data.steps);
+            this.configure_buttons(project_id, data.steps, user_can_edit);
         });
 
         this.configure_title(project_id);
     }
 
-    private configure_buttons(project_id: string, steps) {
-        this.configure_add_step_buttons(project_id, steps);
+    private configure_buttons(project_id: string, steps, user_can_edit: boolean) {
+        this.configure_add_step_buttons(project_id, steps, user_can_edit);
     }
 
-    private configure_add_step_buttons(project_id: string, steps) {
+    private configure_add_step_buttons(project_id: string, steps, user_can_edit: boolean) {
         const buttons = document.getElementsByClassName("add-step-button");
+
         const trigger_add_step = () => Prompts.show_add_step_prompt(project_id, steps);
 
         // Set buttons
         for (const button of buttons) {
-            (button as HTMLButtonElement).onclick = trigger_add_step;
+            if (user_can_edit) {
+                (button as HTMLButtonElement).onclick = trigger_add_step;
+            }
+            else {
+                (button as HTMLButtonElement).disabled = true;
+            }
         }
 
-        // Set hotkeys
-        Hotkeys.set_key('a', trigger_add_step);
+        if (user_can_edit) {
+            // Set hotkeys
+            Hotkeys.set_key('a', trigger_add_step);
+        }
     }
 
     private configure_title(project_id: string) {

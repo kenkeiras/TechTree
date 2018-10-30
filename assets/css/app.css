@@ -20,6 +20,10 @@ nav ul {
     display: inline;
 }
 
+.nav-buttons > .nav-button:disabled {
+    filter: grayscale(100%);
+}
+
 .header > nav > a > img {
     margin-left: 1ex;
     vertical-align: text-bottom;
