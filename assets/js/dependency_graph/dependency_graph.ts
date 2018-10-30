@@ -188,6 +188,12 @@ function on_user_clicks_dependency_node(
     const personal_area = PERSONAL_AREA_SPACE * personal_area_sign;
 
     const follow_pointer = (ev) => {
+        // Don't follow pointer when cursor
+        // is not over canvas
+        if (ev.target !== canvas) {
+            return;
+        }
+
         draw_path(follower_path, from, 
             {x: ev.layerX - personal_area, y: ev.layerY}, runway)
     };
