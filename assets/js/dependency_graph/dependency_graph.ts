@@ -236,6 +236,7 @@ function add_node(canvas, element, left, top, graph) {
             break;
     }
 
+    const group = document.createElementNS(SvgNS, 'g');
     const node = document.createElementNS(SvgNS, 'a');
     const rect = document.createElementNS(SvgNS, 'rect');
     const textBox = document.createElementNS(SvgNS, 'text');
@@ -251,14 +252,15 @@ function add_node(canvas, element, left, top, graph) {
 
     // Use-as/add dependency nodes are outside the main node
     //  so as the callbacks don't interfere
-    canvas.appendChild(use_as_dependency_node);
-    canvas.appendChild(use_as_dependency_node_visible);
-    canvas.appendChild(add_dependency_node);
-    canvas.appendChild(add_dependency_node_visible);
+    group.appendChild(use_as_dependency_node);
+    group.appendChild(use_as_dependency_node_visible);
+    group.appendChild(add_dependency_node);
+    group.appendChild(add_dependency_node_visible);
 
     // Main box is set onto the canvas at the end so it
     // is placed over the other elements.
-    canvas.appendChild(node);
+    group.appendChild(node);
+    canvas.appendChild(group);
 
     textBox.setAttribute('class', 'actionable');
     textBox.textContent = element.title;
@@ -368,11 +370,7 @@ function add_node(canvas, element, left, top, graph) {
     return {
         width: rect.getClientRects()[0].width,
         height: rect.getClientRects()[0].height,
-        node_list: [
-            node,
-            use_as_dependency_node, use_as_dependency_node_visible,
-            add_dependency_node, add_dependency_node_visible,
-        ]
+        node_list: [group],
     }
 }
 
