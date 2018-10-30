@@ -305,7 +305,7 @@ function add_node(canvas, element, left, top, graph) {
     const copy_svg_attribute = (from, to, attribute) => {
         to.setAttributeNS(null, attribute, from.getAttributeNS(null, attribute));
     }
-    use_as_dependency_node_visible.setAttribute('class', node_class);
+    use_as_dependency_node_visible.setAttribute('class', node_class + ' purely-visual-component');
     copy_svg_attribute(use_as_dependency_node, use_as_dependency_node_visible, 'cx');
     copy_svg_attribute(use_as_dependency_node, use_as_dependency_node_visible, 'cy');
     use_as_dependency_node_visible.setAttributeNS(null, 'r', dependency_drag_node_visible_size + "");
@@ -319,7 +319,7 @@ function add_node(canvas, element, left, top, graph) {
     add_dependency_node.setAttribute('class', 'drag-handle');
 
     // Build the visible terminal of the node
-    add_dependency_node_visible.setAttribute('class', node_class);
+    add_dependency_node_visible.setAttribute('class', node_class + ' purely-visual-component');
     copy_svg_attribute(add_dependency_node, add_dependency_node_visible, 'cx');
     copy_svg_attribute(add_dependency_node, add_dependency_node_visible, 'cy');
     add_dependency_node_visible.setAttributeNS(null, 'r', dependency_drag_node_visible_size + "");

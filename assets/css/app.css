@@ -427,9 +427,14 @@ circle.state-archived {
 circle.drag-handle {
     fill: transparent;
     stroke: transparent;
+    cursor: pointer;
 }
 
 circle.drag-handle:hover {
     stroke: #222;
     stroke-width: 0.5px;
+}
+
+.purely-visual-component {
+    pointer-events: none;
 }
