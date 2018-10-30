@@ -6,6 +6,9 @@ import { layout_steps, Layout, LayoutRow, LayoutEntry } from './layout';
 // Offset between the line following the user and the cursor
 const PERSONAL_AREA_SPACE = 3;
 
+const dependency_drag_node_visible_size = 5;
+const dependency_drag_node_real_size = 25;
+
 const SvgNS = "http://www.w3.org/2000/svg";
 const TECHTREE_CANVAS_ID = "techtree-graph";
 
@@ -233,11 +236,14 @@ function add_node(canvas, element, left, top, graph) {
             break;
     }
 
+    const group = document.createElementNS(SvgNS, 'g');
     const node = document.createElementNS(SvgNS, 'a');
     const rect = document.createElementNS(SvgNS, 'rect');
     const textBox = document.createElementNS(SvgNS, 'text');
     const use_as_dependency_node = document.createElementNS(SvgNS, 'circle');
+    const use_as_dependency_node_visible = document.createElementNS(SvgNS, 'circle');
     const add_dependency_node = document.createElementNS(SvgNS, 'circle');
+    const add_dependency_node_visible = document.createElementNS(SvgNS, 'circle');
 
     node.setAttribute('class', 'step-node ' + node_class);
 
@@ -246,9 +252,15 @@ function add_node(canvas, element, left, top, graph) {
 
     // Use-as/add dependency nodes are outside the main node
     //  so as the callbacks don't interfere
-    canvas.appendChild(use_as_dependency_node);
-    canvas.appendChild(add_dependency_node);
-    canvas.appendChild(node);
+    group.appendChild(use_as_dependency_node);
+    group.appendChild(use_as_dependency_node_visible);
+    group.appendChild(add_dependency_node);
+    group.appendChild(add_dependency_node_visible);
+
+    // Main box is set onto the canvas at the end so it
+    // is placed over the other elements.
+    group.appendChild(node);
+    canvas.appendChild(group);
 
     textBox.setAttribute('class', 'actionable');
     textBox.textContent = element.title;
@@ -285,17 +297,33 @@ function add_node(canvas, element, left, top, graph) {
     use_as_dependency_node.setAttribute('element_id', element.id);
     use_as_dependency_node.setAttributeNS(null, 'cx', left + box_width);
     use_as_dependency_node.setAttributeNS(null, 'cy', top + box_height / 2);
-    use_as_dependency_node.setAttributeNS(null, 'r', box_height / 2.5 + "");
-    use_as_dependency_node.setAttribute('class', 'use-as-dependency-node ' + node_class);
+    use_as_dependency_node.setAttributeNS(null, 'r',
+        Math.min(dependency_drag_node_real_size, box_height / 2.5) + "");
+    use_as_dependency_node.setAttribute('class', 'drag-handle');
+
+    // Build the visible terminal of the node
+    const copy_svg_attribute = (from, to, attribute) => {
+        to.setAttributeNS(null, attribute, from.getAttributeNS(null, attribute));
+    }
+    use_as_dependency_node_visible.setAttribute('class', node_class);
+    copy_svg_attribute(use_as_dependency_node, use_as_dependency_node_visible, 'cx');
+    copy_svg_attribute(use_as_dependency_node, use_as_dependency_node_visible, 'cy');
+    use_as_dependency_node_visible.setAttributeNS(null, 'r', dependency_drag_node_visible_size + "");
 
     add_dependency_node.setAttribute('connector_side', 'left');
     add_dependency_node.setAttribute('element_id', element.id);
     add_dependency_node.setAttributeNS(null, 'cx', left);
     add_dependency_node.setAttributeNS(null, 'cy', top + box_height / 2);
-    add_dependency_node.setAttributeNS(null, 'r', box_height / 2.5 + "");
-    add_dependency_node.setAttribute('class', 'add-dependency-node ' + node_class);
+    add_dependency_node.setAttributeNS(null, 'r',
+        Math.min(dependency_drag_node_real_size, box_height / 2.5) + "");
+    add_dependency_node.setAttribute('class', 'drag-handle');
 
-
+    // Build the visible terminal of the node
+    add_dependency_node_visible.setAttribute('class', node_class);
+    copy_svg_attribute(add_dependency_node, add_dependency_node_visible, 'cx');
+    copy_svg_attribute(add_dependency_node, add_dependency_node_visible, 'cy');
+    add_dependency_node_visible.setAttributeNS(null, 'r', dependency_drag_node_visible_size + "");
+    
     node.onclick = () => {
         popup_element(element, graph);
     };
@@ -342,7 +370,7 @@ function add_node(canvas, element, left, top, graph) {
     return {
         width: rect.getClientRects()[0].width,
         height: rect.getClientRects()[0].height,
-        node_list: [node, use_as_dependency_node, add_dependency_node]
+        node_list: [group],
     }
 }
 
