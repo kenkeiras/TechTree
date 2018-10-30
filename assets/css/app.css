@@ -422,3 +422,14 @@ circle.state-work-in-progress {
 circle.state-archived {
     fill: #c15920;
 }
+
+/* Handles are transparent */
+circle.drag-handle {
+    fill: transparent;
+    stroke: transparent;
+}
+
+circle.drag-handle:hover {
+    stroke: #222;
+    stroke-width: 0.5px;
+}
