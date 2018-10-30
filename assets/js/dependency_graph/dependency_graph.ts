@@ -146,6 +146,7 @@ function on_user_clicks_dependency_node(
  
     const origin_side = origin.getAttribute('connector_side');
     const origin_element_id = origin.getAttribute('element_id');
+    const origin_element_state = origin.getAttribute('element_state');
 
     let no_need_to_follow = false;
 
@@ -181,6 +182,7 @@ function on_user_clicks_dependency_node(
     follower_path.setAttribute('id', 'user_follower_path');
     follower_path.setAttribute('connector_side', origin_side);
     follower_path.setAttribute('element_id', origin_element_id);
+    follower_path.setAttribute('class', 'state-'+ origin_element_state.replace(/_/g, '-'));
     canvas.appendChild(follower_path);
 
     let personal_area_sign = 1;
@@ -296,6 +298,7 @@ function add_node(canvas, element, left, top, graph) {
 
     use_as_dependency_node.setAttribute('connector_side', 'right');
     use_as_dependency_node.setAttribute('element_id', element.id);
+    use_as_dependency_node.setAttribute('element_state', element.state);
     use_as_dependency_node.setAttributeNS(null, 'cx', left + box_width);
     use_as_dependency_node.setAttributeNS(null, 'cy', top + box_height / 2);
     use_as_dependency_node.setAttributeNS(null, 'r',
@@ -313,6 +316,7 @@ function add_node(canvas, element, left, top, graph) {
 
     add_dependency_node.setAttribute('connector_side', 'left');
     add_dependency_node.setAttribute('element_id', element.id);
+    add_dependency_node.setAttribute('element_state', element.state);
     add_dependency_node.setAttributeNS(null, 'cx', left);
     add_dependency_node.setAttributeNS(null, 'cy', top + box_height / 2);
     add_dependency_node.setAttributeNS(null, 'r',
