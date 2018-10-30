@@ -3,19 +3,35 @@ defmodule TechtreeWeb.Projects.ProjectController do
 
   alias Techtree.Projects
 
-  plug :require_existing_contributor
+  plug :require_existing_contributor when action not in [:show]
+  plug :require_existing_contributor_visibility when action in [:show]
   plug :authorize_page_visibility when action in [:show]
   plug :authorize_page_edition when action in [:edit, :update, :delete, :api_patch]
 
-  def require_existing_contributor(conn, _) do
-    contributor = Projects.ensure_contributor_exists(conn.assigns.current_user)
+  def require_existing_contributor(conn = %Plug.Conn{assigns: %{current_user: user}}, _) do
+    contributor = Projects.ensure_contributor_exists(user)
     assign(conn, :current_contributor, contributor)
+  end
+
+  # Authentication failure
+  def require_existing_contributor(conn, _) do
+    TechtreeWeb.Router.authenticate_user(conn)
+  end
+
+  def require_existing_contributor_visibility(conn, extra) do
+    project = Projects.get_project!(conn.params["project_id"])
+
+    if not project.public_visible do
+      require_existing_contributor(conn, extra)
+    else
+      conn
+    end
   end
 
   def authorize_page_visibility(conn, _) do
     project = Projects.get_project!(conn.params["project_id"])
 
-    if conn.assigns.current_contributor.id == project.contributor_id or project.public_visible do
+    if project.public_visible or conn.assigns.current_contributor.id == project.contributor_id do
       assign(conn, :project, project)
     else
       conn
