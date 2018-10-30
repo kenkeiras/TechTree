@@ -246,6 +246,7 @@ function add_node(canvas, element, left, top, graph) {
     const add_dependency_node_visible = document.createElementNS(SvgNS, 'circle');
 
     node.setAttribute('class', 'step-node ' + node_class);
+    group.setAttribute('class', 'step-node ' + node_class);
 
     node.appendChild(rect);
     node.appendChild(textBox);

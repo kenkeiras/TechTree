@@ -432,7 +432,23 @@ circle.drag-handle {
 
 circle.drag-handle:hover {
     stroke: #222;
-    stroke-width: 0.5px;
+    stroke-width: 2px;
+}
+
+g.state-to-do > circle.drag-handle:hover {
+    stroke: #000;
+}
+
+g.state-completed > circle.drag-handle:hover {
+    stroke: #548A00;
+}
+
+g.state-archived > circle.drag-handle:hover {
+    stroke: #a13900;
+}
+
+g.state-work-in-progress > circle.drag-handle:hover {
+    stroke: #337ab7;
 }
 
 .purely-visual-component {
