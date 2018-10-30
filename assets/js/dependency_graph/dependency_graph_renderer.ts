@@ -91,10 +91,9 @@ class DependencyGraphRendererDriver {
 
         // Set buttons
         for (const button of buttons) {
-            if (Permissions.can_user_edit()) {
-                (button as HTMLButtonElement).onclick = trigger_add_step;
-            }
-            else {
+            (button as HTMLButtonElement).onclick = trigger_add_step;
+
+            if (!Permissions.can_user_edit()) {
                 (button as HTMLButtonElement).disabled = true;
             }
         }
