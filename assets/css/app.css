@@ -347,6 +347,7 @@ path {
 .step-node > text {
     fill: black;
     stroke: none;
+    font-size: larger;
 }
 .step-node:hover > text {
     fill: white;
@@ -359,6 +360,8 @@ path {
 
 .state-to-do > rect {
     stroke: #000000;
+    stroke-width: 0.5px;
+    filter: drop-shadow(0 0 2px #222);
 }
 .state-to-do:hover > rect {
     fill: #000000;
@@ -369,6 +372,8 @@ path.state-to-do {
 
 .state-completed > rect {
     stroke: #548A00;
+    stroke-width: 0.5px;
+    filter: drop-shadow(0 0 2px #548A00);
 }
 .state-completed:hover > rect {
     fill: #548A00;
@@ -379,6 +384,8 @@ path.state-completed {
 
 .state-work-in-progress > rect {
     stroke: #337ab7;
+    stroke-width: 0.5px;
+    filter: drop-shadow(0 0 2px #337ab7);
 }
 .state-work-in-progress:hover > rect {
     fill: #337ab7;
@@ -389,6 +396,8 @@ path.state-work-in-progress {
 
 .state-archived > rect {
     stroke:  #a13900;
+    stroke-width: 0.5px;
+    filter: drop-shadow(0 0 2px #a13900);
 }
 .state-archived:hover > rect {
     fill:  #a13900;
@@ -399,17 +408,17 @@ path.state-archived {
 
 /* Step nodes */
 circle.state-to-do {
-    stroke: #000000;
+    fill: #222;
 }
 
 circle.state-completed {
-    stroke: #548A00;
+    fill: #74AA20;
 }
 
 circle.state-work-in-progress {
-    stroke: #337ab7;
+    fill: #539ad7;
 }
 
 circle.state-archived {
-    stroke: #a13900;
+    fill: #c15920;
 }
