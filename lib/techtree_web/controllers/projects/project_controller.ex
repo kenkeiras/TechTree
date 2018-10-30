@@ -108,9 +108,17 @@ defmodule TechtreeWeb.Projects.ProjectController do
     end
   end
 
+  def has_edition_permissions?(%Plug.Conn{assigns: %{current_user: current_user}}, %Projects.Project{contributor: owner}) do
+    current_user.id == owner.id
+  end
+
+  def has_edition_permissions?(%Plug.Conn{}, %Projects.Project{}) do
+    false
+  end
+
   def show(conn, %{"project_id" => id}) do
     project = Projects.get_project_with_steps!(id)
-    render(conn, "show.html", project: project)
+    render(conn, "show.html", project: project, can_edit: has_edition_permissions?(conn, project))
   end
 
   def export(conn, %{"project_id" => id}) do
