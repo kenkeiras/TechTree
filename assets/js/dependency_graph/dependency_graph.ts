@@ -192,10 +192,31 @@ function on_user_clicks_dependency_node(
 
     const personal_area = PERSONAL_AREA_SPACE * personal_area_sign;
 
+    const is_position_distored_by_filter = (ev: MouseEvent) => {
+        // An ad-hoc heuristic to detect when a CSS filter might
+        // have distorted the ev.layer values.
+        // The `drop-shadow` filter does this.
+        //
+        // @TODO: Get a better measure
+        const target = ev.target as any;
+        if (target.tagName === "rect"){
+            const top_attr = target.getAttributeNS(null, 'y');
+            if (top_attr !== undefined) {
+                const top = parseInt(top_attr);
+
+                if (ev.layerY < top) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    };
+
     const follow_pointer = (ev) => {
         // Don't follow pointer when cursor
         // is not over canvas
-        if (ev.target !== canvas) {
+        if (!canvas.contains(ev.target) || is_position_distored_by_filter(ev)) {
             return;
         }
 
