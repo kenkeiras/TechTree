@@ -2,6 +2,7 @@ import * as Api from '../api';
 import * as params from '../params';
 import {ElementState} from './element';
 import { layout_steps, Layout, LayoutRow, LayoutEntry } from './layout';
+import * as Permissions from './permissions';
 
 // Offset between the line following the user and the cursor
 const PERSONAL_AREA_SPACE = 3;
@@ -276,9 +277,11 @@ function add_node(canvas, element, left, top, graph) {
 
     // Use-as/add dependency nodes are outside the main node
     //  so as the callbacks don't interfere
-    group.appendChild(use_as_dependency_node);
+    if (Permissions.can_user_edit()) {
+        group.appendChild(use_as_dependency_node);
+        group.appendChild(add_dependency_node);
+    }
     group.appendChild(use_as_dependency_node_visible);
-    group.appendChild(add_dependency_node);
     group.appendChild(add_dependency_node_visible);
 
     // Main box is set onto the canvas at the end so it
