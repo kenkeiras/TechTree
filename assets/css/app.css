@@ -363,12 +363,18 @@ path {
 .state-to-do:hover > rect {
     fill: #000000;
 }
+path.state-to-do {
+    stroke: #000000;
+}
 
 .state-completed > rect {
     stroke: #548A00;
 }
 .state-completed:hover > rect {
     fill: #548A00;
+}
+path.state-completed {
+    stroke: #548A00;
 }
 
 .state-work-in-progress > rect {
@@ -377,12 +383,18 @@ path {
 .state-work-in-progress:hover > rect {
     fill: #337ab7;
 }
+path.state-work-in-progress {
+    stroke: #337ab7;
+}
 
 .state-archived > rect {
     stroke:  #a13900;
 }
 .state-archived:hover > rect {
     fill:  #a13900;
+}
+path.state-archived {
+    stroke:  #a13900;
 }
 
 /* Step nodes */

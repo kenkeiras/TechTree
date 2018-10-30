@@ -925,7 +925,7 @@ function draw_column_from(base_x_off, base_y_off,
             },
             column_num: column_num,
 
-            _debug: element
+            element: element
         };
 
         for (const dependency of element.dependencies) {
@@ -943,25 +943,26 @@ function draw_column_from(base_x_off, base_y_off,
                 const init_column = nodes_map[dependency].column_num;
                 const end_column = nodes_map[element.id].column_num;
 
+                const init_element = nodes_map[dependency];
+                const init = init_element.right_middle;
+
+                const end_element = nodes_map[element.id];
+                const end = end_element.left_middle;
+
                 const path_element = document.createElementNS(SvgNS, 'path');
+                path_element.setAttribute('class',
+                                          "state-" + init_element.element.state.replace(/_/g, '-'));
                 let curve;
 
                 if (init_column !== end_column) {
-                    const init = nodes_map[dependency].right_middle;
-                    const end = nodes_map[element.id].left_middle;
-
                     curve = [
                         "M", init.left, ",", init.top,
                         " C", end.left - end_runway, ",", init.top,
                         " ", end.left - end_runway, ",", end.top,
                         " ", end.left, ",", end.top
                     ].join("");
-
                 }
                 else {
-                    const init = nodes_map[dependency].right_middle;
-                    const end = nodes_map[element.id].left_middle;
-
                     curve = [
                         "M", init.left, ",", init.top,
                         " C", init.left + end_runway, ",", init.top,
