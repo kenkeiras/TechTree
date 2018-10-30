@@ -128,6 +128,19 @@ function on_user_clicks_dependency_node(
         cb: (element_id: number) => void,
         runway: number=0) {
 
+    // @TODO: Remove the asumption that
+    // window.onmousemove and canvas.onclick
+    // is not used for anything else.
+    const cancel_follow_pointer = () => {
+        // Clicked on canvas, not on an element
+        // Thus, cancel the pointer following
+        window.onmousemove = undefined;
+        canvas.onclick = undefined;
+
+        const follower = canvas.getElementById('user_follower_path');
+        follower.parentElement.removeChild(follower);
+    };
+ 
     const origin_side = origin.getAttribute('connector_side');
     const origin_element_id = origin.getAttribute('element_id');
 
@@ -149,7 +162,7 @@ function on_user_clicks_dependency_node(
             }
         }
 
-        previous_follower.parentElement.removeChild(previous_follower);
+        cancel_follow_pointer();
     }
 
     if (no_need_to_follow) {
@@ -174,10 +187,22 @@ function on_user_clicks_dependency_node(
 
     const personal_area = PERSONAL_AREA_SPACE * personal_area_sign;
 
-    window.onmousemove = (ev) => {
+    const follow_pointer = (ev) => {
         draw_path(follower_path, from, 
             {x: ev.layerX - personal_area, y: ev.layerY}, runway)
     };
+
+    window.onmousemove = follow_pointer;
+    canvas.onclick = cancel_follow_pointer;
+}
+
+function stopPropagation(ev: Event) {
+    if (ev.stopPropagation) {
+        ev.stopPropagation();
+    }
+    else {
+        ev.cancelBubble = true;
+    }
 }
 
 function add_node(canvas, element, left, top, graph) {
@@ -274,31 +299,39 @@ function add_node(canvas, element, left, top, graph) {
         document.location = document.location;
     };
 
-    (add_dependency_node as any).onclick = () => on_user_clicks_dependency_node(
-        add_dependency_node, // from
-        canvas,
-        (previous_element_id) => {
-            Api.add_dependency(
-                element.project_id,
-                element.id,
-                previous_element_id,
-                on_dependencies_updated);
-        },
-        -box_height, // runway
-    );
+    (add_dependency_node as any).onclick = (ev) => {
+        on_user_clicks_dependency_node(
+            add_dependency_node, // from
+            canvas,
+            (previous_element_id) => {
+                Api.add_dependency(
+                    element.project_id,
+                    element.id,
+                    previous_element_id,
+                    on_dependencies_updated);
+            },
+            -box_height, // runway
+        );
 
-    (use_as_dependency_node as any).onclick = () => on_user_clicks_dependency_node(
-        use_as_dependency_node, // from
-        canvas,
-        (previous_element_id) => {
-            Api.add_dependency(
-                element.project_id,
-                previous_element_id,
-                element.id,
-                on_dependencies_updated);
-        },
-        +box_height, // runway
-    );
+        stopPropagation(ev);
+    }
+
+    (use_as_dependency_node as any).onclick = (ev) => {
+        on_user_clicks_dependency_node(
+            use_as_dependency_node, // from
+            canvas,
+            (previous_element_id) => {
+                Api.add_dependency(
+                    element.project_id,
+                    previous_element_id,
+                    element.id,
+                    on_dependencies_updated);
+            },
+            +box_height, // runway
+        );
+
+        stopPropagation(ev);
+    }
 
     return {
         width: rect.getClientRects()[0].width,
