@@ -57,7 +57,7 @@ function to_graph(base) {
 
 
 function prepare_draw_grid_in_canvas(grid: Layout, canvas, graph) {
-    const left_margin = 10; // px
+    const left_margin = 35; // px
     const top_margin = 10; // px
     const inter_column_separation = 20; // px
     let draw_actions = [];
