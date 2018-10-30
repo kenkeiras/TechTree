@@ -340,6 +340,10 @@ svg#techtree-graph a {
     text-decoration: none;
 }
 
+path {
+    pointer-events: none;
+}
+
 /* States */
 .step-node > text {
     fill: black;
