@@ -673,6 +673,9 @@ function build_fast_element_form(element, base, graph) {
     stateLabel.innerText = 'State:';
     stateRow.appendChild(stateLabel);
     stateRow.appendChild(stateSelect);
+    if (!Permissions.can_user_edit()) {
+        stateSelect.disabled = true;
+    }
 
     body.appendChild(stateRow);
 
@@ -753,7 +756,6 @@ function build_fast_element_form(element, base, graph) {
                                   has_changed = true;
                               });
     };
-    body.appendChild(addDependencyButton);
 
     const removeStepButton = document.createElement('button');
     removeStepButton.setAttribute('class', 'action-button dangerous');
@@ -769,12 +771,10 @@ function build_fast_element_form(element, base, graph) {
         });
     }
 
-    body.appendChild(removeStepButton);
 
-    if (!Permissions.can_user_edit()) {
-        addDependencyButton.disabled = true;
-        removeStepButton.disabled = true;
-        stateSelect.disabled = true;
+    if (Permissions.can_user_edit()) {
+        body.appendChild(addDependencyButton);
+        body.appendChild(removeStepButton);
     }
 
     return () => { return has_changed };
