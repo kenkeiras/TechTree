@@ -23,6 +23,10 @@ docker -t techtree .
 sh launch-docker.sh
 ```
 
+## TechTree plan on TechTree
+
+You can check this project TechTree on https://techtree.spiral.systems/projects/2 .
+
 ## References
 
 ### More about phoenix framework
