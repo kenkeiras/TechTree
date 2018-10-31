@@ -119,7 +119,13 @@ class DependencyGraphRendererDriver {
             title.insertBefore(unfocus_link, editableTitle);
         }
 
-        make_editable(editableTitle, project_id);
+        if (Permissions.can_user_edit()){
+            make_editable(editableTitle, project_id);
+        }
+        else {
+            // Remove editable property
+            editableTitle.classList.remove('editable');
+        }
     }
 };
 

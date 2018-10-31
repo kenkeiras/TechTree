@@ -620,7 +620,9 @@ function build_fast_element_form(element, base, graph) {
     title.innerText = element.title;
     let has_changed = false;
 
-    make_editable_title(title, element, () => { has_changed = true });
+    if (Permissions.can_user_edit()) {
+        make_editable_title(title, element, () => { has_changed = true });
+    }
 
     const backButton = document.createElement('a');
     backButton.setAttribute('class', 'navigation');
@@ -649,13 +651,19 @@ function build_fast_element_form(element, base, graph) {
 
     const description = document.createElement('textarea');
     description.setAttribute('class', 'description actionable');
-    description.placeholder = 'Add a description...';
 
     if (element.description !== null) {
         description.value = element.description;
     }
 
-    make_editable_description(description, element, () => { has_changed = true });
+    if (Permissions.can_user_edit()) {
+        description.placeholder = 'Add a description...';
+        make_editable_description(description, element, () => { has_changed = true });
+    }
+    else {
+        description.disabled = true;
+        description.placeholder = 'No description';
+    }
     body.appendChild(description);
 
     const stateRow = document.createElement('div');
@@ -705,7 +713,11 @@ function build_fast_element_form(element, base, graph) {
             const removeDependencyButton = document.createElement('button');
             removeDependencyButton.setAttribute('class', 'list-index dangerous');
             add_cross(removeDependencyButton);
-            dependency.appendChild(removeDependencyButton);
+
+            if (Permissions.can_user_edit()) {
+                dependency.appendChild(removeDependencyButton);
+            }
+
             removeDependencyButton.onclick = () => {
                 Api.remove_dependency(element.project_id, element.id, dep, () => {
                     dependencies.removeChild(dependency);
@@ -756,7 +768,14 @@ function build_fast_element_form(element, base, graph) {
             });
         });
     }
+
     body.appendChild(removeStepButton);
+
+    if (!Permissions.can_user_edit()) {
+        addDependencyButton.disabled = true;
+        removeStepButton.disabled = true;
+        stateSelect.disabled = true;
+    }
 
     return () => { return has_changed };
 }
