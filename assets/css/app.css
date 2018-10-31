@@ -216,6 +216,18 @@ span.loading {
     color: #222;
 }
 
+select:disabled {
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+
+    background-color: #f1f1f1;
+    border: 1px solid #b6b6b6;
+    border-radius: 4px;
+
+    padding: 0.5ex;
+}
+
 .form-group .warning, .form-group .warning:focus, .form-group .warning:hover {
     border: 1px solid #ff3100;
     box-shadow: 0px 0px 5px 1px #ff3100;
