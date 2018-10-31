@@ -3,6 +3,7 @@ import * as params from '../params';
 import * as Api from '../api';
 import * as Prompts from './prompts';
 import * as Hotkeys from '../hotkeys';
+import * as Permissions from './permissions';
 
 function is_depended_by(depended, depender, graph) {
     if (depender.id === depended.id) {
@@ -62,7 +63,9 @@ function focus_data(data) {
 }
 
 class DependencyGraphRendererDriver {
-    public run() {
+    public run(user_can_edit: boolean) {
+        Permissions.set_user_can_edit(user_can_edit);
+
         const graph = new DependencyGraph(document.getElementById("dependency_graph"));
 
         const project_id = document.location.pathname.split("/")[2];
@@ -83,15 +86,22 @@ class DependencyGraphRendererDriver {
 
     private configure_add_step_buttons(project_id: string, steps) {
         const buttons = document.getElementsByClassName("add-step-button");
+
         const trigger_add_step = () => Prompts.show_add_step_prompt(project_id, steps);
 
         // Set buttons
         for (const button of buttons) {
             (button as HTMLButtonElement).onclick = trigger_add_step;
+
+            if (!Permissions.can_user_edit()) {
+                (button as HTMLButtonElement).disabled = true;
+            }
         }
 
-        // Set hotkeys
-        Hotkeys.set_key('a', trigger_add_step);
+        if (Permissions.can_user_edit()) {
+            // Set hotkeys
+            Hotkeys.set_key('a', trigger_add_step);
+        }
     }
 
     private configure_title(project_id: string) {
@@ -109,7 +119,13 @@ class DependencyGraphRendererDriver {
             title.insertBefore(unfocus_link, editableTitle);
         }
 
-        make_editable(editableTitle, project_id);
+        if (Permissions.can_user_edit()){
+            make_editable(editableTitle, project_id);
+        }
+        else {
+            // Remove editable property
+            editableTitle.classList.remove('editable');
+        }
     }
 };
 

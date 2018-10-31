@@ -3,7 +3,8 @@ defmodule TechtreeWeb.Projects.ProjectController do
 
   alias Techtree.Projects
 
-  plug :require_existing_contributor
+  plug :require_existing_contributor when action not in [:show]
+  plug :require_existing_contributor_visibility when action in [:show]
   plug :authorize_page_visibility when action in [:show]
   plug :authorize_page_edition when action in [:edit, :update, :delete, :api_patch]
 
@@ -12,10 +13,25 @@ defmodule TechtreeWeb.Projects.ProjectController do
     assign(conn, :current_contributor, contributor)
   end
 
+  def require_existing_contributor_visibility(conn = %Plug.Conn{assigns: %{current_user: _}}, extra) do
+    require_existing_contributor(conn, extra)
+  end
+
+  def require_existing_contributor_visibility(conn, extra) do
+    project = Projects.get_project!(conn.params["project_id"])
+
+    if not project.public_visible do
+      # Authentication failure
+      TechtreeWeb.Router.authenticate_user(conn)
+    else
+      conn
+    end
+  end
+
   def authorize_page_visibility(conn, _) do
     project = Projects.get_project!(conn.params["project_id"])
 
-    if conn.assigns.current_contributor.id == project.contributor_id or project.public_visible do
+    if project.public_visible or conn.assigns.current_contributor.id == project.contributor_id do
       assign(conn, :project, project)
     else
       conn
@@ -92,9 +108,17 @@ defmodule TechtreeWeb.Projects.ProjectController do
     end
   end
 
+  def has_edition_permissions?(%Plug.Conn{assigns: %{current_user: current_user}}, %Projects.Project{contributor: owner}) do
+    current_user.id == owner.id
+  end
+
+  def has_edition_permissions?(%Plug.Conn{}, %Projects.Project{}) do
+    false
+  end
+
   def show(conn, %{"project_id" => id}) do
     project = Projects.get_project_with_steps!(id)
-    render(conn, "show.html", project: project)
+    render(conn, "show.html", project: project, can_edit: has_edition_permissions?(conn, project))
   end
 
   def export(conn, %{"project_id" => id}) do

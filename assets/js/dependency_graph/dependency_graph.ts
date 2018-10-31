@@ -2,6 +2,7 @@ import * as Api from '../api';
 import * as params from '../params';
 import {ElementState} from './element';
 import { layout_steps, Layout, LayoutRow, LayoutEntry } from './layout';
+import * as Permissions from './permissions';
 
 // Offset between the line following the user and the cursor
 const PERSONAL_AREA_SPACE = 3;
@@ -276,9 +277,11 @@ function add_node(canvas, element, left, top, graph) {
 
     // Use-as/add dependency nodes are outside the main node
     //  so as the callbacks don't interfere
-    group.appendChild(use_as_dependency_node);
+    if (Permissions.can_user_edit()) {
+        group.appendChild(use_as_dependency_node);
+        group.appendChild(add_dependency_node);
+    }
     group.appendChild(use_as_dependency_node_visible);
-    group.appendChild(add_dependency_node);
     group.appendChild(add_dependency_node_visible);
 
     // Main box is set onto the canvas at the end so it
@@ -617,7 +620,9 @@ function build_fast_element_form(element, base, graph) {
     title.innerText = element.title;
     let has_changed = false;
 
-    make_editable_title(title, element, () => { has_changed = true });
+    if (Permissions.can_user_edit()) {
+        make_editable_title(title, element, () => { has_changed = true });
+    }
 
     const backButton = document.createElement('a');
     backButton.setAttribute('class', 'navigation');
@@ -646,13 +651,19 @@ function build_fast_element_form(element, base, graph) {
 
     const description = document.createElement('textarea');
     description.setAttribute('class', 'description actionable');
-    description.placeholder = 'Add a description...';
 
     if (element.description !== null) {
         description.value = element.description;
     }
 
-    make_editable_description(description, element, () => { has_changed = true });
+    if (Permissions.can_user_edit()) {
+        description.placeholder = 'Add a description...';
+        make_editable_description(description, element, () => { has_changed = true });
+    }
+    else {
+        description.disabled = true;
+        description.placeholder = 'No description';
+    }
     body.appendChild(description);
 
     const stateRow = document.createElement('div');
@@ -662,6 +673,9 @@ function build_fast_element_form(element, base, graph) {
     stateLabel.innerText = 'State:';
     stateRow.appendChild(stateLabel);
     stateRow.appendChild(stateSelect);
+    if (!Permissions.can_user_edit()) {
+        stateSelect.disabled = true;
+    }
 
     body.appendChild(stateRow);
 
@@ -702,7 +716,11 @@ function build_fast_element_form(element, base, graph) {
             const removeDependencyButton = document.createElement('button');
             removeDependencyButton.setAttribute('class', 'list-index dangerous');
             add_cross(removeDependencyButton);
-            dependency.appendChild(removeDependencyButton);
+
+            if (Permissions.can_user_edit()) {
+                dependency.appendChild(removeDependencyButton);
+            }
+
             removeDependencyButton.onclick = () => {
                 Api.remove_dependency(element.project_id, element.id, dep, () => {
                     dependencies.removeChild(dependency);
@@ -738,7 +756,6 @@ function build_fast_element_form(element, base, graph) {
                                   has_changed = true;
                               });
     };
-    body.appendChild(addDependencyButton);
 
     const removeStepButton = document.createElement('button');
     removeStepButton.setAttribute('class', 'action-button dangerous');
@@ -753,7 +770,12 @@ function build_fast_element_form(element, base, graph) {
             });
         });
     }
-    body.appendChild(removeStepButton);
+
+
+    if (Permissions.can_user_edit()) {
+        body.appendChild(addDependencyButton);
+        body.appendChild(removeStepButton);
+    }
 
     return () => { return has_changed };
 }

@@ -7,21 +7,25 @@ defmodule TechtreeWeb.Projects.DependencyController do
 
   alias TechtreeWeb.Projects.Plugs
 
-  plug :require_existing_contributor
+  plug :require_existing_contributor when action not in [:dependency_graph]
+  plug :require_existing_contributor_visibility when action in [:dependency_graph]
   plug :authorize_page_visibility when action in [
-    :get_available_dependencies_for_step,
     :dependency_graph,
-    :get_step_dependencies,
   ]
 
-  plug :authorize_page_edition when action in [
-    :new, :create, :delete, :add_dependency, :remove_dependency
+  plug :authorize_page_edition when action not in [
+    :dependency_graph,
   ]
 
 
   defp require_existing_contributor(conn, x) do
     # TODO move to it's own module
     ProjectController.require_existing_contributor(conn, x)
+  end
+
+  defp require_existing_contributor_visibility(conn, x) do
+    # TODO move to it's own module
+    ProjectController.require_existing_contributor_visibility(conn, x)
   end
 
   defp authorize_page_visibility(conn, x) do

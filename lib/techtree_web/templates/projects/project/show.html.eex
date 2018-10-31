@@ -2,4 +2,7 @@
 </div>
 
 <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
-<script>require("js/dependency_graph/dependency_graph_renderer.ts").DependencyGraphRenderer.run();</script>
+<script>
+const user_can_edit = <%= @can_edit %>;
+require("js/dependency_graph/dependency_graph_renderer.ts").DependencyGraphRenderer.run(user_can_edit);
+</script>

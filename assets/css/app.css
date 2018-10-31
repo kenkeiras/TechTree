@@ -20,6 +20,10 @@ nav ul {
     display: inline;
 }
 
+.nav-buttons > .nav-button:disabled {
+    filter: grayscale(100%);
+}
+
 .header > nav > a > img {
     margin-left: 1ex;
     vertical-align: text-bottom;
@@ -206,6 +210,22 @@ span.loading {
 .action-button:disabled, .action-button:disabled {
     background: repeating-linear-gradient(45deg,#AAA,#AAA 10px,#eee 10px,#eee 20px);
     color: #222;
+}
+
+.action-button:disabled:hover, .action-button:disabled:hover {
+    color: #222;
+}
+
+select:disabled {
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+
+    background-color: #f1f1f1;
+    border: 1px solid #b6b6b6;
+    border-radius: 4px;
+
+    padding: 0.5ex;
 }
 
 .form-group .warning, .form-group .warning:focus, .form-group .warning:hover {
