@@ -367,8 +367,8 @@ path {
 .step-node > text {
     fill: black;
     stroke: none;
-    font-size: larger;
 }
+
 .step-node:hover > text {
     fill: white;
 }
