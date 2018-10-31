@@ -33,10 +33,6 @@ nav ul {
     margin: 1ex;
 }
 
-.editable:hover::after {
-    content: "✎";
-}
-
 .nav-button:hover {
     text-decoration: none;
     background-color: #eee;
