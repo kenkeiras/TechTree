@@ -12,6 +12,10 @@
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" title="Clear default" href="<%= static_path(@conn, "/css/app.css") %>">
     <link rel="alternate stylesheet" title="Night" href="<%= static_path(@conn, "/css/app_night.css") %>">
+
+    <script src="<%= static_path(@conn, "/js/jquery-3.3.1.min.js") %>"></script>
+    <script src="<%= static_path(@conn, "/js/bootstrap-3.3.7.min.js") %>"></script>
+
     <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
   </head>
 

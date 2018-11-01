@@ -65,7 +65,13 @@ exports.config = {
             }
         },
         copycat: {
-            fonts: ["node_modules/bootstrap-sass/assets/fonts/bootstrap"]
+            fonts: ["node_modules/bootstrap-sass/assets/fonts/bootstrap"],
+            js: [
+                "vendor/js/jquery-3.3.1.min.js",
+                // Bootstrap version 3.3 is used as phoenix.css uses
+                // bootstrap 3.3.5
+                "vendor/js/bootstrap-3.3.7.min.js"
+            ]
         }
     },
 
