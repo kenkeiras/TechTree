@@ -17,7 +17,7 @@ defmodule Techtree.Projects.Project do
   @doc false
   def changeset(project, attrs) do
     project
-    |> cast(attrs, [:name])
+    |> cast(attrs, [:name, :public_visible])
     |> validate_required([:name])
   end
 end

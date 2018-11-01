@@ -4,6 +4,7 @@ import * as Api from '../api';
 import * as Prompts from './prompts';
 import * as Hotkeys from '../hotkeys';
 import * as Permissions from './permissions';
+import * as Project from '../project';
 
 function is_depended_by(depended, depender, graph) {
     if (depender.id === depended.id) {
@@ -81,9 +82,33 @@ class DependencyGraphRendererDriver {
         this.configure_visibility_dropdown(project_id);
     }
 
+    private project_set_private(project_id: string) {
+        Api.set_project_visibility(project_id, Project.Visibility.Private, (success) => {
+            if (success) {
+                document.location = document.location;
+            }
+        });
+    }
+
+    private project_set_public(project_id: string) {
+        Api.set_project_visibility(project_id, Project.Visibility.Public, (success) => {
+            if (success) {
+                document.location = document.location;
+            }
+        });
+    }
+
     private configure_visibility_dropdown(project_id: string) {
         if (Permissions.can_user_edit()) {
+            const set_private_elements = document.getElementsByClassName('set-project-visibility-private');
+            for (const private_setter of set_private_elements) {
+                (private_setter as any).onclick = () => { this.project_set_private(project_id); return false; }
+            }
 
+            const set_public_elements = document.getElementsByClassName('set-project-visibility-public');
+            for (const public_setter of set_public_elements) {
+                (public_setter as any).onclick = () => { this.project_set_public(project_id); return false; }
+            }
 
         }
         else {
