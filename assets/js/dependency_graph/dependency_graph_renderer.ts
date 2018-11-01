@@ -78,6 +78,30 @@ class DependencyGraphRendererDriver {
         });
 
         this.configure_title(project_id);
+        this.configure_visibility_dropdown(project_id);
+    }
+
+    private configure_visibility_dropdown(project_id: string) {
+        if (Permissions.can_user_edit()) {
+
+
+        }
+        else {
+            this.disable_visibility_dropdown();
+        }
+    }
+
+    private disable_visibility_dropdown() {
+        const buttons = document.getElementsByClassName('visibility-dropdown-button');
+
+        for (const button of buttons) {
+            (button as HTMLButtonElement).disabled = true;
+
+            // Remove arrows down inside
+            for (const arrow_down of button.getElementsByClassName('glyphicon-menu-down')) {
+                arrow_down.parentElement.removeChild(arrow_down);
+            }
+        }
     }
 
     private configure_buttons(project_id: string, steps) {

@@ -21,26 +21,27 @@ defmodule TechtreeWeb.Projects.ProjectView do
     ~E{
       <div class="nav-buttons">
         <div class="dropdown btn-group">
-            <button type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">
-              <%= if project.public_visible do %>
+            <button type="button" data-toggle="dropdown" class="nav-button dropdown-toggle visibility-dropdown-button">
+            <%= if project.public_visible do %>
                   <i class="glyphicon glyphicon-eye-open"></i>
                   Public
               <% else %>
                   <i class="glyphicon glyphicon-lock"></i>
                   Private
               <% end %>
+              <i class="glyphicon glyphicon-menu-down"></i>
             </button>
             <ul class="dropdown-menu" role="menu">
               <%= if project.public_visible do %>
                 <li>
-                  <a href="#">
+                  <a href="#" class="set-project-visibility-private">
                     <i class="glyphicon glyphicon-lock"></i>
                     Make private
                   </a>
                 </li>
               <% else %>
                 <li>
-                  <a href="#">
+                  <a href="#" class="set-project-visibility-public">
                     <i class="glyphicon glyphicon-eye-open"></i>
                     Make public
                   </a>
