@@ -20,8 +20,13 @@ nav ul {
     display: inline;
 }
 
-.nav-buttons > .nav-button:disabled {
+.nav-button:disabled {
     filter: grayscale(100%);
+    cursor: not-allowed;
+}
+
+.dropdown.btn-group {
+    vertical-align: baseline;
 }
 
 .header > nav > a > img {
@@ -31,10 +36,6 @@ nav ul {
 
 .message > div, .message > span {
     margin: 1ex;
-}
-
-.editable:hover::after {
-    content: "✎";
 }
 
 .nav-button:hover {

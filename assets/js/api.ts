@@ -1,3 +1,5 @@
+import * as Project from './project';
+
 function get_csrf_token(): string {
     return (document.head.querySelector('[name="csrf-token"]') as HTMLMetaElement).content;
 }
@@ -143,6 +145,14 @@ export function set_project_name(project_id: string, name: string, cb: Function)
         return;
     }
 
+    patch_project(project_id, {"name": name}, cb);
+}
+
+export function set_project_visibility(project_id: id, visibility: Project.Visibility, cb: Function) {
+    patch_project(project_id, {"visibility": visibility}, cb);
+}
+
+function patch_project(project_id: id, data, cb: Function) {
     const xhttp = new XMLHttpRequest();
 
     xhttp.onreadystatechange = function() {
@@ -158,7 +168,7 @@ export function set_project_name(project_id: string, name: string, cb: Function)
     xhttp.setRequestHeader("x-csrf-token", get_csrf_token());
     xhttp.setRequestHeader("Content-Type", "application/json");
 
-    xhttp.send(JSON.stringify({"name": name}));
+    xhttp.send(JSON.stringify(data));
 }
 
 export function create_step(project_id: string, properties: any, cb: Function){

@@ -3,6 +3,7 @@ import * as params from '../params';
 import {ElementState} from './element';
 import { layout_steps, Layout, LayoutRow, LayoutEntry } from './layout';
 import * as Permissions from './permissions';
+import * as Prompts from './prompts';
 
 // Offset between the line following the user and the cursor
 const PERSONAL_AREA_SPACE = 3;
@@ -762,7 +763,7 @@ function build_fast_element_form(element, base, graph) {
     removeStepButton.innerText = 'Remove step';
 
     removeStepButton.onclick = () => {
-        confirm_dangerous_action("Remove step “" + element.title + "”",
+        Prompts.confirm_dangerous_action("Remove step “" + element.title + "”",
                                  element.title, () => {
             Api.remove_step(element.project_id, element.id, (success) => {
                 has_changed = true;
@@ -778,84 +779,6 @@ function build_fast_element_form(element, base, graph) {
     }
 
     return () => { return has_changed };
-}
-
-function confirm_dangerous_action(action_description, type_information, callback) {
-    const overlay = document.createElement("div");
-    overlay.setAttribute('class', 'overlay');    
-    const popup = document.createElement("div");
-    popup.setAttribute('class', 'popup small');
-
-    overlay.appendChild(popup);
-    document.body.appendChild(overlay);
-    overlay.style.height = document.body.offsetHeight + 'px';
-    overlay.style.width = document.body.offsetWidth + 'px';
-
-    const messageBox = document.createElement('div');
-    messageBox.setAttribute('class', 'message');
-
-    const messageStart = document.createElement('div');
-    messageStart.innerText = "The following action is about to be performed:";
-    messageBox.appendChild(messageStart);
-
-    const actionDescriptionMessage = document.createElement('div');
-    actionDescriptionMessage.setAttribute('class', 'action-description dangerous');
-    actionDescriptionMessage.innerText = action_description;
-    messageBox.appendChild(actionDescriptionMessage);
-
-    const warningMessage = document.createElement('div');
-    warningMessage.innerText = 'This cannot be undone!';
-    messageBox.appendChild(warningMessage);
-
-    const callToAction = document.createElement('div');
-    const instructionsStart = document.createElement('span');
-    instructionsStart.innerText = 'Type “';
-    callToAction.appendChild(instructionsStart);
-
-    const instructionsRequirement = document.createElement('span');
-    instructionsRequirement.innerText = type_information;
-    callToAction.appendChild(instructionsRequirement);
-
-    const instructionsEnd = document.createElement('span');
-    instructionsEnd.innerText = '” to confirm';
-    callToAction.appendChild(instructionsEnd);
-    messageBox.appendChild(callToAction);
-    popup.appendChild(messageBox);
-
-    const inputBox = document.createElement('input');
-    inputBox.type = 'text';
-    inputBox.setAttribute('class', 'user-confirmation');
-    popup.appendChild(inputBox);
-
-    const confirmButton = document.createElement('button');
-    confirmButton.setAttribute('class', 'action-button dangerous');
-    confirmButton.innerText = 'Confirm';
-    confirmButton.disabled = true;
-    confirmButton.onclick = () => {
-        (popup as any).close();
-        callback();
-    }
-    popup.appendChild(confirmButton);
-
-    inputBox.onkeyup = () => {
-        const confirmed = inputBox.value === type_information;
-        confirmButton.disabled = !confirmed;
-    };
-
-    (popup as any).close = () => {
-        document.body.removeChild(overlay);
-    }
-
-    const cancelButton = document.createElement('button');
-    cancelButton.setAttribute('class', 'action-button');
-    cancelButton.innerText = 'Cancel';
-    cancelButton.onclick = (popup as any).close;
-    popup.appendChild(cancelButton);
-
-    overlay.onclick = (popup as any).close;
-    popup.onclick = (ev) => {
-        ev.stopPropagation();
-    }
 }
 
 function build_popup(element, graph){ 

@@ -4,6 +4,7 @@ import * as Api from '../api';
 import * as Prompts from './prompts';
 import * as Hotkeys from '../hotkeys';
 import * as Permissions from './permissions';
+import * as Project from '../project';
 
 function is_depended_by(depended, depender, graph) {
     if (depender.id === depended.id) {
@@ -78,6 +79,68 @@ class DependencyGraphRendererDriver {
         });
 
         this.configure_title(project_id);
+        this.configure_visibility_dropdown(project_id);
+    }
+
+    private project_set_private(project_id: string) {
+        const project_name = this.get_project_name();
+
+        Prompts.confirm_dangerous_action("Set project “" + project_name + "” as private",
+                                 project_name, () => {
+            Api.set_project_visibility(project_id, Project.Visibility.Private, (success) => {
+                if (success) {
+                    document.location = document.location;
+                }
+            });
+        },
+        { danger: "This will remove general access to the project"}
+        );
+    }
+
+    private project_set_public(project_id: string) {
+        const project_name = this.get_project_name();
+
+        Prompts.confirm_dangerous_action("Set project “" + project_name + "” as public",
+                                 project_name, () => {
+            Api.set_project_visibility(project_id, Project.Visibility.Public, (success) => {
+                if (success) {
+                    document.location = document.location;
+                }
+            });
+        },
+        { danger: "This will allow anyone to see the project"}
+        );
+    }
+
+    private configure_visibility_dropdown(project_id: string) {
+        if (Permissions.can_user_edit()) {
+            const set_private_elements = document.getElementsByClassName('set-project-visibility-private');
+            for (const private_setter of set_private_elements) {
+                (private_setter as any).onclick = () => { this.project_set_private(project_id); return false; }
+            }
+
+            const set_public_elements = document.getElementsByClassName('set-project-visibility-public');
+            for (const public_setter of set_public_elements) {
+                (public_setter as any).onclick = () => { this.project_set_public(project_id); return false; }
+            }
+
+        }
+        else {
+            this.disable_visibility_dropdown();
+        }
+    }
+
+    private disable_visibility_dropdown() {
+        const buttons = document.getElementsByClassName('visibility-dropdown-button');
+
+        for (const button of buttons) {
+            (button as HTMLButtonElement).disabled = true;
+
+            // Remove arrows down inside
+            for (const arrow_down of button.getElementsByClassName('glyphicon-menu-down')) {
+                arrow_down.parentElement.removeChild(arrow_down);
+            }
+        }
     }
 
     private configure_buttons(project_id: string, steps) {
@@ -102,6 +165,13 @@ class DependencyGraphRendererDriver {
             // Set hotkeys
             Hotkeys.set_key('a', trigger_add_step);
         }
+    }
+
+    private get_project_name(): string {
+        const title = document.querySelector(".header > nav > h1.title");
+
+        const editableTitle: HTMLSpanElement = title.querySelector("span.editable");
+        return editableTitle.innerText;
     }
 
     private configure_title(project_id: string) {

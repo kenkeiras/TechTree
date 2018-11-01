@@ -153,7 +153,31 @@ defmodule TechtreeWeb.Projects.ProjectController do
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
         |> put_status(:internal_server_error)
+        |> render("result.json", %{result: %{ success: false}})
+    end
+  end
+
+  def api_patch(conn, %{ "visibility" => "public" }) do
+    case Projects.update_project(conn.assigns.project, %{ "public_visible" => true }) do
+      {:ok, project} ->
+        conn
         |> render("result.json", %{result: %{ success: true}})
+      {:error, %Ecto.Changeset{} = changeset} ->
+        conn
+        |> put_status(:internal_server_error)
+        |> render("result.json", %{result: %{ success: false}})
+    end
+  end
+
+  def api_patch(conn, %{ "visibility" => "private" }) do
+    case Projects.update_project(conn.assigns.project, %{ "public_visible" => false }) do
+      {:ok, project} ->
+        conn
+        |> render("result.json", %{result: %{ success: true}})
+      {:error, %Ecto.Changeset{} = changeset} ->
+        conn
+        |> put_status(:internal_server_error)
+        |> render("result.json", %{result: %{ success: false}})
     end
   end
 
