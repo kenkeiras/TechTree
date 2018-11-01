@@ -20,6 +20,17 @@ defmodule TechtreeWeb.Projects.ProjectView do
 
     ~E{
       <div class="nav-buttons">
+        <%= if project.public_visible do %>
+          <button class="nav-button public-visibility-button">
+            <i class="glyphicon glyphicon-eye-open"></i>
+            Public
+          </button>
+        <% else %>
+          <button class="nav-button private-visibility-button">
+            <i class="glyphicon glyphicon-lock"></i>
+            Private
+          </button>
+        <% end %>
         <button class="nav-button add-step-button">Add step [⌨ a]</button>
         <a target="_blank" href="<%= export_url %>" class="nav-button export-project-button">
           Export project
