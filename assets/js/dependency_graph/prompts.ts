@@ -1,6 +1,8 @@
 import * as Api from '../api';
 import * as Hotkeys from '../hotkeys';
 
+const DEFAULT_DANGER = 'This cannot be undone!';
+
 export function show_add_step_prompt(project_id: string, steps) {
     build_popup((popup) => add_step_prompt(popup, project_id, steps));
 
@@ -203,4 +205,87 @@ function build_popup(setup_prompt: Function){
 
 
     return popup;
+}
+
+export function confirm_dangerous_action(action_description, type_information, callback, options) {
+    let danger = DEFAULT_DANGER;
+    if ((options !== undefined) && (options.danger !== undefined)) {
+        danger = options.danger;
+    }
+
+    const overlay = document.createElement("div");
+    overlay.setAttribute('class', 'overlay');    
+    const popup = document.createElement("div");
+    popup.setAttribute('class', 'popup small');
+
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+    overlay.style.height = document.body.offsetHeight + 'px';
+    overlay.style.width = document.body.offsetWidth + 'px';
+
+    const messageBox = document.createElement('div');
+    messageBox.setAttribute('class', 'message');
+
+    const messageStart = document.createElement('div');
+    messageStart.innerText = "The following action is about to be performed:";
+    messageBox.appendChild(messageStart);
+
+    const actionDescriptionMessage = document.createElement('div');
+    actionDescriptionMessage.setAttribute('class', 'action-description dangerous');
+    actionDescriptionMessage.innerText = action_description;
+    messageBox.appendChild(actionDescriptionMessage);
+
+    const warningMessage = document.createElement('div');
+    warningMessage.innerText = danger;
+    messageBox.appendChild(warningMessage);
+
+    const callToAction = document.createElement('div');
+    const instructionsStart = document.createElement('span');
+    instructionsStart.innerText = 'Type “';
+    callToAction.appendChild(instructionsStart);
+
+    const instructionsRequirement = document.createElement('span');
+    instructionsRequirement.innerText = type_information;
+    callToAction.appendChild(instructionsRequirement);
+
+    const instructionsEnd = document.createElement('span');
+    instructionsEnd.innerText = '” to confirm';
+    callToAction.appendChild(instructionsEnd);
+    messageBox.appendChild(callToAction);
+    popup.appendChild(messageBox);
+
+    const inputBox = document.createElement('input');
+    inputBox.type = 'text';
+    inputBox.setAttribute('class', 'user-confirmation');
+    popup.appendChild(inputBox);
+
+    const confirmButton = document.createElement('button');
+    confirmButton.setAttribute('class', 'action-button dangerous');
+    confirmButton.innerText = 'Confirm';
+    confirmButton.disabled = true;
+    confirmButton.onclick = () => {
+        (popup as any).close();
+        callback();
+    }
+    popup.appendChild(confirmButton);
+
+    inputBox.onkeyup = () => {
+        const confirmed = inputBox.value === type_information;
+        confirmButton.disabled = !confirmed;
+    };
+
+    (popup as any).close = () => {
+        document.body.removeChild(overlay);
+    }
+
+    const cancelButton = document.createElement('button');
+    cancelButton.setAttribute('class', 'action-button');
+    cancelButton.innerText = 'Cancel';
+    cancelButton.onclick = (popup as any).close;
+    popup.appendChild(cancelButton);
+
+    overlay.onclick = (popup as any).close;
+    popup.onclick = (ev) => {
+        ev.stopPropagation();
+    }
 }

@@ -83,19 +83,33 @@ class DependencyGraphRendererDriver {
     }
 
     private project_set_private(project_id: string) {
-        Api.set_project_visibility(project_id, Project.Visibility.Private, (success) => {
-            if (success) {
-                document.location = document.location;
-            }
-        });
+        const project_name = this.get_project_name();
+
+        Prompts.confirm_dangerous_action("Set project “" + project_name + "” as private",
+                                 project_name, () => {
+            Api.set_project_visibility(project_id, Project.Visibility.Private, (success) => {
+                if (success) {
+                    document.location = document.location;
+                }
+            });
+        },
+        { danger: "This will remove general access to the project"}
+        );
     }
 
     private project_set_public(project_id: string) {
-        Api.set_project_visibility(project_id, Project.Visibility.Public, (success) => {
-            if (success) {
-                document.location = document.location;
-            }
-        });
+        const project_name = this.get_project_name();
+
+        Prompts.confirm_dangerous_action("Set project “" + project_name + "” as public",
+                                 project_name, () => {
+            Api.set_project_visibility(project_id, Project.Visibility.Public, (success) => {
+                if (success) {
+                    document.location = document.location;
+                }
+            });
+        },
+        { danger: "This will allow anyone to see the project"}
+        );
     }
 
     private configure_visibility_dropdown(project_id: string) {
@@ -151,6 +165,13 @@ class DependencyGraphRendererDriver {
             // Set hotkeys
             Hotkeys.set_key('a', trigger_add_step);
         }
+    }
+
+    private get_project_name(): string {
+        const title = document.querySelector(".header > nav > h1.title");
+
+        const editableTitle: HTMLSpanElement = title.querySelector("span.editable");
+        return editableTitle.innerText;
     }
 
     private configure_title(project_id: string) {
