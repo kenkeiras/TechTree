@@ -109,7 +109,7 @@ defmodule TechtreeWeb.Projects.ProjectController do
   end
 
   def has_edition_permissions?(%Plug.Conn{assigns: %{current_user: current_user}}, %Projects.Project{contributor: owner}) do
-    current_user.id == owner.id
+    current_user.id == owner.user_id
   end
 
   def has_edition_permissions?(%Plug.Conn{}, %Projects.Project{}) do
