@@ -68,6 +68,26 @@ defmodule Techtree.Projects do
   end
 
   @doc """
+  Retrieve a project with all it's contributors.
+  """
+  def get_project_contributors(id) do
+    Project
+    |> Repo.get!(id)
+    |> Repo.preload([:contributors])
+  end
+
+  @doc """
+  Adds a contributor to a project.
+  """
+  def add_project_contributor(project = %Project{}, contributor = %Contributor{}) do
+    project
+    |> Repo.preload(:contributors) # Load existing data
+    |> Ecto.Changeset.change() # Build the changeset
+    |> Ecto.Changeset.put_assoc(:contributors, [contributor | project.contributors]) # Set the association
+    |> Repo.update!
+  end
+
+  @doc """
   Gets a single project.
 
   Raises `Ecto.NoResultsError` if the Project does not exist.
