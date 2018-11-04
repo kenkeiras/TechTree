@@ -3,8 +3,8 @@ defmodule TechtreeWeb.Projects.ProjectView do
 
   alias Techtree.Projects
 
-  def author_name(%Projects.Project{ contributor: contributor }) do
-    contributor.user.name
+  def author_name(%Projects.Project{ owner: owner }) do
+    owner.user.name
   end
 
   def render("section_title_completion.css", %{ project: project }) do

@@ -6,7 +6,7 @@ defmodule Techtree.Projects.Project do
 
   schema "projects" do
     field :name, :string
-    belongs_to :contributor, Contributor
+    belongs_to :owner, Contributor
     has_many :steps, Step
     field :completed, :boolean, virtual: true
     field :public_visible, :boolean

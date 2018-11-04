@@ -31,7 +31,7 @@ defmodule TechtreeWeb.Projects.ProjectController do
   def authorize_page_visibility(conn, _) do
     project = Projects.get_project!(conn.params["project_id"])
 
-    if project.public_visible or conn.assigns.current_contributor.id == project.contributor_id do
+    if project.public_visible or conn.assigns.current_contributor.id == project.owner_id do
       assign(conn, :project, project)
     else
       conn
@@ -44,7 +44,7 @@ defmodule TechtreeWeb.Projects.ProjectController do
   def authorize_page_edition(conn, _) do
     project = Projects.get_project!(conn.params["project_id"])
 
-    if conn.assigns.current_contributor.id == project.contributor_id do
+    if conn.assigns.current_contributor.id == project.owner_id do
       assign(conn, :project, project)
     else
       conn
@@ -108,7 +108,7 @@ defmodule TechtreeWeb.Projects.ProjectController do
     end
   end
 
-  def has_edition_permissions?(%Plug.Conn{assigns: %{current_user: current_user}}, %Projects.Project{contributor: owner}) do
+  def has_edition_permissions?(%Plug.Conn{assigns: %{current_user: current_user}}, %Projects.Project{owner: owner}) do
     current_user.id == owner.user_id
   end
 
