@@ -11,6 +11,11 @@ defmodule Techtree.Projects.Project do
     field :completed, :boolean, virtual: true
     field :public_visible, :boolean
 
+    many_to_many(:contributors, Contributor,
+      join_through: "project_contributors",
+      join_keys: [project_id: :id, contributor_id: :id]
+    )
+
     timestamps()
   end
 
