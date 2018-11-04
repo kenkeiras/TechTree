@@ -29,7 +29,8 @@ defmodule Techtree.Projects do
   end
 
   @doc """
-  Returns the list of projects.
+  Returns the list of projects a contributor can have access to.
+  At this point is the projects the contributor owns.
 
   ## Examples
 
@@ -39,9 +40,9 @@ defmodule Techtree.Projects do
   """
   def list_projects(contributor=%Contributor{}) do
     result = Project
-    |> Ecto.Query.where(contributor_id: ^contributor.id)
+    |> Ecto.Query.where(owner_id: ^contributor.id)
     |> Repo.all()
-    |> Repo.preload(contributor: [user: :email], steps: [])
+    |> Repo.preload(owner: [user: :email], steps: [])
 
     check_completed_projects(result)
   end
@@ -63,7 +64,7 @@ defmodule Techtree.Projects do
   def get_project!(id) do
     Project
     |> Repo.get!(id)
-    |> Repo.preload(contributor: [user: :email])
+    |> Repo.preload(owner: [user: :email])
   end
 
   @doc """
@@ -83,7 +84,7 @@ defmodule Techtree.Projects do
   def get_project_with_steps!(id) do
     project = Project
     |> Repo.get!(id)
-    |> Repo.preload(contributor: [user: :email], steps: [])
+    |> Repo.preload(owner: [user: :email], steps: [])
     check_completed_project(project)
   end
 
@@ -119,10 +120,10 @@ defmodule Techtree.Projects do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_project(%Contributor{} = contributor, attrs \\ %{}) do
+  def create_project(%Contributor{} = owner, attrs \\ %{}) do
     %Project{}
     |> Project.changeset(attrs)
-    |> Ecto.Changeset.put_change(:contributor_id, contributor.id)
+    |> Ecto.Changeset.put_change(:owner_id, owner.id)
     |> Repo.insert()
   end
 
@@ -382,10 +383,10 @@ defmodule Techtree.Projects do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_step(%Contributor{} = contributor, %Project{} = project, attrs \\ %{}) do
+  def create_step(%Contributor{} = owner, %Project{} = project, attrs \\ %{}) do
     %Step{}
     |> Step.changeset(attrs)
-    |> Ecto.Changeset.put_change(:contributor_id, contributor.id)
+    |> Ecto.Changeset.put_change(:owner_id, owner.id)
     |> Ecto.Changeset.put_change(:project_id, project.id)
     |> Repo.insert()
   end

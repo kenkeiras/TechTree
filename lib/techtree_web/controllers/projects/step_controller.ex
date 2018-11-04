@@ -54,9 +54,7 @@ defmodule TechtreeWeb.Projects.StepController do
       {:ok, step} ->
         render(conn, "operation_result.json", result: %{success: true})
       {:error, %Ecto.Changeset{} = changeset} ->
-        IO.puts("----  ERROR ----")
         IO.inspect(changeset)
-        IO.puts("---- /ERROR ----")
         conn
         |> put_status(:bad_request)
         |> render("operation_result.json", result: %{success: false})
