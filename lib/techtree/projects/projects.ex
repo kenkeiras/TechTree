@@ -88,6 +88,23 @@ defmodule Techtree.Projects do
   end
 
   @doc """
+  Removes a contributor from a project.
+  """
+  def remove_project_contributor(project_id, removed_contributor_id) when is_number(project_id) and is_number(removed_contributor_id) do
+    # This is built as a custom query to avoid having to resolve
+    # the elements being deleted
+    query = """
+    DELETE
+    FROM project_contributors
+    WHERE project_id = $1
+      AND contributor_id = $2
+    ;
+    """
+
+    Ecto.Adapters.SQL.query(Repo, query, [project_id, removed_contributor_id])
+  end
+
+  @doc """
   Gets a single project.
 
   Raises `Ecto.NoResultsError` if the Project does not exist.
