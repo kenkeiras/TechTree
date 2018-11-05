@@ -48,7 +48,11 @@ defmodule TechtreeWeb.Projects.ProjectController do
   def authorize_page_edition(conn, _) do
     project = Projects.get_project!(conn.params["project_id"])
 
-    if conn.assigns.current_contributor.id == project.owner_id do
+    if conn.assigns.current_contributor.id == project.owner_id or
+         MapSet.member?(
+           Projects.get_project_contributor_set(conn.params["project_id"]),
+           conn.assigns.current_contributor.id
+         ) do
       assign(conn, :project, project)
     else
       conn
@@ -112,8 +116,15 @@ defmodule TechtreeWeb.Projects.ProjectController do
     end
   end
 
-  def has_edition_permissions?(%Plug.Conn{assigns: %{current_user: current_user}}, %Projects.Project{owner: owner}) do
-    current_user.id == owner.user_id
+  def has_edition_permissions?(
+        conn = %Plug.Conn{assigns: %{current_user: current_user}},
+        %Projects.Project{owner: owner}
+      ) do
+    current_user.id == owner.user_id or
+      MapSet.member?(
+        Projects.get_project_contributor_set(conn.params["project_id"]),
+        conn.assigns.current_contributor.id
+      )
   end
 
   def has_edition_permissions?(%Plug.Conn{}, %Projects.Project{}) do
