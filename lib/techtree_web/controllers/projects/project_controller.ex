@@ -31,7 +31,11 @@ defmodule TechtreeWeb.Projects.ProjectController do
   def authorize_page_visibility(conn, _) do
     project = Projects.get_project!(conn.params["project_id"])
 
-    if project.public_visible or conn.assigns.current_contributor.id == project.owner_id do
+    if project.public_visible or conn.assigns.current_contributor.id == project.owner_id or
+         MapSet.member?(
+           Projects.get_project_contributor_set(conn.params["project_id"]),
+           conn.assigns.current_contributor.id
+         ) do
       assign(conn, :project, project)
     else
       conn

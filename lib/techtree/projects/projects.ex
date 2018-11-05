@@ -70,10 +70,23 @@ defmodule Techtree.Projects do
   @doc """
   Retrieve a project with all it's contributors.
   """
-  def get_project_contributors(id) do
+  def get_project_with_contributors(id) do
     Project
     |> Repo.get!(id)
     |> Repo.preload([:contributors])
+  end
+
+  @doc """
+  Retrieve a project with all it's contributors.
+  """
+  def get_project_contributor_set(id) do
+    contributors =
+      for(
+        %Contributor{id: contributor_id} <- get_project_with_contributors(id).contributors,
+        do: contributor_id
+      )
+
+    Enum.into(contributors, MapSet.new)
   end
 
   @doc """
