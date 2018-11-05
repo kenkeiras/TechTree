@@ -78,8 +78,27 @@ class DependencyGraphRendererDriver {
             this.configure_buttons(project_id, data.steps);
         });
 
+        if (user_can_edit) {
+            // Only owners or contributors can see the list
+            // of contributors
+            Api.get_contributors(project_id, contributor_data => {
+                this.configure_contributor_data(contributor_data);
+            });
+        }
+
         this.configure_title(project_id);
         this.configure_visibility_dropdown(project_id);
+    }
+
+    private configure_contributor_data(contributor_data) {
+        const contributors = contributor_data.contributors;
+        const contributors_menus = document.getElementsByClassName('contributors-option');
+        
+        for (const contributors_menu of contributors_menus) {
+            for (const count of contributors_menu.getElementsByClassName('contributors-count')) {
+                (count as any).innerText = contributors.length;
+            }
+        }
     }
 
     private project_set_private(project_id: string) {

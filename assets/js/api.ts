@@ -113,6 +113,28 @@ export function set_element_description(project_id: string, step_id: string, new
     patch_step(project_id, step_id, { "description": new_value }, cb);
 }
 
+export function get_contributors(project_id: id, cb: Function) {
+    const xhr = new XMLHttpRequest(),
+        method = "GET",
+        url = "/api/projects/" + project_id + "/contributors";
+
+    xhr.open(method, url, true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            const result = JSON.parse(xhr.responseText);
+            cb(result);
+        } else if (xhr.readyState === 4) {
+            console.error(
+                "Request returned code",
+                xhr.status,
+                "text",
+                xhr.responseText
+            );
+        }
+    };
+    xhr.send();
+}
+
 export function get_project_graph(project_id: id, cb: Function) {
     function process(project_id, stepsResult) {
         for (const step of stepsResult.steps){

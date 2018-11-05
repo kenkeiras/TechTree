@@ -79,6 +79,15 @@ defmodule Techtree.Projects do
   @doc """
   Retrieve a project with all it's contributors.
   """
+  def get_project_with_fullcontributors(id) do
+    Project
+    |> Repo.get!(id)
+    |> Repo.preload([contributors: [user: :email]])
+  end
+
+  @doc """
+  Retrieve a project with all it's contributors.
+  """
   def get_project_contributor_set(id) do
     contributors =
       for(
