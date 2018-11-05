@@ -430,11 +430,41 @@ function sort_tree_elements(trees: StepTree, steps): StepTree {
     return trees.sort((a: StepTreeEntry, b: StepTreeEntry) => {
         const step_a = steps[a.step_id];
         const step_b = steps[b.step_id]
+
+        const title_a = step_a.title;
+        const title_b = step_b.title;
+
+        const num_a = parseInt(title_a);
+        const num_b = parseInt(title_b);
+
+        // Sort by title numbering
+        if (isNaN(num_a) && (!isNaN(num_b))) {
+            // B is a number, go higher
+            return 1;
+        }
+
+        if (!isNaN(num_a) && (isNaN(num_b))) {
+            // A is a number, go higher
+            return -1;
+        }
+
+        if (!isNaN(num_a) && !isNaN(num_b)){
+            if (num_a < num_b) {
+                return -1;
+            }
+
+            if (num_a > num_b) {
+                return 1;
+            }
+        }
+
+        // If not possible, sort by dependencies length
         let count_dependers = step_a.depended_by.length - step_b.depended_by.length;
         if (count_dependers !== 0) {
             return count_dependers;
         }
 
+        // At last sort by title length
         return step_a.title.length - step_b.title.length;
     });
 }
