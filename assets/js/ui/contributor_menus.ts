@@ -64,14 +64,17 @@ function add_contributor_prompt(
     popup.appendChild(titleBar);
 
     const contributor_list_holder = document.createElement("div");
-    contributor_store.link_set((contributors: Contributor[]) => {
+
+    const on_contributors_change = (contributors: Contributor[]) => {
         const contributor_list = build_contributor_list(contributors);
         for (const subelement of contributor_list_holder.childNodes) {
             contributor_list_holder.removeChild(subelement);
         }
 
         contributor_list_holder.appendChild(contributor_list);
-    });
+    };
+
+    contributor_store.link_set(on_contributors_change);
     popup.appendChild(contributor_list_holder);
 
     const form = document.createElement("form");
