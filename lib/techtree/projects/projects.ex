@@ -39,12 +39,30 @@ defmodule Techtree.Projects do
 
   """
   def list_projects(contributor=%Contributor{}) do
-    result = Project
+    owned_projects = get_projects_owned(contributor)
+    contributed_projects = get_projects_contributed(contributor)
+
+    check_completed_projects(owned_projects ++ contributed_projects)
+  end
+
+  def get_projects_owned(contributor=%Contributor{}) do
+    Project
     |> Ecto.Query.where(owner_id: ^contributor.id)
     |> Repo.all()
     |> Repo.preload(owner: [user: :email], steps: [])
+  end
 
-    check_completed_projects(result)
+  def get_projects_contributed(contributor=%Contributor{}) do
+    query = from pc in "project_contributors",
+            where: pc.contributor_id == ^contributor.id,
+            select: pc.project_id
+
+    projects = Repo.all(query)
+
+    for project_id <- projects, do:
+      Project
+      |> Repo.get!(project_id)
+      |> Repo.preload(owner: [user: :email], steps: [])
   end
 
   @doc """
