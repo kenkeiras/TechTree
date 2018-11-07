@@ -162,7 +162,7 @@ function set_class(element: HTMLElement, className: string) {
     element.classList.add(className);
 }
 
-function build_popup(setup_prompt: Function){ 
+export function build_popup(setup_prompt: Function){ 
     const overlay = document.createElement("div");
     overlay.setAttribute('class', 'overlay');    
     const popup = document.createElement("div");

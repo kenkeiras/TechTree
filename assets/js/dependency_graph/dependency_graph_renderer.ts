@@ -5,6 +5,9 @@ import * as Prompts from './prompts';
 import * as Hotkeys from '../hotkeys';
 import * as Permissions from './permissions';
 import * as Project from '../project';
+import { Contributor } from '../ui/contributor';
+import { ContributorStore } from '../ui/contributor_store';
+import * as ContributorMenus from '../ui/contributor_menus';
 
 function is_depended_by(depended, depender, graph) {
     if (depender.id === depended.id) {
@@ -82,7 +85,7 @@ class DependencyGraphRendererDriver {
             // Only owners or contributors can see the list
             // of contributors
             Api.get_contributors(project_id, contributor_data => {
-                this.configure_contributor_data(contributor_data);
+                this.configure_contributor_data(contributor_data, project_id);
             });
         }
 
@@ -90,14 +93,20 @@ class DependencyGraphRendererDriver {
         this.configure_visibility_dropdown(project_id);
     }
 
-    private configure_contributor_data(contributor_data) {
-        const contributors = contributor_data.contributors;
+    private configure_contributor_data(contributor_data, project_id) {
+        const contributors: Contributor[] = contributor_data.contributors;
+        const contributor_store: ContributorStore = new ContributorStore(contributors);
+
         const contributors_menus = document.getElementsByClassName('contributors-option');
         
         for (const contributors_menu of contributors_menus) {
             for (const count of contributors_menu.getElementsByClassName('contributors-count')) {
-                (count as any).innerText = contributors.length;
+                contributor_store.link_set((contributors) => {
+                    (count as any).innerText = contributors.length;
+                });
             }
+
+            (contributors_menu as any).onclick = () => ContributorMenus.show_contributor_prompt(contributor_store, project_id);
         }
     }
 

@@ -475,3 +475,7 @@ g.state-work-in-progress > circle.drag-handle:hover {
 .purely-visual-component {
     pointer-events: none;
 }
+
+a.contributors-option {
+    cursor: pointer;
+}

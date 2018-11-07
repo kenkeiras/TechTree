@@ -4,13 +4,13 @@ function get_csrf_token(): string {
     return (document.head.querySelector('[name="csrf-token"]') as HTMLMetaElement).content;
 }
 
-type id = number | string;
+export type Id = number | string;
 
-export function set_step_state(project_id: id, step_id: id, state: string, cb: Function) {
+export function set_step_state(project_id: Id, step_id: Id, state: string, cb: Function) {
     patch_step(project_id, step_id, {state: state}, cb);
 }
 
-export function patch_step(project_id: id, step_id: id, state: any, cb: Function) {
+export function patch_step(project_id: Id, step_id: Id, state: any, cb: Function) {
     const xhttp = new XMLHttpRequest();
    
     xhttp.onreadystatechange = function() {
@@ -29,7 +29,7 @@ export function patch_step(project_id: id, step_id: id, state: any, cb: Function
     xhttp.send(JSON.stringify({"state": state}));
 }
 
-export function get_available_dependencies_for_step(project_id: id, step_id: id, cb: Function){
+export function get_available_dependencies_for_step(project_id: Id, step_id: Id, cb: Function){
     const xhttp = new XMLHttpRequest();
    
     xhttp.onreadystatechange = function() {
@@ -47,7 +47,7 @@ export function get_available_dependencies_for_step(project_id: id, step_id: id,
     xhttp.send();
 }
 
-export function add_dependency(project_id: id, depender_id: id, dependency_id: id, cb: Function) {
+export function add_dependency(project_id: Id, depender_id: Id, dependency_id: Id, cb: Function) {
     const xhttp = new XMLHttpRequest();
    
     xhttp.onreadystatechange = function() {
@@ -66,7 +66,7 @@ export function add_dependency(project_id: id, depender_id: id, dependency_id: i
     xhttp.send();
 }
 
-export function remove_dependency(project_id: id, step_id: id, dependency_id: id, cb: Function){
+export function remove_dependency(project_id: Id, step_id: Id, dependency_id: Id, cb: Function){
     const xhttp = new XMLHttpRequest();
    
     xhttp.onreadystatechange = function() {
@@ -86,7 +86,7 @@ export function remove_dependency(project_id: id, step_id: id, dependency_id: id
 
 }
 
-export function remove_step(project_id: id, step_id: id, cb: Function){
+export function remove_step(project_id: Id, step_id: Id, cb: Function){
     const xhttp = new XMLHttpRequest();
    
     xhttp.onreadystatechange = function() {
@@ -113,7 +113,7 @@ export function set_element_description(project_id: string, step_id: string, new
     patch_step(project_id, step_id, { "description": new_value }, cb);
 }
 
-export function get_contributors(project_id: id, cb: Function) {
+export function get_contributors(project_id: Id, cb: Function) {
     const xhr = new XMLHttpRequest(),
         method = "GET",
         url = "/api/projects/" + project_id + "/contributors";
@@ -135,10 +135,10 @@ export function get_contributors(project_id: id, cb: Function) {
     xhr.send();
 }
 
-export function get_project_graph(project_id: id, cb: Function) {
+export function get_project_graph(project_id: Id, cb: Function) {
     function process(project_id, stepsResult) {
         for (const step of stepsResult.steps){
-            step.location = "/projects/" + project_id + "/steps/" + step.id;
+            step.location = "/projects/" + project_id + "/steps/" + step.Id;
             step.project_id = project_id;
         }
     }
@@ -170,11 +170,11 @@ export function set_project_name(project_id: string, name: string, cb: Function)
     patch_project(project_id, {"name": name}, cb);
 }
 
-export function set_project_visibility(project_id: id, visibility: Project.Visibility, cb: Function) {
+export function set_project_visibility(project_id: Id, visibility: Project.Visibility, cb: Function) {
     patch_project(project_id, {"visibility": visibility}, cb);
 }
 
-function patch_project(project_id: id, data, cb: Function) {
+function patch_project(project_id: Id, data, cb: Function) {
     const xhttp = new XMLHttpRequest();
 
     xhttp.onreadystatechange = function() {

@@ -48,7 +48,7 @@ defmodule TechtreeWeb.Projects.ProjectView do
                 </li>
               <% end %>
               <li>
-                <a href="#" class="contributors-option" disabled=true>
+                <a class="contributors-option">
                   <i class="glyphicon glyphicon-user"></i>
                   <span class="contributors-count"></span>
                   Contributors
