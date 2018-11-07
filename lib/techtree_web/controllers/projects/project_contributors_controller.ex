@@ -24,4 +24,33 @@ defmodule TechtreeWeb.Projects.ProjectContributorsController do
 
     render(conn, "result.json", %{contributors: project.contributors})
   end
+
+  def api_create(conn, %{"project_id" => project_id, "email" => email}) do
+    contributor = Projects.get_contributor_with_email(email)
+    project = Projects.get_project_with_fullcontributors(project_id)
+
+    case Projects.project_involves_contributor(project, contributor) do
+      false ->
+        case Projects.add_project_contributor(project, contributor) do
+          %Projects.Project{} ->
+            render(conn, "operation_result.json",
+              result: %{success: true, contributor: %{id: contributor.id}}
+            )
+
+          {:error, %Ecto.Changeset{} = changeset} ->
+            IO.inspect(changeset)
+
+            conn
+            |> put_status(:bad_request)
+            |> render("operation_result.json", result: %{success: false, reason: :error_on_user_data})
+        end
+
+      true ->
+        conn
+        |> put_status(:bad_request)
+        |> render("operation_result.json",
+          result: %{success: false, reason: :user_already_on_project}
+        )
+    end
+  end
 end

@@ -2,6 +2,7 @@ defmodule Techtree.Accounts.Email do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Techtree.Accounts.User
 
   schema "emails" do
     field :email, :string

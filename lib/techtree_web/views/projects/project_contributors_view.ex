@@ -15,4 +15,8 @@ defmodule TechtreeWeb.Projects.ProjectContributorsView do
       }) do
     %{email: email, id: contributor_id}
   end
+
+  def render("operation_result.json", %{result: result}) do
+    result
+  end
 end

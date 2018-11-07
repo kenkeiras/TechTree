@@ -6,7 +6,7 @@ defmodule Techtree.Projects do
   import Ecto.Query, warn: false
   alias Techtree.Repo
 
-  alias Techtree.Accounts
+  alias Techtree.Accounts.{User, Email}
   alias Techtree.Projects.{Contributor, Project, Step}
 
   def is_project_completed(%Project{} = project) do
@@ -127,6 +127,23 @@ defmodule Techtree.Projects do
     |> Repo.update!
   end
 
+
+  def project_involves_contributor(
+        %Project{owner_id: owner_id},
+        %Contributor{id: owner_id}
+      ) do
+    true
+  end
+
+  def project_involves_contributor(
+    %Project{contributors: contributors},
+    %Contributor{id: contributor_id}
+  ) do
+    involved_ids = for c <- contributors, do: c.id
+
+    MapSet.member?(Enum.into(contributors, MapSet.new), contributor_id)
+  end
+
   @doc """
   Removes a contributor from a project.
   """
@@ -204,7 +221,7 @@ defmodule Techtree.Projects do
     |> Repo.insert()
   end
 
-  def ensure_contributor_exists(%Accounts.User{} = user) do
+  def ensure_contributor_exists(%User{} = user) do
     %Contributor{user_id: user.id}
     |> Ecto.Changeset.change()
     |> Ecto.Changeset.unique_constraint(:user_id)
@@ -295,6 +312,17 @@ defmodule Techtree.Projects do
     Contributor
     |> Repo.get!(id)
     |> Repo.preload(user: :email)
+  end
+
+  @spec get_contributor_with_email(String.t()) :: Contributor.t()
+  def get_contributor_with_email(email) do
+    email_with_user =
+      Email
+      |> Repo.get_by!(email: email)
+      |> Repo.preload([:user])
+
+    IO.inspect(email_with_user)
+    ensure_contributor_exists(email_with_user.user)
   end
 
   @doc """

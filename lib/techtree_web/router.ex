@@ -56,6 +56,7 @@ defmodule TechtreeWeb.Router do
 
     # Project contributors
     get "/:project_id/contributors", ProjectContributorsController, :index
+    post "/:project_id/contributors", ProjectContributorsController, :api_create
   end
 
   defp authenticate_user(conn, _) do

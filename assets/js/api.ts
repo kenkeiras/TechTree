@@ -211,3 +211,34 @@ export function create_step(project_id: string, properties: any, cb: Function){
 
     xhttp.send(JSON.stringify({step: properties}));
 }
+
+export function add_contributor_to_project(
+    project_id: Id,
+    contributor_email: string,
+    cb: (success: boolean, contributor_id: Number) => void
+) {
+    const xhttp = new XMLHttpRequest();
+
+    xhttp.onreadystatechange = function() {
+        if (this.readyState != 4) {
+            return;
+        }
+
+        const success = this.status == 200;
+
+        let contributor_id: Number = null;
+
+        if (success) {
+            const data = JSON.parse(this.responseText);
+            contributor_id = data.contributor.id;
+        }
+
+        cb(success, contributor_id);
+    };
+
+    xhttp.open("POST", "/api/projects/" + project_id + "/contributors", true);
+    xhttp.setRequestHeader("x-csrf-token", get_csrf_token());
+    xhttp.setRequestHeader("Content-Type", "application/json");
+
+    xhttp.send(JSON.stringify({email: contributor_email}));
+}

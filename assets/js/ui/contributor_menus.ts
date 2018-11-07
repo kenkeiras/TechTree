@@ -1,6 +1,7 @@
 import { ContributorStore } from "./contributor_store";
 import { build_popup } from "../dependency_graph/prompts";
 import { Id } from "../api";
+import * as API from "../api";
 import { Contributor } from "./contributor";
 
 export function show_contributor_prompt(
@@ -80,15 +81,62 @@ function add_contributor_prompt(
     const form = document.createElement("form");
     form.onsubmit = () => false;
 
+    const add_contributor_group = document.createElement("div");
+    add_contributor_group.setAttribute("class", "form-group");
+
+    const contributor_input_label = document.createElement('label');
+    contributor_input_label.className = 'control-label';
+    contributor_input_label.innerText = 'Add contributor';
+
+    const contributor_text_input = document.createElement("input");
+    contributor_text_input.type = 'email';
+    contributor_text_input.className = 'light-form-control';
+    contributor_text_input.placeholder = 'Introduce email of new contributor';
+
+    const add_contributor_button = document.createElement('input');
+    add_contributor_button.type = 'submit';
+    add_contributor_button.setAttribute('class', 'btn btn-primary');
+    add_contributor_button.value = 'Add';
+
+    add_contributor_button.onclick = () => {
+        const contributor_email = contributor_text_input.value.trim();
+
+        if (contributor_email.length === 0) {
+            return;
+        }
+
+        add_contributor_button.disabled = true;
+        API.add_contributor_to_project(project_id, contributor_email, (success, id) => {
+            add_contributor_button.disabled = false;
+
+            if (success) {
+                // On success, we know the id is safe.
+                const safe_id: number = id as number;
+
+                contributor_text_input.value = '';
+                contributor_store.add_contributor({
+                    id: safe_id,
+                    email: contributor_email
+                });
+            }
+        })
+    };
+
+    add_contributor_group.appendChild(contributor_input_label);
+    add_contributor_group.appendChild(contributor_text_input);
+    add_contributor_group.appendChild(add_contributor_button);
+
+    form.appendChild(add_contributor_group);
+
     const button_group = document.createElement("div");
     button_group.setAttribute("class", "form-group");
 
-    const cancel_button = document.createElement("button");
-    cancel_button.setAttribute("class", "nav-button");
-    cancel_button.innerText = "Close";
-    cancel_button.onclick = () => popup.close();
+    const close_button = document.createElement("button");
+    close_button.setAttribute("class", "nav-button");
+    close_button.innerText = "Close";
+    close_button.onclick = () => popup.close();
 
-    button_group.appendChild(cancel_button);
+    button_group.appendChild(close_button);
 
     form.appendChild(button_group);
 
