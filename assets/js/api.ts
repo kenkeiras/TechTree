@@ -1,4 +1,5 @@
 import * as Project from './project';
+import { Contributor } from './ui/contributor';
 
 function get_csrf_token(): string {
     return (document.head.querySelector('[name="csrf-token"]') as HTMLMetaElement).content;
@@ -241,4 +242,28 @@ export function add_contributor_to_project(
     xhttp.setRequestHeader("Content-Type", "application/json");
 
     xhttp.send(JSON.stringify({email: contributor_email}));
+}
+
+export function remove_contributor_from_project(
+    project_id: Id,
+    contributor: Contributor,
+    cb: ((success: boolean) => void)
+) {
+    const xhttp = new XMLHttpRequest();
+
+    xhttp.onreadystatechange = function() {
+        if (this.readyState != 4) {
+            return;
+        }
+
+        const success = this.status == 200;
+
+        cb(success);
+    };
+
+    xhttp.open("DELETE", "/api/projects/" + project_id + "/contributors/" + contributor.id, true);
+    xhttp.setRequestHeader("x-csrf-token", get_csrf_token());
+    xhttp.setRequestHeader("Content-Type", "application/json");
+
+    xhttp.send();
 }

@@ -1,5 +1,6 @@
 import { ContributorStore } from "./contributor_store";
 import { build_popup } from "../dependency_graph/prompts";
+import { add_index_item_removal } from "../dependency_graph/dependency_graph";
 import { Id } from "../api";
 import * as API from "../api";
 import { Contributor } from "./contributor";
@@ -35,14 +36,33 @@ function sort_contributors_by_email(contributors: Contributor[]) {
     });
 }
 
-function build_contributor_list(contributors: Contributor[]) {
+function build_contributor_list(project_id: Id, contributor_store: ContributorStore) {
     const list = document.createElement("ul");
+
+    const contributors = contributor_store.list_contributors();
 
     sort_contributors_by_email(contributors);
 
     for (const contributor of contributors) {
         const item = document.createElement("li");
-        item.innerText = contributor.email;
+
+        const removeDependencyButton = document.createElement('button');
+        removeDependencyButton.setAttribute('class', 'list-index dangerous');
+        add_index_item_removal(removeDependencyButton);
+        item.appendChild(removeDependencyButton);
+
+        removeDependencyButton.onclick = () => {
+            API.remove_contributor_from_project(project_id, contributor, (success) => {
+                if (success) {
+                    contributor_store.remove_contributor(contributor);
+                }
+            });
+        };
+
+        const contributor_info = document.createElement("span");
+        contributor_info.innerText = contributor.email;
+        contributor_info.className = 'contributor-email';
+        item.appendChild(contributor_info);
 
         list.appendChild(item);
     }
@@ -67,7 +87,7 @@ function add_contributor_prompt(
     const contributor_list_holder = document.createElement("div");
 
     const on_contributors_change = (contributors: Contributor[]) => {
-        const contributor_list = build_contributor_list(contributors);
+        const contributor_list = build_contributor_list(project_id, contributor_store);
         for (const subelement of contributor_list_holder.childNodes) {
             contributor_list_holder.removeChild(subelement);
         }

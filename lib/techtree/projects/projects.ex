@@ -128,6 +128,7 @@ defmodule Techtree.Projects do
   end
 
 
+  @spec project_involves_contributor(Project.t(), Contributor.t()) :: boolean()
   def project_involves_contributor(
         %Project{owner_id: owner_id},
         %Contributor{id: owner_id}
@@ -321,7 +322,6 @@ defmodule Techtree.Projects do
       |> Repo.get_by!(email: email)
       |> Repo.preload([:user])
 
-    IO.inspect(email_with_user)
     ensure_contributor_exists(email_with_user.user)
   end
 
