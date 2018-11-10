@@ -6,7 +6,7 @@ defmodule Techtree.Projects do
   import Ecto.Query, warn: false
   alias Techtree.Repo
 
-  alias Techtree.Accounts
+  alias Techtree.Accounts.{User, Email}
   alias Techtree.Projects.{Contributor, Project, Step}
 
   def is_project_completed(%Project{} = project) do
@@ -39,12 +39,30 @@ defmodule Techtree.Projects do
 
   """
   def list_projects(contributor=%Contributor{}) do
-    result = Project
+    owned_projects = get_projects_owned(contributor)
+    contributed_projects = get_projects_contributed(contributor)
+
+    check_completed_projects(owned_projects ++ contributed_projects)
+  end
+
+  def get_projects_owned(contributor=%Contributor{}) do
+    Project
     |> Ecto.Query.where(owner_id: ^contributor.id)
     |> Repo.all()
     |> Repo.preload(owner: [user: :email], steps: [])
+  end
 
-    check_completed_projects(result)
+  def get_projects_contributed(contributor=%Contributor{}) do
+    query = from pc in "project_contributors",
+            where: pc.contributor_id == ^contributor.id,
+            select: pc.project_id
+
+    projects = Repo.all(query)
+
+    for project_id <- projects, do:
+      Project
+      |> Repo.get!(project_id)
+      |> Repo.preload(owner: [user: :email], steps: [])
   end
 
   @doc """
@@ -65,6 +83,83 @@ defmodule Techtree.Projects do
     Project
     |> Repo.get!(id)
     |> Repo.preload(owner: [user: :email])
+  end
+
+  @doc """
+  Retrieve a project with all it's contributors.
+  """
+  def get_project_with_contributors(id) do
+    Project
+    |> Repo.get!(id)
+    |> Repo.preload([:contributors])
+  end
+
+  @doc """
+  Retrieve a project with all it's contributors.
+  """
+  def get_project_with_fullcontributors(id) do
+    Project
+    |> Repo.get!(id)
+    |> Repo.preload([contributors: [user: :email]])
+  end
+
+  @doc """
+  Retrieve a project with all it's contributors.
+  """
+  def get_project_contributor_set(id) do
+    contributors =
+      for(
+        %Contributor{id: contributor_id} <- get_project_with_contributors(id).contributors,
+        do: contributor_id
+      )
+
+    Enum.into(contributors, MapSet.new)
+  end
+
+  @doc """
+  Adds a contributor to a project.
+  """
+  def add_project_contributor(project = %Project{}, contributor = %Contributor{}) do
+    project
+    |> Repo.preload(:contributors) # Load existing data
+    |> Ecto.Changeset.change() # Build the changeset
+    |> Ecto.Changeset.put_assoc(:contributors, [contributor | project.contributors]) # Set the association
+    |> Repo.update!
+  end
+
+
+  @spec project_involves_contributor(Project.t(), Contributor.t()) :: boolean()
+  def project_involves_contributor(
+        %Project{owner_id: owner_id},
+        %Contributor{id: owner_id}
+      ) do
+    true
+  end
+
+  def project_involves_contributor(
+    %Project{contributors: contributors},
+    %Contributor{id: contributor_id}
+  ) do
+    involved_ids = for c <- contributors, do: c.id
+
+    MapSet.member?(Enum.into(contributors, MapSet.new), contributor_id)
+  end
+
+  @doc """
+  Removes a contributor from a project.
+  """
+  def remove_project_contributor(project_id, removed_contributor_id) when is_number(project_id) and is_number(removed_contributor_id) do
+    # This is built as a custom query to avoid having to resolve
+    # the elements being deleted
+    query = """
+    DELETE
+    FROM project_contributors
+    WHERE project_id = $1
+      AND contributor_id = $2
+    ;
+    """
+
+    Ecto.Adapters.SQL.query(Repo, query, [project_id, removed_contributor_id])
   end
 
   @doc """
@@ -127,7 +222,7 @@ defmodule Techtree.Projects do
     |> Repo.insert()
   end
 
-  def ensure_contributor_exists(%Accounts.User{} = user) do
+  def ensure_contributor_exists(%User{} = user) do
     %Contributor{user_id: user.id}
     |> Ecto.Changeset.change()
     |> Ecto.Changeset.unique_constraint(:user_id)
@@ -218,6 +313,16 @@ defmodule Techtree.Projects do
     Contributor
     |> Repo.get!(id)
     |> Repo.preload(user: :email)
+  end
+
+  @spec get_contributor_with_email(String.t()) :: Contributor.t()
+  def get_contributor_with_email(email) do
+    email_with_user =
+      Email
+      |> Repo.get_by!(email: email)
+      |> Repo.preload([:user])
+
+    ensure_contributor_exists(email_with_user.user)
   end
 
   @doc """

@@ -453,7 +453,7 @@ function createDependencyAdder(project_id, step_id, section, on_updated) {
     });
 }
 
-function add_cross(element, size?) {
+export function add_index_item_removal(element, size?) {
     if (size === undefined){
         size = 15;
     }
@@ -716,7 +716,7 @@ function build_fast_element_form(element, base, graph) {
 
             const removeDependencyButton = document.createElement('button');
             removeDependencyButton.setAttribute('class', 'list-index dangerous');
-            add_cross(removeDependencyButton);
+            add_index_item_removal(removeDependencyButton);
 
             if (Permissions.can_user_edit()) {
                 dependency.appendChild(removeDependencyButton);

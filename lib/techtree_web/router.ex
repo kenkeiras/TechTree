@@ -30,6 +30,7 @@ defmodule TechtreeWeb.Router do
     get "/new/import", ProjectController, :import
     post "/new/import", ProjectController, :new_import
     get "/:project_id/export", ProjectController, :export
+
   end
 
   # Services usable without needed authentication
@@ -52,6 +53,11 @@ defmodule TechtreeWeb.Router do
     get "/:project_id/steps/:step_id/dependencies", DependencyController, :get_step_dependencies
     put "/:project_id/steps/:step_id/dependencies/:depended_id", DependencyController, :add_dependency
     delete "/:project_id/steps/:step_id/dependencies/:depended_id", DependencyController, :remove_dependency
+
+    # Project contributors
+    get "/:project_id/contributors", ProjectContributorsController, :index
+    post "/:project_id/contributors", ProjectContributorsController, :api_create
+    delete "/:project_id/contributors/:contributor_id", ProjectContributorsController, :api_remove
   end
 
   defp authenticate_user(conn, _) do

@@ -162,7 +162,7 @@ function set_class(element: HTMLElement, className: string) {
     element.classList.add(className);
 }
 
-function build_popup(setup_prompt: Function){ 
+export function build_popup(setup_prompt: Function){ 
     const overlay = document.createElement("div");
     overlay.setAttribute('class', 'overlay');    
     const popup = document.createElement("div");
@@ -207,7 +207,7 @@ function build_popup(setup_prompt: Function){
     return popup;
 }
 
-export function confirm_dangerous_action(action_description, type_information, callback, options) {
+export function confirm_dangerous_action(action_description, type_information, callback, options?) {
     let danger = DEFAULT_DANGER;
     if ((options !== undefined) && (options.danger !== undefined)) {
         danger = options.danger;
