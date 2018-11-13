@@ -1,5 +1,5 @@
 import { ContributorStore } from "./contributor_store";
-import { build_popup } from "../dependency_graph/prompts";
+import * as Prompts from "../dependency_graph/prompts";
 import { add_index_item_removal } from "../dependency_graph/dependency_graph";
 import { Id } from "../api";
 import * as API from "../api";
@@ -10,7 +10,7 @@ export function show_contributor_prompt(
     project_id: Id
 ) {
     try {
-        build_popup(popup =>
+        Prompts.build_popup(popup =>
             add_contributor_prompt(popup, contributor_store, project_id)
         );
     } catch (e) {
@@ -52,10 +52,13 @@ function build_contributor_list(project_id: Id, contributor_store: ContributorSt
         item.appendChild(removeDependencyButton);
 
         removeDependencyButton.onclick = () => {
-            API.remove_contributor_from_project(project_id, contributor, (success) => {
-                if (success) {
-                    contributor_store.remove_contributor(contributor);
-                }
+            Prompts.confirm_dangerous_action("Remove contributor “" + contributor.email + "”",
+            contributor.email, () => {
+                API.remove_contributor_from_project(project_id, contributor, (success) => {
+                    if (success) {
+                        contributor_store.remove_contributor(contributor);
+                    }
+                });
             });
         };
 
