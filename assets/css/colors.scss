@@ -1,0 +1,28 @@
+$almost-white: #eee;
+
+$shadow-gray: rgba(0,0,0,0.5); /* Used for overlay backgrounds*/
+
+$full-white: white;
+
+$almost-black: #222; /* Used for borders */
+
+$ignorable-warning-color: #ff3100; /* Used to note warnings that can be ignored. */
+
+$completed-color: #548A00; /* Color to denote step or task completion. */
+$error-color: #ff0000; /* Color to denote an error . */
+
+/**
+ * Step colors
+ */
+
+$completed-step-color: $completed-color;
+$completed-step-node-color: #74AA20;
+
+$work-in-progress-step-color: #337ab7;
+$work-in-progress-step-node-color: #539ad7;
+
+$archived-step-color: #a13900;
+$archived-step-node-color: #c15920;
+
+$to-do-step-color: #000000;
+$to-do-step-node-color: #222;

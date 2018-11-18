@@ -1,3 +1,6 @@
+@import "./colors.scss";
+@import "./fonts.scss";
+
 html body {
     margin: 0px;
 }
@@ -40,7 +43,7 @@ nav ul {
 
 .nav-button:hover {
     text-decoration: none;
-    background-color: #eee;
+    background-color: $almost-white;
 }
 
 .nav-button {
@@ -89,7 +92,7 @@ input.form-control[type="file"] {
 
 .call-to-action:hover {
     text-decoration: none;
-    background-color: #eee;
+    background-color: $almost-white;
 }
 
 .call-to-action {
@@ -133,7 +136,7 @@ svg#techtree-graph {
 }
 
 .overlay {
-    background: rgba(0,0,0,0.5);
+    background: $shadow-gray;
     left: 0;
     top: 0;
     width: 100%;
@@ -142,11 +145,11 @@ svg#techtree-graph {
 }
 
 input.invalid {
-    border-color: red;
+    border-color: $error-color;
 }
 
 .popup {
-    background-color: white;
+    background-color: $full-white;
     margin: 2ex;
     border-radius: 2px;
     padding: 2ex;
@@ -184,11 +187,11 @@ input.invalid {
 }
 
 span.ready {
-    border-bottom: 2px solid #222;
+    border-bottom: 2px solid $almost-black;
 }
 
 span.loading {
-    border-bottom: 2px dashed #222;
+    border-bottom: 2px dashed $almost-black;
 }
 
 .secondary {
@@ -205,7 +208,7 @@ span.loading {
 
 .action-button:hover {
     background: rgba(0,0,0,0.8);
-    color: #eee;
+    color: $almost-white;
 }
 
 .action-button:disabled, .action-button:disabled {
@@ -230,8 +233,8 @@ select:disabled {
 }
 
 .form-group .warning, .form-group .warning:focus, .form-group .warning:hover {
-    border: 1px solid #ff3100;
-    box-shadow: 0px 0px 5px 1px #ff3100;
+    border: 1px solid $ignorable-warning-color;
+    box-shadow: 0px 0px 5px 1px $ignorable-warning-color;
 }
 
 .form-group.add-step-name > .help-block {
@@ -240,7 +243,7 @@ select:disabled {
 }
 
 .form-group button.warning {
-    background-color: #ff3100;
+    background-color: $ignorable-warning-color;
     box-shadow: inherit;
 }
 
@@ -255,7 +258,7 @@ select:disabled {
 }
 
 .description {
-    font-family: 'Courier New', Courier, monospace;
+    font-family: $monospace-family;
     cursor: pointer;
 }
 
@@ -272,11 +275,11 @@ button.dangerous:hover {
 }
 
 .action-description.dangerous {
-    border-bottom: 1px solid #ff3100;
+    border-bottom: 1px solid $ignorable-warning-color;
 }
 
 .instruction {
-    font-family: 'Courier New', Courier, monospace;
+    font-family: $monospace-family;
     border: 1px solid rgba(0,0,0,0.3);
     padding: 0.5ex;
 }
@@ -300,45 +303,45 @@ button.list-index svg {
 }
 
 button.loading {
-    background: linear-gradient(to left, rgba(0,0,0,0.8) 50%,#548A00 50%);
+    background: linear-gradient(to left, rgba(0,0,0,0.8) 50%, $completed-color 50%);
     color: white;
 }
 
 button.loading:hover {
-    background: linear-gradient(to left, rgba(0,0,0,0.8) 50%,#548A00 50%);
+    background: linear-gradient(to left, rgba(0,0,0,0.8) 50%, $completed-color 50%);
     color: white;
 }
 
 button.loaded {
-    background: #548A00;
+    background: $completed-color;
     color: white;
 }
 
 button.loaded:hover {
-    background: #548A00;
+    background: $completed-color;
     color: white;
 }
 
 button.error {
-    background: #ff0000;
+    background: $error-color;
     color: white;
 }
 
 button.error:hover {
-    background: #ff0000;
+    background: $error-color;
     color: white;
 }
 
 .completion-marker {
     width: 0;
     font-style: italic;
-    color: #548A00;
+    color: $completed-color;
 }
 
 .title.completed::before {
     content: "Complete!";
     font-style: italic;
-    color: #548A00;
+    color: $completed-color;
     font-size: medium;
     margin-left: 2ex;
 }
@@ -357,11 +360,11 @@ textarea.description:focus {
 }
 
 textarea.loading {
-    border: 2px dashed #222;
+    border: 2px dashed $almost-black;
 }
 
 .light-form-control {
     margin: 2ex;
 }
 
-@import "./graph.scss"
+@import "./graph.scss";
