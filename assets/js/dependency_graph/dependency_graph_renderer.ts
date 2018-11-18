@@ -1,7 +1,7 @@
 import { DependencyGraph } from './dependency_graph';
 import * as params from '../params';
 import * as Api from '../api';
-import * as Prompts from './prompts';
+import * as Prompts from '../ui/prompts';
 import * as Hotkeys from '../hotkeys';
 import * as Permissions from './permissions';
 import * as Project from '../project';

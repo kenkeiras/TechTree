@@ -1,5 +1,5 @@
 import { ContributorStore } from "./contributor_store";
-import * as Prompts from "../dependency_graph/prompts";
+import * as Prompts from "./prompts";
 import { add_index_item_removal } from "../dependency_graph/dependency_graph";
 import { Id } from "../api";
 import * as API from "../api";

@@ -162,6 +162,22 @@ function set_class(element: HTMLElement, className: string) {
     element.classList.add(className);
 }
 
+function get_full_dimensions() {
+    const graphTree = document.getElementById('techtree-graph');
+    const height = Math.max(screen.height,
+                                document.body.parentElement.offsetHeight);
+
+    const width = Math.max(screen.width,
+                               document.body.parentElement.offsetWidth,
+                               (parseInt(graphTree.style.width) +
+                                parseInt(graphTree.style.left))
+                               );
+
+    return {
+        height, width,
+    };
+}
+
 export function build_popup(setup_prompt: Function){ 
     const overlay = document.createElement("div");
     overlay.setAttribute('class', 'overlay');    
@@ -171,18 +187,10 @@ export function build_popup(setup_prompt: Function){
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
 
-    const graphTree = document.getElementById('techtree-graph');
-    const fullHeight = Math.max(screen.height,
-                                document.body.parentElement.offsetHeight);
+    const dimensions = get_full_dimensions();
 
-    const fullWidth = Math.max(screen.width,
-                               document.body.parentElement.offsetWidth,
-                               (parseInt(graphTree.style.width) +
-                                parseInt(graphTree.style.left))
-                               );
-
-    overlay.style.height = fullHeight + 'px';
-    overlay.style.width = fullWidth + 'px';
+    overlay.style.height = dimensions.height + 'px';
+    overlay.style.width = dimensions.width + 'px';
 
     const has_element_changed = setup_prompt(popup);
 
@@ -220,8 +228,11 @@ export function confirm_dangerous_action(action_description, type_information, c
 
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
-    overlay.style.height = document.body.offsetHeight + 'px';
-    overlay.style.width = document.body.offsetWidth + 'px';
+
+    const dimensions = get_full_dimensions();
+
+    overlay.style.height = dimensions.height + 'px';
+    overlay.style.width = dimensions.width + 'px';
 
     const messageBox = document.createElement('div');
     messageBox.setAttribute('class', 'message');
