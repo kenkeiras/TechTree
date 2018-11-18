@@ -215,7 +215,7 @@ export function create_step(project_id: string, properties: any, cb: Function){
 
 export function add_contributor_to_project(
     project_id: Id,
-    contributor_email: string,
+    contributor_username: string,
     cb: (success: boolean, contributor_id: Number) => void
 ) {
     const xhttp = new XMLHttpRequest();
@@ -241,7 +241,7 @@ export function add_contributor_to_project(
     xhttp.setRequestHeader("x-csrf-token", get_csrf_token());
     xhttp.setRequestHeader("Content-Type", "application/json");
 
-    xhttp.send(JSON.stringify({email: contributor_email}));
+    xhttp.send(JSON.stringify({username: contributor_username}));
 }
 
 export function remove_contributor_from_project(

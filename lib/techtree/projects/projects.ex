@@ -315,14 +315,13 @@ defmodule Techtree.Projects do
     |> Repo.preload(user: :email)
   end
 
-  @spec get_contributor_with_email(String.t()) :: Contributor.t()
-  def get_contributor_with_email(email) do
-    email_with_user =
-      Email
-      |> Repo.get_by!(email: email)
-      |> Repo.preload([:user])
+  @spec get_contributor_with_username(String.t()) :: Contributor.t()
+  def get_contributor_with_username(username) do
+    user =
+      User
+      |> Repo.get_by!(username: username)
 
-    ensure_contributor_exists(email_with_user.user)
+    ensure_contributor_exists(user)
   end
 
   @doc """

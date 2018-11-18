@@ -18,10 +18,10 @@ export function show_contributor_prompt(
     }
 }
 
-function sort_contributors_by_email(contributors: Contributor[]) {
+function sort_contributors_by_username(contributors: Contributor[]) {
     contributors.sort((a, b) => {
-        const name_a = a.email.toUpperCase(); // ignore upper and lowercase
-        const name_b = b.email.toUpperCase(); // ignore upper and lowercase
+        const name_a = a.username.toUpperCase(); // ignore upper and lowercase
+        const name_b = b.username.toUpperCase(); // ignore upper and lowercase
 
         if (name_a < name_b) {
             return -1;
@@ -41,7 +41,7 @@ function build_contributor_list(project_id: Id, contributor_store: ContributorSt
 
     const contributors = contributor_store.list_contributors();
 
-    sort_contributors_by_email(contributors);
+    sort_contributors_by_username(contributors);
 
     for (const contributor of contributors) {
         const item = document.createElement("li");
@@ -52,8 +52,8 @@ function build_contributor_list(project_id: Id, contributor_store: ContributorSt
         item.appendChild(removeDependencyButton);
 
         removeDependencyButton.onclick = () => {
-            Prompts.confirm_dangerous_action("Remove contributor “" + contributor.email + "”",
-            contributor.email, () => {
+            Prompts.confirm_dangerous_action("Remove contributor “" + contributor.username + "”",
+            contributor.username, () => {
                 API.remove_contributor_from_project(project_id, contributor, (success) => {
                     if (success) {
                         contributor_store.remove_contributor(contributor);
@@ -63,8 +63,8 @@ function build_contributor_list(project_id: Id, contributor_store: ContributorSt
         };
 
         const contributor_info = document.createElement("span");
-        contributor_info.innerText = contributor.email;
-        contributor_info.className = 'contributor-email';
+        contributor_info.innerText = contributor.username;
+        contributor_info.className = 'contributor-identifier';
         item.appendChild(contributor_info);
 
         list.appendChild(item);
@@ -112,9 +112,9 @@ function add_contributor_prompt(
     contributor_input_label.innerText = 'Add contributor';
 
     const contributor_text_input = document.createElement("input");
-    contributor_text_input.type = 'email';
+    contributor_text_input.type = 'text';
     contributor_text_input.className = 'light-form-control';
-    contributor_text_input.placeholder = 'Introduce email of new contributor';
+    contributor_text_input.placeholder = 'Introduce username of new contributor';
 
     const add_contributor_button = document.createElement('input');
     add_contributor_button.type = 'submit';
@@ -122,14 +122,14 @@ function add_contributor_prompt(
     add_contributor_button.value = 'Add';
 
     add_contributor_button.onclick = () => {
-        const contributor_email = contributor_text_input.value.trim();
+        const contributor_username = contributor_text_input.value.trim();
 
-        if (contributor_email.length === 0) {
+        if (contributor_username.length === 0) {
             return;
         }
 
         add_contributor_button.disabled = true;
-        API.add_contributor_to_project(project_id, contributor_email, (success, id) => {
+        API.add_contributor_to_project(project_id, contributor_username, (success, id) => {
             add_contributor_button.disabled = false;
 
             if (success) {
@@ -139,7 +139,7 @@ function add_contributor_prompt(
                 contributor_text_input.value = '';
                 contributor_store.add_contributor({
                     id: safe_id,
-                    email: contributor_email
+                    username: contributor_username
                 });
             }
         })

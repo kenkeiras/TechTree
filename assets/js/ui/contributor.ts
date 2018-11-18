@@ -1,11 +1,11 @@
 export interface Contributor {
-    email: string;
+    username: string;
     id: number;
 }
 
 export function clone_contributor(contributor: Contributor): Contributor {
     return {
-        email: contributor.email,
+        username: contributor.username,
         id: contributor.id
     };
 }

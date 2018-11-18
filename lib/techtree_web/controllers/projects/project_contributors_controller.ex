@@ -25,8 +25,8 @@ defmodule TechtreeWeb.Projects.ProjectContributorsController do
     render(conn, "result.json", %{contributors: project.contributors})
   end
 
-  def api_create(conn, %{"project_id" => project_id, "email" => email}) do
-    contributor = Projects.get_contributor_with_email(email)
+  def api_create(conn, %{"project_id" => project_id, "username" => username}) do
+    contributor = Projects.get_contributor_with_username(username)
     project = Projects.get_project_with_fullcontributors(project_id)
 
     case Projects.project_involves_contributor(project, contributor) do
