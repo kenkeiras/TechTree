@@ -256,7 +256,7 @@ export function confirm_dangerous_action(action_description, type_information, c
     messageStart.innerText = "The following action is about to be performed:";
     messageBox.appendChild(messageStart);
 
-    const actionDescriptionMessage = document.createElement('div');
+    const actionDescriptionMessage = document.createElement('span');
     actionDescriptionMessage.setAttribute('class', 'action-description dangerous');
     actionDescriptionMessage.innerText = action_description;
     messageBox.appendChild(actionDescriptionMessage);
@@ -267,15 +267,16 @@ export function confirm_dangerous_action(action_description, type_information, c
 
     const callToAction = document.createElement('div');
     const instructionsStart = document.createElement('span');
-    instructionsStart.innerText = 'Type “';
+    instructionsStart.innerText = 'Type ';
     callToAction.appendChild(instructionsStart);
 
     const instructionsRequirement = document.createElement('span');
+    instructionsRequirement.className = 'instruction';
     instructionsRequirement.innerText = type_information;
     callToAction.appendChild(instructionsRequirement);
 
     const instructionsEnd = document.createElement('span');
-    instructionsEnd.innerText = '” to confirm';
+    instructionsEnd.innerText = ' to confirm';
     callToAction.appendChild(instructionsEnd);
     messageBox.appendChild(callToAction);
     popup.appendChild(messageBox);

@@ -271,6 +271,16 @@ button.dangerous:hover {
     color: white;
 }
 
+.action-description.dangerous {
+    border-bottom: 1px solid #ff3100;
+}
+
+.instruction {
+    font-family: 'Courier New', Courier, monospace;
+    border: 1px solid rgba(0,0,0,0.3);
+    padding: 0.5ex;
+}
+
 li {
     list-style: none;
 }
