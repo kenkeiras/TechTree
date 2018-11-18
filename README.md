@@ -1,5 +1,7 @@
 # Techtree
 
+[![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=kenkeiras/TechTree)](https://dependabot.com)
+
 To start your Phoenix server:
 
   * Install dependencies with `mix deps.get`
