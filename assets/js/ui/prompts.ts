@@ -2,6 +2,7 @@ import * as Api from '../api';
 import * as Hotkeys from '../hotkeys';
 
 const DEFAULT_DANGER = 'This cannot be undone!';
+const DEFAULT_DANGER_TITLE = 'Confirm action';
 
 export function show_add_step_prompt(project_id: string, steps) {
     build_popup((popup) => add_step_prompt(popup, project_id, steps));
@@ -162,6 +163,22 @@ function set_class(element: HTMLElement, className: string) {
     element.classList.add(className);
 }
 
+function get_full_dimensions() {
+    const graphTree = document.getElementById('techtree-graph');
+    const height = Math.max(screen.height,
+                                document.body.parentElement.offsetHeight);
+
+    const width = Math.max(screen.width,
+                               document.body.parentElement.offsetWidth,
+                               (parseInt(graphTree.style.width) +
+                                parseInt(graphTree.style.left))
+                               );
+
+    return {
+        height, width,
+    };
+}
+
 export function build_popup(setup_prompt: Function){ 
     const overlay = document.createElement("div");
     overlay.setAttribute('class', 'overlay');    
@@ -171,18 +188,10 @@ export function build_popup(setup_prompt: Function){
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
 
-    const graphTree = document.getElementById('techtree-graph');
-    const fullHeight = Math.max(screen.height,
-                                document.body.parentElement.offsetHeight);
+    const dimensions = get_full_dimensions();
 
-    const fullWidth = Math.max(screen.width,
-                               document.body.parentElement.offsetWidth,
-                               (parseInt(graphTree.style.width) +
-                                parseInt(graphTree.style.left))
-                               );
-
-    overlay.style.height = fullHeight + 'px';
-    overlay.style.width = fullWidth + 'px';
+    overlay.style.height = dimensions.height + 'px';
+    overlay.style.width = dimensions.width + 'px';
 
     const has_element_changed = setup_prompt(popup);
 
@@ -207,10 +216,20 @@ export function build_popup(setup_prompt: Function){
     return popup;
 }
 
-export function confirm_dangerous_action(action_description, type_information, callback, options?) {
+export interface DangerousActionOptions {
+    danger: string, // What will happen?
+    title: string, // Title for the confirmation popup
+}
+
+export function confirm_dangerous_action(action_description, type_information, callback, options?: DangerousActionOptions) {
     let danger = DEFAULT_DANGER;
     if ((options !== undefined) && (options.danger !== undefined)) {
         danger = options.danger;
+    }
+
+    let titleMsg = DEFAULT_DANGER_TITLE;
+    if ((options !== undefined) && (options.title !== undefined)) {
+        titleMsg = options.title;
     }
 
     const overlay = document.createElement("div");
@@ -220,8 +239,15 @@ export function confirm_dangerous_action(action_description, type_information, c
 
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
-    overlay.style.height = document.body.offsetHeight + 'px';
-    overlay.style.width = document.body.offsetWidth + 'px';
+
+    const dimensions = get_full_dimensions();
+
+    overlay.style.height = dimensions.height + 'px';
+    overlay.style.width = dimensions.width + 'px';
+
+    const title = document.createElement('h1');
+    title.innerText = titleMsg;
+    popup.appendChild(title);
 
     const messageBox = document.createElement('div');
     messageBox.setAttribute('class', 'message');

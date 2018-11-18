@@ -3,7 +3,7 @@ import * as params from '../params';
 import {ElementState} from './element';
 import { layout_steps, Layout, LayoutRow, LayoutEntry } from './layout';
 import * as Permissions from './permissions';
-import * as Prompts from './prompts';
+import * as Prompts from '../ui/prompts';
 
 // Offset between the line following the user and the cursor
 const PERSONAL_AREA_SPACE = 3;
