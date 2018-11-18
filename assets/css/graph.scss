@@ -1,0 +1,131 @@
+@import "./colors.scss";
+
+/* Graph styles */
+.use-as-dependency-node, .add-dependency-node {
+    stroke-width: 2px;
+    fill: transparent; /* Transparent, not none, to allow easier selection */
+}
+
+svg#techtree-graph a {
+    text-decoration: none;
+}
+
+path {
+    pointer-events: none;
+}
+
+/* States */
+.step-node > text {
+    fill: black;
+    stroke: none;
+}
+
+.step-node:hover > text {
+    fill: white;
+}
+
+.step-node > rect {
+    fill: white;
+    stroke-width: 1px;
+}
+
+.state-to-do > rect {
+    stroke: $to-do-step-color;
+    stroke-width: 0.5px;
+    filter: drop-shadow(0 0 2px $to-do-step-color);
+}
+.state-to-do:hover > rect {
+    fill: $to-do-step-color;
+}
+path.state-to-do {
+    stroke: $to-do-step-color;
+}
+
+.state-completed > rect {
+    stroke: $completed-step-color;
+    stroke-width: 0.5px;
+    filter: drop-shadow(0 0 2px $completed-step-color);
+}
+.state-completed:hover > rect {
+    fill: $completed-step-color;
+}
+path.state-completed {
+    stroke: $completed-step-color;
+}
+
+.state-work-in-progress > rect {
+    stroke: $work-in-progress-step-color;
+    stroke-width: 0.5px;
+    filter: drop-shadow(0 0 2px $work-in-progress-step-color);
+}
+.state-work-in-progress:hover > rect {
+    fill: $work-in-progress-step-color;
+}
+path.state-work-in-progress {
+    stroke: $work-in-progress-step-color;
+}
+
+.state-archived > rect {
+    stroke:  $archived-step-color;
+    stroke-width: 0.5px;
+    filter: drop-shadow(0 0 2px $archived-step-color);
+}
+.state-archived:hover > rect {
+    fill:  $archived-step-color;
+}
+path.state-archived {
+    stroke:  $archived-step-color;
+}
+
+/* Step nodes */
+circle.state-to-do {
+    fill: $to-do-step-node-color;
+}
+
+circle.state-completed {
+    fill: $completed-step-node-color;
+}
+
+circle.state-work-in-progress {
+    fill: $work-in-progress-step-node-color;
+}
+
+circle.state-archived {
+    fill: $archived-step-node-color;
+}
+
+/* Handles are transparent */
+circle.drag-handle {
+    fill: transparent;
+    stroke: transparent;
+    cursor: pointer;
+}
+
+circle.drag-handle:hover {
+    stroke: $to-do-step-color;
+    stroke-width: 2px;
+}
+
+g.state-to-do > circle.drag-handle:hover {
+    stroke: $to-do-step-color;
+}
+
+g.state-completed > circle.drag-handle:hover {
+    stroke: $completed-step-color;
+}
+
+g.state-archived > circle.drag-handle:hover {
+    stroke: $archived-step-color;
+}
+
+g.state-work-in-progress > circle.drag-handle:hover {
+    stroke: $work-in-progress-step-color;
+}
+
+.purely-visual-component {
+    pointer-events: none;
+}
+
+a.contributors-option {
+    cursor: pointer;
+}
