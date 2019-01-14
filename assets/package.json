@@ -19,7 +19,7 @@
     "clean-css-brunch": "^2.10.0",
     "copycat-brunch": "https://github.com/cmelgarejo/copycat-brunch",
     "mocha": "^5.2.0",
-    "sass-brunch": "^2.10.7",
+    "sass-brunch": "^2.10.8",
     "typescript-brunch": "^2.3.0",
     "uglify-js-brunch": "^2.10.0"
   }
