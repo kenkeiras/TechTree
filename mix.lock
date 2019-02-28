@@ -1,7 +1,7 @@
 %{
   "argon2_elixir": {:hex, :argon2_elixir, "1.3.3", "487ffa071ef78c51d9b16e50ff3cf30cf8204e0aa4bdc8afd3765fdd8195e213", [:make, :mix], [{:elixir_make, "~> 0.4", [hex: :elixir_make, repo: "hexpm", optional: false]}], "hexpm"},
   "artificery": {:hex, :artificery, "0.2.6", "f602909757263f7897130cbd006b0e40514a541b148d366ad65b89236b93497a", [:mix], [], "hexpm"},
-  "comeonin": {:hex, :comeonin, "5.0.0", "e87716d3b1c31e56312f6a1545a5548cdc80376cff5025fe3b12be2046934837", [:mix], [], "hexpm"},
+  "comeonin": {:hex, :comeonin, "5.1.0", "dc7dc04cc2fd12ffee16ddf3f91e876ee1a686447be403baf6f89da38e215365", [:mix], [], "hexpm"},
   "connection": {:hex, :connection, "1.0.4", "a1cae72211f0eef17705aaededacac3eb30e6625b04a6117c1b2db6ace7d5976", [:mix], [], "hexpm"},
   "cowboy": {:hex, :cowboy, "1.1.2", "61ac29ea970389a88eca5a65601460162d370a70018afe6f949a29dca91f3bb0", [:rebar3], [{:cowlib, "~> 1.0.2", [hex: :cowlib, repo: "hexpm", optional: false]}, {:ranch, "~> 1.3.2", [hex: :ranch, repo: "hexpm", optional: false]}], "hexpm"},
   "cowlib": {:hex, :cowlib, "1.0.2", "9d769a1d062c9c3ac753096f868ca121e2730b9a377de23dec0f7e08b1df84ee", [:make], [], "hexpm"},
