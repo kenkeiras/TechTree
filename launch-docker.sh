@@ -20,7 +20,7 @@ if [ `docker ps -a --filter=name="${DB_DOCKER_NAME}"|wc -l` -eq 1 ]; then
     docker run --name ${DB_DOCKER_NAME} -e POSTGRES_PASSWD="$PASSWORD" \
                                         -e POSTGRES_USER=$USERNAME   \
                                         -e POSTGRES_DB=${DB_NAME}    \
-                                        -d postgres
+                                        -d postgres:11
 
     # Wait for the DB to be active
     set +e

@@ -1,5 +1,6 @@
 defmodule Techtree.Repo do
-  use Ecto.Repo, otp_app: :techtree
+  use Ecto.Repo, otp_app: :techtree,
+    adapter: Ecto.Adapters.Postgres
 
   @doc """
   Dynamically loads the repository url from the
