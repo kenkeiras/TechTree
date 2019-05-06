@@ -20,7 +20,7 @@ do the following
 
 ```bash
 # Build docker image
-docker -t techtree .
+docker build -t techtree .
 # Launch docker image and database
 sh launch-docker.sh
 ```
