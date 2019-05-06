@@ -139,8 +139,9 @@ defmodule TechtreeWeb.Projects.ProjectController do
   def export(conn, %{"project_id" => id}) do
     project = Projects.get_full_project!(id)
 
-    conn = Plug.Conn.put_resp_header(conn, "content-disposition", ~s(attachment; filename="#{project.name}-export.json"))
-    render(conn, "export-project.json", project: project)
+    conn
+    |> Plug.Conn.put_resp_header("content-disposition", ~s(attachment; filename="#{project.name}-export.json"))
+    |> render("export-project.json", project: project)
   end
 
   def edit(conn, _) do

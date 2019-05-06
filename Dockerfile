@@ -43,4 +43,4 @@ RUN mix phx.digest
 
 # WORKDIR /app/techtree
 
-CMD ["mix", "phx.server"]
+CMD ["sh", "-c", "mix ecto.migrate && mix phx.server"]

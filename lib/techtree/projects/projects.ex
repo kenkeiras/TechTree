@@ -490,7 +490,6 @@ defmodule Techtree.Projects do
   def create_step(%Contributor{} = owner, %Project{} = project, attrs \\ %{}) do
     %Step{}
     |> Step.changeset(attrs)
-    |> Ecto.Changeset.put_change(:owner_id, owner.id)
     |> Ecto.Changeset.put_change(:project_id, project.id)
     |> Repo.insert()
   end
