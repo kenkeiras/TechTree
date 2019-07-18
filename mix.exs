@@ -38,7 +38,7 @@ defmodule Techtree.Mixfile do
       {:phoenix_ecto, "~> 4.0"},
       {:ecto_sql, "~> 3.0"},
       {:poison, "~> 3.1"},
-      {:postgrex, "~> 0.14.0"},
+      {:postgrex, "~> 0.15.0"},
       {:phoenix_html, "~> 2.10"},
       {:phoenix_live_reload, "~> 1.0", only: :dev},
       {:gettext, "~> 0.11"},
