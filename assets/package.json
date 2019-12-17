@@ -16,7 +16,7 @@
     "babel-brunch": "^7.0.1",
     "bootstrap-sass": "^3.4.1",
     "brunch": "^2.10.17",
-    "clean-css-brunch": "^2.10.0",
+    "clean-css-brunch": "^3.0.0",
     "copycat-brunch": "https://github.com/cmelgarejo/copycat-brunch",
     "mocha": "^6.1.4",
     "sass-brunch": "^2.10.8",
